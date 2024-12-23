@@ -13,6 +13,27 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TomlParserTests {
     @Test
+    public void emptyFile() throws IOException {
+        var result = parse("");
+
+        assertEquals(result, TomlTable.of(List.of()));
+    }
+
+    @Test
+    public void onlyLf() throws IOException {
+        var result = parse("\n");
+
+        assertEquals(result, TomlTable.of(List.of()));
+    }
+
+    @Test
+    public void onlyCrLf() throws IOException {
+        var result = parse("\r\n");
+
+        assertEquals(result, TomlTable.of(List.of()));
+    }
+
+    @Test
     public void valueTrue() throws IOException {
         var result = parse("x = true");
 
