@@ -23,6 +23,7 @@ public class TomlParserTests {
         var testTomlFilePaths = Files.readAllLines(tomlTestPath.resolve("files-toml-1.0.0"));
 
         return testTomlFilePaths.stream()
+            .filter(testTomlFilePath -> testTomlFilePath.endsWith(".toml"))
             .map(testTomlFilePath -> {
                 return DynamicTest.dynamicTest(testTomlFilePath, () -> {
                     var inputTomlPath = tomlTestPath.resolve(testTomlFilePath);
