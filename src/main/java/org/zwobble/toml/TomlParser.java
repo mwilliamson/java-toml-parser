@@ -142,7 +142,13 @@ public class TomlParser {
     }
 
     private static String formatCodePoint(int codePoint) {
-        return new String(new int[] {codePoint}, 0, 1);
+        if (codePoint == '\r') {
+            return "CR";
+        } else if (codePoint == '\n') {
+            return "LF";
+        } else {
+            return new String(new int[] {codePoint}, 0, 1);
+        }
     }
 
     private static class Reader {
