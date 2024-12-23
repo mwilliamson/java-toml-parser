@@ -43,6 +43,9 @@ public class TomlParser {
                     return new TomlTable(keyValuePairs);
                 }
 
+                if (reader.codePoint == '\r') {
+                    reader.skip('\r');
+                }
                 reader.skip('\n');
             }
         }
