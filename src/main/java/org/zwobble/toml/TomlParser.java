@@ -25,7 +25,14 @@ public class TomlParser {
                     return new TomlTable(keyValuePairs);
                 }
 
-                if (isBareKeyCodePoint(reader.codePoint)) {
+                if (reader.codePoint == '#') {
+                    reader.read();
+
+                    while (reader.codePoint != '\n' && reader.codePoint != -1) {
+                        reader.read();
+                    }
+                    reader.read();
+                } else if (isBareKeyCodePoint(reader.codePoint)) {
                     var key = readBareKey(reader);
                     skipWhitespace(reader);
                     reader.skip('=');
@@ -34,7 +41,7 @@ public class TomlParser {
                     reader.skip('\n');
                     keyValuePairs.add(TomlKeyValuePair.of(key, value));
                 } else {
-                    throw new TomlParseError("TODO");
+                    throw new TomlParseError("TODO: " + formatCodePoint(reader.codePoint));
                 }
             }
         }
