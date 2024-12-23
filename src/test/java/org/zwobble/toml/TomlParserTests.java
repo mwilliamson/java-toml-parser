@@ -86,7 +86,7 @@ public class TomlParserTests {
 
             case TomlString tomlString -> {
                 var jsonObject = new JsonObject();
-                jsonObject.addProperty("type", "bool");
+                jsonObject.addProperty("type", "string");
                 jsonObject.addProperty("value", tomlString.value());
                 yield jsonObject;
             }
