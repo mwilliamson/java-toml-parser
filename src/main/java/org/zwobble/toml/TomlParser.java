@@ -28,7 +28,9 @@ public class TomlParser {
                 if (trySkipComment(reader)) {
                     // Comment for the entire line
                 } else if (reader.codePoint == '\n') {
-                    // Blank line
+                    // Blank line with LF
+                } else if (reader.codePoint == '\r') {
+                    // Blank line with CRLF
                 } else if (isBareKeyCodePoint(reader.codePoint)) {
                     var key = readBareKey(reader);
                     skipWhitespace(reader);
@@ -167,6 +169,11 @@ public class TomlParser {
         }
 
         public void skip(int expectedCodePoint) throws IOException {
+            expect(expectedCodePoint);
+            read();
+        }
+
+        public void expect(int expectedCodePoint) {
             if (this.codePoint != expectedCodePoint) {
                 throw new TomlParseError(String.format(
                     "Expected %s but got %s",
@@ -174,7 +181,6 @@ public class TomlParser {
                     formatCodePoint(this.codePoint)
                 ));
             }
-            read();
         }
 
         public boolean isEndOfFile() {
