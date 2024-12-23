@@ -34,6 +34,7 @@ public class TomlParser {
                     skipWhitespace(reader);
                     var value = readValue(reader);
                     keyValuePairs.add(TomlKeyValuePair.of(key, value));
+                    skipWhitespace(reader);
                     trySkipComment(reader);
                 } else {
                     throw new TomlParseError("TODO: " + formatCodePoint(reader.codePoint));
