@@ -3,6 +3,7 @@ package org.zwobble.toml;
 import org.junit.jupiter.api.Test;
 import org.zwobble.toml.values.TomlBool;
 import org.zwobble.toml.values.TomlKeyValuePair;
+import org.zwobble.toml.values.TomlString;
 import org.zwobble.toml.values.TomlTable;
 
 import java.io.IOException;
@@ -50,6 +51,34 @@ public class TomlParserTests {
 
         assertEquals(result, TomlTable.of(List.of(
             TomlKeyValuePair.of("x", new TomlBool(false))
+        )));
+    }
+
+    // == Strings ==
+
+    @Test
+    public void emptyString() throws IOException {
+        var result = parse(
+            """
+            x = ""
+            """
+        );
+
+        assertEquals(result, TomlTable.of(List.of(
+            TomlKeyValuePair.of("x", new TomlString(""))
+        )));
+    }
+
+    @Test
+    public void stringWithAscii() throws IOException {
+        var result = parse(
+            """
+            x = "abc"
+            """
+        );
+
+        assertEquals(result, TomlTable.of(List.of(
+            TomlKeyValuePair.of("x", new TomlString("abc"))
         )));
     }
 
