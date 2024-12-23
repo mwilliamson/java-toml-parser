@@ -82,6 +82,31 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void stringWithCompactEscapeSequence() throws IOException {
+        var result = parse(
+            """
+            backspace = "\\b"
+            tab = "\\t"
+            linefeed = "\\n"
+            formfeed = "\\f"
+            carriagereturn = "\\r"
+            quote = "\\""
+            backslash = "\\\\"
+            """
+        );
+
+        assertEquals(result, TomlTable.of(List.of(
+            TomlKeyValuePair.of("backspace", new TomlString("\b")),
+            TomlKeyValuePair.of("tab", new TomlString("\t")),
+            TomlKeyValuePair.of("linefeed", new TomlString("\n")),
+            TomlKeyValuePair.of("formfeed", new TomlString("\f")),
+            TomlKeyValuePair.of("carriagereturn", new TomlString("\r")),
+            TomlKeyValuePair.of("quote", new TomlString("\"")),
+            TomlKeyValuePair.of("backslash", new TomlString("\\"))
+        )));
+    }
+
     // == Comments ==
 
     @Test

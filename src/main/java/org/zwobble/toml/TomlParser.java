@@ -113,12 +113,49 @@ public class TomlParser {
     }
 
     private static StringBuilder parseStringValue(Reader reader) throws IOException {
-        reader.read();
+        reader.skip('"');
 
         var string = new StringBuilder();
         while (reader.codePoint != '"') {
-            string.appendCodePoint(reader.codePoint);
-            reader.read();
+            if (reader.codePoint == '\\') {
+                reader.read();
+                switch (reader.codePoint) {
+                    case 'b' -> {
+                        string.appendCodePoint('\b');
+                        reader.read();
+                    }
+                    case 't' -> {
+                        string.appendCodePoint('\t');
+                        reader.read();
+                    }
+                    case 'n' -> {
+                        string.appendCodePoint('\n');
+                        reader.read();
+                    }
+                    case 'f' -> {
+                        string.appendCodePoint('\f');
+                        reader.read();
+                    }
+                    case 'r' -> {
+                        string.appendCodePoint('\r');
+                        reader.read();
+                    }
+                    case '"' -> {
+                        string.appendCodePoint('"');
+                        reader.read();
+                    }
+                    case '\\' -> {
+                        string.appendCodePoint('\\');
+                        reader.read();
+                    }
+                    default -> {
+                        throw new TomlParseError("TODO");
+                    }
+                }
+            } else {
+                string.appendCodePoint(reader.codePoint);
+                reader.read();
+            }
         }
 
         reader.skip('"');
