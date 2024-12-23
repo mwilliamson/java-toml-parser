@@ -25,24 +25,25 @@ public class TomlParser {
                     return new TomlTable(keyValuePairs);
                 }
 
-                if (reader.codePoint == '#') {
-                    reader.read();
-
-                    while (reader.codePoint != '\n' && reader.codePoint != -1) {
-                        reader.read();
-                    }
-                    reader.read();
+                if (trySkipComment(reader)) {
+                    // Do nothing
                 } else if (isBareKeyCodePoint(reader.codePoint)) {
                     var key = readBareKey(reader);
                     skipWhitespace(reader);
                     reader.skip('=');
                     skipWhitespace(reader);
                     var value = readValue(reader);
-                    reader.skip('\n');
                     keyValuePairs.add(TomlKeyValuePair.of(key, value));
+                    trySkipComment(reader);
                 } else {
                     throw new TomlParseError("TODO: " + formatCodePoint(reader.codePoint));
                 }
+
+                if (reader.isEndOfFile()) {
+                    return new TomlTable(keyValuePairs);
+                }
+
+                reader.skip('\n');
             }
         }
     }
@@ -91,6 +92,20 @@ public class TomlParser {
             return new TomlInt(integer);
         } else {
             throw new TomlParseError("??");
+        }
+    }
+
+    private static boolean trySkipComment(Reader reader) throws IOException {
+        if (reader.codePoint == '#') {
+            reader.read();
+
+            while (reader.codePoint != '\n' && reader.codePoint != -1) {
+                reader.read();
+            }
+
+            return true;
+        } else {
+            return false;
         }
     }
 
