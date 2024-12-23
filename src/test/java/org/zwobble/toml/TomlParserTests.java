@@ -33,6 +33,8 @@ public class TomlParserTests {
         assertEquals(result, TomlTable.of(List.of()));
     }
 
+    // == Booleans ==
+
     @Test
     public void valueTrue() throws IOException {
         var result = parse("x = true");
