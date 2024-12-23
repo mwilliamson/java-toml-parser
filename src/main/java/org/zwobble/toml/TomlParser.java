@@ -14,45 +14,49 @@ public class TomlParser {
 
     public static TomlTable parseFile(Path path) throws IOException {
         try (var fileReader = new FileReader(path.toFile())) {
-            var reader = new Reader(fileReader);
-            var keyValuePairs = new ArrayList<TomlKeyValuePair>();
+            return parseReader(fileReader);
+        }
+    }
 
-            // TODO: handle surrogate pairs
-            reader.read();
+    public static TomlTable parseReader(java.io.Reader rawReader) throws IOException {
+        var reader = new Reader(rawReader);
+        var keyValuePairs = new ArrayList<TomlKeyValuePair>();
 
-            while (true) {
-                if (reader.isEndOfFile()) {
-                    return new TomlTable(keyValuePairs);
-                }
+        // TODO: handle surrogate pairs
+        reader.read();
 
-                if (trySkipComment(reader)) {
-                    // Comment for the entire line
-                } else if (reader.codePoint == '\n') {
-                    // Blank line with LF
-                } else if (reader.codePoint == '\r') {
-                    // Blank line with CRLF
-                } else if (isBareKeyCodePoint(reader.codePoint)) {
-                    var key = readBareKey(reader);
-                    skipWhitespace(reader);
-                    reader.skip('=');
-                    skipWhitespace(reader);
-                    var value = readValue(reader);
-                    keyValuePairs.add(TomlKeyValuePair.of(key, value));
-                    skipWhitespace(reader);
-                    trySkipComment(reader);
-                } else {
-                    throw new TomlParseError("TODO: " + formatCodePoint(reader.codePoint));
-                }
-
-                if (reader.isEndOfFile()) {
-                    return new TomlTable(keyValuePairs);
-                }
-
-                if (reader.codePoint == '\r') {
-                    reader.skip('\r');
-                }
-                reader.skip('\n');
+        while (true) {
+            if (reader.isEndOfFile()) {
+                return new TomlTable(keyValuePairs);
             }
+
+            if (trySkipComment(reader)) {
+                // Comment for the entire line
+            } else if (reader.codePoint == '\n') {
+                // Blank line with LF
+            } else if (reader.codePoint == '\r') {
+                // Blank line with CRLF
+            } else if (isBareKeyCodePoint(reader.codePoint)) {
+                var key = readBareKey(reader);
+                skipWhitespace(reader);
+                reader.skip('=');
+                skipWhitespace(reader);
+                var value = readValue(reader);
+                keyValuePairs.add(TomlKeyValuePair.of(key, value));
+                skipWhitespace(reader);
+                trySkipComment(reader);
+            } else {
+                throw new TomlParseError("TODO: " + formatCodePoint(reader.codePoint));
+            }
+
+            if (reader.isEndOfFile()) {
+                return new TomlTable(keyValuePairs);
+            }
+
+            if (reader.codePoint == '\r') {
+                reader.skip('\r');
+            }
+            reader.skip('\n');
         }
     }
 
@@ -162,10 +166,10 @@ public class TomlParser {
     }
 
     private static class Reader {
-        private final FileReader reader;
+        private final java.io.Reader reader;
         private int codePoint;
 
-        private Reader(FileReader reader) {
+        private Reader(java.io.Reader reader) {
             this.reader = reader;
         }
 
