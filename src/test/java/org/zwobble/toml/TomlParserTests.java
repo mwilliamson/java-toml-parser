@@ -6,10 +6,7 @@ import com.google.gson.JsonParser;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.tomlj.TomlParseError;
-import org.zwobble.toml.values.TomlBool;
-import org.zwobble.toml.values.TomlString;
-import org.zwobble.toml.values.TomlTable;
-import org.zwobble.toml.values.TomlValue;
+import org.zwobble.toml.values.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -76,6 +73,13 @@ public class TomlParserTests {
                 var jsonObject = new JsonObject();
                 jsonObject.addProperty("type", "bool");
                 jsonObject.addProperty("value", tomlBool.value() ? "true" : "false");
+                yield jsonObject;
+            }
+
+            case TomlInt tomlInt -> {
+                var jsonObject = new JsonObject();
+                jsonObject.addProperty("type", "integer");
+                jsonObject.addProperty("value", Long.toString(tomlInt.value()));
                 yield jsonObject;
             }
 

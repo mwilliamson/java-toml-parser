@@ -1,10 +1,7 @@
 package org.zwobble.toml;
 
 import org.zwobble.toml.errors.TomlParseError;
-import org.zwobble.toml.values.TomlBool;
-import org.zwobble.toml.values.TomlKeyValuePair;
-import org.zwobble.toml.values.TomlTable;
-import org.zwobble.toml.values.TomlValue;
+import org.zwobble.toml.values.*;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -28,7 +25,7 @@ public class TomlParser {
                     return new TomlTable(keyValuePairs);
                 }
 
-                if (isBareKeyCharacter(reader.codePoint)) {
+                if (isBareKeyCodePoint(reader.codePoint)) {
                     var key = readBareKey(reader);
                     skipWhitespace(reader);
                     reader.skip('=');
@@ -51,7 +48,7 @@ public class TomlParser {
 
     private static String readBareKey(Reader reader) throws IOException {
         var key = new StringBuilder();
-        while (isBareKeyCharacter(reader.codePoint)) {
+        while (isBareKeyCodePoint(reader.codePoint)) {
             key.appendCodePoint(reader.codePoint);
             reader.read();
         }
@@ -72,6 +69,19 @@ public class TomlParser {
             reader.skip('s');
             reader.skip('e');
             return new TomlBool(false);
+        } else if (isAsciiDigitCodePoint(reader.codePoint) || reader.codePoint == '+' || reader.codePoint == '-') {
+            var integerString = new StringBuilder();
+
+            integerString.appendCodePoint(reader.codePoint);
+            reader.read();
+
+            while (isAsciiDigitCodePoint(reader.codePoint)) {
+                integerString.appendCodePoint(reader.codePoint);
+                reader.read();
+            }
+
+            var integer = Long.parseLong(integerString.toString());
+            return new TomlInt(integer);
         } else {
             throw new TomlParseError("??");
         }
@@ -81,10 +91,14 @@ public class TomlParser {
         return character == 0x09 || character == 0x20;
     }
 
-    private static boolean isBareKeyCharacter(int character) {
-        return (character >= 0x30 && character <= 0x39) ||
+    private static boolean isBareKeyCodePoint(int character) {
+        return isAsciiDigitCodePoint(character) ||
             (character >= 0x41 && character <= 0x5a) ||
             (character >= 0x61 && character <= 0x7a);
+    }
+
+    private static boolean isAsciiDigitCodePoint(int character) {
+        return character >= 0x30 && character <= 0x39;
     }
 
     private static String formatCodePoint(int codePoint) {
