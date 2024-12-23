@@ -26,7 +26,9 @@ public class TomlParser {
                 }
 
                 if (trySkipComment(reader)) {
-                    // Do nothing
+                    // Comment for the entire line
+                } else if (reader.codePoint == '\n') {
+                    // Blank line
                 } else if (isBareKeyCodePoint(reader.codePoint)) {
                     var key = readBareKey(reader);
                     skipWhitespace(reader);
