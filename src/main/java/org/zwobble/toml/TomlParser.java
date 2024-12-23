@@ -101,19 +101,24 @@ public class TomlParser {
             var integer = Long.parseLong(integerString.toString());
             return new TomlInt(integer);
         } else if (reader.codePoint == '"') {
-            reader.read();
-
-            var string = new StringBuilder();
-            while (reader.codePoint != '"') {
-                string.appendCodePoint(reader.codePoint);
-                reader.read();
-            }
-
-            reader.skip('"');
+            var string = parseStringValue(reader);
             return new TomlString(string.toString());
         } else {
             throw new TomlParseError("??");
         }
+    }
+
+    private static StringBuilder parseStringValue(Reader reader) throws IOException {
+        reader.read();
+
+        var string = new StringBuilder();
+        while (reader.codePoint != '"') {
+            string.appendCodePoint(reader.codePoint);
+            reader.read();
+        }
+
+        reader.skip('"');
+        return string;
     }
 
     private static boolean trySkipComment(Reader reader) throws IOException {
