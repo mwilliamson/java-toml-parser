@@ -34,6 +34,13 @@ public class TomlParserTests {
     }
 
     @Test
+    public void onlyLineComment() throws IOException {
+        var result = parse("# a");
+
+        assertEquals(result, TomlTable.of(List.of()));
+    }
+
+    @Test
     public void valueTrue() throws IOException {
         var result = parse("x = true");
 
