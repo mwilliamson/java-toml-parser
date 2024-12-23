@@ -4,6 +4,7 @@ import org.zwobble.toml.errors.TomlParseError;
 import org.zwobble.toml.values.TomlBool;
 import org.zwobble.toml.values.TomlKeyValuePair;
 import org.zwobble.toml.values.TomlTable;
+import org.zwobble.toml.values.TomlValue;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -28,56 +29,51 @@ public class TomlParser {
                 }
 
                 if (isBareKeyCharacter(reader.codePoint)) {
-                    var key = new StringBuilder();
-                    while (isBareKeyCharacter(reader.codePoint)) {
-                        key.appendCodePoint(reader.codePoint);
-                        reader.read();
-                    }
-
-                    while (isTomlWhitespace(reader.codePoint)) {
-                        reader.read();
-                    }
-
-                    if (reader.codePoint != '=') {
-                        throw new TomlParseError(String.format(
-                            "Expected '=' but got %s",
-                            formatCodePoint(reader.codePoint)
-                        ));
-                    }
-                    reader.read();
-
-                    while (isTomlWhitespace(reader.codePoint)) {
-                        reader.read();
-                    }
-
-                    if (reader.codePoint == 't') {
-                        reader.read();
-                        reader.read();
-                        reader.read();
-                        reader.read();
-                        keyValuePairs.add(TomlKeyValuePair.of(key.toString(), new TomlBool(true)));
-                    } else if (reader.codePoint == 'f') {
-                        reader.read();
-                        reader.read();
-                        reader.read();
-                        reader.read();
-                        reader.read();
-                        keyValuePairs.add(TomlKeyValuePair.of(key.toString(), new TomlBool(false)));
-                    } else {
-                        throw new TomlParseError("??");
-                    }
-
-                    if (reader.codePoint != '\n') {
-                        throw new TomlParseError(String.format(
-                            "Expected newline but got %s",
-                            formatCodePoint(reader.codePoint)
-                        ));
-                    }
-                    reader.read();
+                    var key = readBareKey(reader);
+                    skipWhitespace(reader);
+                    reader.skip('=');
+                    skipWhitespace(reader);
+                    var value = readValue(reader);
+                    reader.skip('\n');
+                    keyValuePairs.add(TomlKeyValuePair.of(key, value));
                 } else {
                     throw new TomlParseError("TODO");
                 }
             }
+        }
+    }
+
+    private static void skipWhitespace(Reader reader) throws IOException {
+        while (isTomlWhitespace(reader.codePoint)) {
+            reader.read();
+        }
+    }
+
+    private static String readBareKey(Reader reader) throws IOException {
+        var key = new StringBuilder();
+        while (isBareKeyCharacter(reader.codePoint)) {
+            key.appendCodePoint(reader.codePoint);
+            reader.read();
+        }
+        return key.toString();
+    }
+
+    private static TomlValue readValue(Reader reader) throws IOException {
+        if (reader.codePoint == 't') {
+            reader.skip('t');
+            reader.skip('r');
+            reader.skip('u');
+            reader.skip('e');
+            return new TomlBool(true);
+        } else if (reader.codePoint == 'f') {
+            reader.skip('f');
+            reader.skip('a');
+            reader.skip('l');
+            reader.skip('s');
+            reader.skip('e');
+            return new TomlBool(false);
+        } else {
+            throw new TomlParseError("??");
         }
     }
 
@@ -104,7 +100,18 @@ public class TomlParser {
         }
 
         public void read() throws IOException {
-            codePoint = reader.read();
+            this.codePoint = reader.read();
+        }
+
+        public void skip(int expectedCodePoint) throws IOException {
+            if (this.codePoint != expectedCodePoint) {
+                throw new TomlParseError(String.format(
+                    "Expected %s but got %s",
+                    formatCodePoint(expectedCodePoint),
+                    formatCodePoint(this.codePoint)
+                ));
+            }
+            read();
         }
 
         public boolean isEndOfFile() {
