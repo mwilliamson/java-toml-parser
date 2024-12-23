@@ -94,7 +94,9 @@ public class TomlParser {
     private static boolean isBareKeyCodePoint(int character) {
         return isAsciiDigitCodePoint(character) ||
             (character >= 0x41 && character <= 0x5a) ||
-            (character >= 0x61 && character <= 0x7a);
+            (character >= 0x61 && character <= 0x7a) ||
+            character == '_' ||
+            character == '-';
     }
 
     private static boolean isAsciiDigitCodePoint(int character) {
