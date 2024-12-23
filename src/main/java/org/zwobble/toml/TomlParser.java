@@ -83,8 +83,10 @@ public class TomlParser {
             integerString.appendCodePoint(reader.codePoint);
             reader.read();
 
-            while (isAsciiDigitCodePoint(reader.codePoint)) {
-                integerString.appendCodePoint(reader.codePoint);
+            while (isAsciiDigitCodePoint(reader.codePoint) || reader.codePoint == '_') {
+                if (reader.codePoint != '_') {
+                    integerString.appendCodePoint(reader.codePoint);
+                }
                 reader.read();
             }
 
