@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
-import org.tomlj.TomlParseError;
+import org.zwobble.toml.errors.TomlParseError;
 import org.zwobble.toml.values.*;
 
 import java.io.IOException;
