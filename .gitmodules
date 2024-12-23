@@ -1,0 +1,6 @@
+[submodule "runtime/deps/walloc"]
+	path = runtime/deps/walloc
+	url = git@github.com:wingo/walloc.git
+[submodule "toml-test"]
+	path = toml-test
+	url = git@github.com:toml-lang/toml-test.git
