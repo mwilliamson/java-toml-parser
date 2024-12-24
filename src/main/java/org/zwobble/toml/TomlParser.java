@@ -39,18 +39,8 @@ public class TomlParser {
             } else if (reader.codePoint == '\r') {
                 // Blank line with CRLF
             } else if (isBareKeyCodePoint(reader.codePoint) || reader.codePoint == '\"' || reader.codePoint == '\'') {
-                var key =
-                    reader.codePoint == '\"' ? parseBasicStringValue(reader) :
-                    reader.codePoint == '\'' ? parseLiteralStringValue(reader) :
-                    readBareKey(reader);
-
-                skipWhitespace(reader);
-                reader.skip('=');
-                skipWhitespace(reader);
-                var value = readValue(reader);
-                keyValuePairs.add(TomlKeyValuePair.of(key, value));
-                skipWhitespace(reader);
-                trySkipComment(reader);
+                var keyValuePair = parseKeyValuePair(reader);
+                keyValuePairs.add(keyValuePair);
             } else {
                 throw new TomlParseError("TODO: " + formatCodePoint(reader.codePoint));
             }
@@ -64,6 +54,21 @@ public class TomlParser {
             }
             reader.skip('\n');
         }
+    }
+
+    private static TomlKeyValuePair parseKeyValuePair(Reader reader) throws IOException {
+        var key =
+            reader.codePoint == '\"' ? parseBasicStringValue(reader) :
+            reader.codePoint == '\'' ? parseLiteralStringValue(reader) :
+            readBareKey(reader);
+
+        skipWhitespace(reader);
+        reader.skip('=');
+        skipWhitespace(reader);
+        var value = readValue(reader);
+        skipWhitespace(reader);
+        trySkipComment(reader);
+        return TomlKeyValuePair.of(key, value);
     }
 
     private static void skipWhitespace(Reader reader) throws IOException {
