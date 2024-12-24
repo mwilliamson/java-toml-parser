@@ -337,38 +337,12 @@ public class TomlParser {
                     }
                     case 'u' -> {
                         reader.read();
-                        var codePoint = 0;
-                        for (var i = 0; i < 4; i++) {
-                            codePoint <<= 4;
-                            if (reader.codePoint >= '0' && reader.codePoint <= '9') {
-                                codePoint += reader.codePoint - '0';
-                            } else if (reader.codePoint >= 'a' && reader.codePoint <= 'f') {
-                                codePoint += reader.codePoint - 'a' + 10;
-                            } else if (reader.codePoint >= 'A' && reader.codePoint <= 'F') {
-                                codePoint += reader.codePoint - 'A' + 10;
-                            } else {
-                                throw new TomlParseError("TODO");
-                            }
-                            reader.read();
-                        }
+                        var codePoint = parseHex(reader, 4);
                         string.appendCodePoint(codePoint);
                     }
                     case 'U' -> {
                         reader.read();
-                        var codePoint = 0;
-                        for (var i = 0; i < 8; i++) {
-                            codePoint <<= 4;
-                            if (reader.codePoint >= '0' && reader.codePoint <= '9') {
-                                codePoint += reader.codePoint - '0';
-                            } else if (reader.codePoint >= 'a' && reader.codePoint <= 'f') {
-                                codePoint += reader.codePoint - 'a' + 10;
-                            } else if (reader.codePoint >= 'A' && reader.codePoint <= 'F') {
-                                codePoint += reader.codePoint - 'A' + 10;
-                            } else {
-                                throw new TomlParseError("TODO");
-                            }
-                            reader.read();
-                        }
+                        var codePoint = parseHex(reader, 8);
                         string.appendCodePoint(codePoint);
                     }
                     default -> {
@@ -384,6 +358,24 @@ public class TomlParser {
         reader.skip('"');
 
         return string.toString();
+    }
+
+    private static int parseHex(Reader reader, int codePointCount) throws IOException {
+        var codePoint = 0;
+        for (var i = 0; i < codePointCount; i++) {
+            codePoint <<= 4;
+            if (reader.codePoint >= '0' && reader.codePoint <= '9') {
+                codePoint += reader.codePoint - '0';
+            } else if (reader.codePoint >= 'a' && reader.codePoint <= 'f') {
+                codePoint += reader.codePoint - 'a' + 10;
+            } else if (reader.codePoint >= 'A' && reader.codePoint <= 'F') {
+                codePoint += reader.codePoint - 'A' + 10;
+            } else {
+                throw new TomlParseError("TODO");
+            }
+            reader.read();
+        }
+        return codePoint;
     }
 
     private static String parseLiteralStringValue(Reader reader) throws IOException {
