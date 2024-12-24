@@ -65,7 +65,7 @@ public class TomlParser {
         skipWhitespace(reader);
         reader.skip('=');
         skipWhitespace(reader);
-        var value = readValue(reader);
+        var value = parseValue(reader);
         skipWhitespace(reader);
         trySkipComment(reader);
         return TomlKeyValuePair.of(key, value);
@@ -86,7 +86,7 @@ public class TomlParser {
         return key.toString();
     }
 
-    private static TomlValue readValue(Reader reader) throws IOException {
+    private static TomlValue parseValue(Reader reader) throws IOException {
         if (reader.codePoint == 't') {
             return parseTrue(reader);
         } else if (reader.codePoint == 'f') {
@@ -386,7 +386,7 @@ public class TomlParser {
         skipWhitespace(reader);
         var elements = new ArrayList<TomlValue>();
         while (reader.codePoint != ']') {
-            var element = readValue(reader);
+            var element = parseValue(reader);
             skipWhitespace(reader);
             elements.add(element);
 
