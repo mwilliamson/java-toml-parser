@@ -158,6 +158,15 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void intBinary() throws IOException {
+        var result = parse("x = 0b1101");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isInt(13, isSourceRange(4, 10)))
+        )));
+    }
+
     // == Floats ==
 
     @Test

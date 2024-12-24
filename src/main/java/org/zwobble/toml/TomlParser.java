@@ -161,6 +161,7 @@ public class TomlParser {
 
         var isFloat = false;
         var numberString = new StringBuilder();
+        var intBase = 10;
 
         numberString.appendCodePoint(reader.codePoint);
         reader.read();
@@ -198,6 +199,11 @@ public class TomlParser {
             return new TomlFloat(Double.POSITIVE_INFINITY, sourceRange);
         }
 
+        if (reader.codePoint == 'b') {
+            intBase = 2;
+            reader.read();
+        }
+
         while (
             isAsciiDigitCodePoint(reader.codePoint) ||
                 reader.codePoint == '_' ||
@@ -229,7 +235,7 @@ public class TomlParser {
             var value = Double.parseDouble(numberString.toString());
             return new TomlFloat(value, sourceRange);
         } else {
-            var integer = Long.parseLong(numberString.toString());
+            var integer = Long.parseLong(numberString.toString(), intBase);
             return new TomlInt(integer, sourceRange);
         }
     }
