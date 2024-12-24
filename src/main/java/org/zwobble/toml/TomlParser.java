@@ -92,29 +92,7 @@ public class TomlParser {
             reader.skip('e');
             return new TomlBool(false);
         } else if (isAsciiDigitCodePoint(reader.codePoint) || reader.codePoint == '+' || reader.codePoint == '-') {
-            var isFloat = false;
-            var numberString = new StringBuilder();
-
-            numberString.appendCodePoint(reader.codePoint);
-            reader.read();
-
-            while (isAsciiDigitCodePoint(reader.codePoint) || reader.codePoint == '_' || reader.codePoint == '.') {
-                if (reader.codePoint != '_') {
-                    if (reader.codePoint == '.') {
-                        isFloat = true;
-                    }
-                    numberString.appendCodePoint(reader.codePoint);
-                }
-                reader.read();
-            }
-
-            if (isFloat) {
-                var value = Double.parseDouble(numberString.toString());
-                return new TomlFloat(value);
-            } else {
-                var integer = Long.parseLong(numberString.toString());
-                return new TomlInt(integer);
-            }
+            return parseNumber(reader);
         } else if (reader.codePoint == '"') {
             var string = parseStringValue(reader);
             return new TomlString(string);
@@ -122,6 +100,32 @@ public class TomlParser {
             return parseArray(reader);
         } else {
             throw new TomlParseError("??");
+        }
+    }
+
+    private static TomlValue parseNumber(Reader reader) throws IOException {
+        var isFloat = false;
+        var numberString = new StringBuilder();
+
+        numberString.appendCodePoint(reader.codePoint);
+        reader.read();
+
+        while (isAsciiDigitCodePoint(reader.codePoint) || reader.codePoint == '_' || reader.codePoint == '.') {
+            if (reader.codePoint != '_') {
+                if (reader.codePoint == '.') {
+                    isFloat = true;
+                }
+                numberString.appendCodePoint(reader.codePoint);
+            }
+            reader.read();
+        }
+
+        if (isFloat) {
+            var value = Double.parseDouble(numberString.toString());
+            return new TomlFloat(value);
+        } else {
+            var integer = Long.parseLong(numberString.toString());
+            return new TomlInt(integer);
         }
     }
 
