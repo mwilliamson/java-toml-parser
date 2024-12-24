@@ -186,6 +186,15 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void floatNan() throws IOException {
+        var result = parse("x = nan");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isFloat(Double.NaN, isSourceRange(4, 7)))
+        )));
+    }
+
     // == Strings ==
 
     @Test
