@@ -1,5 +1,10 @@
 package org.zwobble.toml.values;
 
-public record TomlBool(boolean value) implements TomlValue {
+import org.zwobble.toml.sources.SourceRange;
+
+public record TomlBool(
+    boolean value,
+    SourceRange sourceRange
+) implements TomlValue {
 
 }

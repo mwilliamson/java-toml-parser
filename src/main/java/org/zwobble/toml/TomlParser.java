@@ -1,6 +1,7 @@
 package org.zwobble.toml;
 
 import org.zwobble.toml.errors.TomlParseError;
+import org.zwobble.toml.sources.SourcePosition;
 import org.zwobble.toml.values.*;
 
 import java.io.FileReader;
@@ -80,18 +81,30 @@ public class TomlParser {
 
     private static TomlValue readValue(Reader reader) throws IOException {
         if (reader.codePoint == 't') {
+            var start = reader.position();
+
             reader.skip('t');
             reader.skip('r');
             reader.skip('u');
             reader.skip('e');
-            return new TomlBool(true);
+
+            var end = reader.position();
+            var sourceRange = start.to(end);
+
+            return new TomlBool(true, sourceRange);
         } else if (reader.codePoint == 'f') {
+            var start = reader.position();
+
             reader.skip('f');
             reader.skip('a');
             reader.skip('l');
             reader.skip('s');
             reader.skip('e');
-            return new TomlBool(false);
+
+            var end = reader.position();
+            var sourceRange = start.to(end);
+
+            return new TomlBool(false, sourceRange);
         } else if (isAsciiDigitCodePoint(reader.codePoint) || reader.codePoint == '+' || reader.codePoint == '-') {
             return parseNumber(reader);
         } else if (reader.codePoint == '"') {
@@ -245,13 +258,16 @@ public class TomlParser {
     private static class Reader {
         private final java.io.Reader reader;
         private int codePoint;
+        private int codePointIndex;
 
         private Reader(java.io.Reader reader) {
             this.reader = reader;
+            this.codePointIndex = -1;
         }
 
         public void read() throws IOException {
             this.codePoint = reader.read();
+            codePointIndex += 1;
         }
 
         public void skip(int expectedCodePoint) throws IOException {
@@ -272,5 +288,10 @@ public class TomlParser {
         public boolean isEndOfFile() {
             return codePoint == -1;
         }
+
+        public SourcePosition position() {
+            return new SourcePosition(codePointIndex);
+        }
     }
+
 }

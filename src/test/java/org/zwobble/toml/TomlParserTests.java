@@ -2,6 +2,7 @@ package org.zwobble.toml;
 
 import org.junit.jupiter.api.Test;
 import org.zwobble.precisely.Matcher;
+import org.zwobble.toml.sources.SourceRange;
 import org.zwobble.toml.values.*;
 
 import java.io.IOException;
@@ -96,7 +97,7 @@ public class TomlParserTests {
         var result = parse("x = true");
 
         assertThat(result, isTable(isSequence(
-            isKeyValuePair("x", isBool(true))
+            isKeyValuePair("x", isBool(true, isSourceRange(4, 8)))
         )));
     }
 
@@ -105,7 +106,7 @@ public class TomlParserTests {
         var result = parse("x = false");
 
         assertThat(result, isTable(isSequence(
-            isKeyValuePair("x", isBool(false))
+            isKeyValuePair("x", isBool(false, isSourceRange(4, 9)))
         )));
     }
 
@@ -353,6 +354,14 @@ public class TomlParserTests {
         );
     }
 
+    private Matcher<TomlValue> isBool(boolean value, Matcher<SourceRange> sourceRange) {
+        return instanceOf(
+            TomlBool.class,
+            has("value", x -> x.value(), equalTo(value)),
+            has("sourceRange", x -> x.sourceRange(), sourceRange)
+        );
+    }
+
     private Matcher<TomlValue> isInt(long value) {
         return instanceOf(
             TomlInt.class,
@@ -399,6 +408,16 @@ public class TomlParserTests {
         return allOf(
             has("key", x -> x.key(), equalTo(key)),
             has("value", x -> x.value(), value)
+        );
+    }
+
+    private Matcher<SourceRange> isSourceRange(
+        int codePointStartIndex,
+        int codePointEndIndex
+    ) {
+        return allOf(
+            has("start.codePointIndex", x -> x.start().codePointIndex(), equalTo(codePointStartIndex)),
+            has("end.codePointIndex", x -> x.end().codePointIndex(), equalTo(codePointEndIndex))
         );
     }
 }
