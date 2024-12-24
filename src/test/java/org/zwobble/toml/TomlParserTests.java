@@ -34,6 +34,53 @@ public class TomlParserTests {
         assertEquals(result, TomlTable.of(List.of()));
     }
 
+    // == Keys ==
+
+    @Test
+    public void keyCanBeLowercaseAsciiLetters() throws IOException {
+        var result = parse("abc = true");
+
+        assertEquals(result, TomlTable.of(List.of(
+            TomlKeyValuePair.of("abc", new TomlBool(true))
+        )));
+    }
+
+    @Test
+    public void keyCanBeUppercaseAsciiLetters() throws IOException {
+        var result = parse("ABC = true");
+
+        assertEquals(result, TomlTable.of(List.of(
+            TomlKeyValuePair.of("ABC", new TomlBool(true))
+        )));
+    }
+
+    @Test
+    public void keyCanBeAsciiDigits() throws IOException {
+        var result = parse("123 = true");
+
+        assertEquals(result, TomlTable.of(List.of(
+            TomlKeyValuePair.of("123", new TomlBool(true))
+        )));
+    }
+
+    @Test
+    public void keyCanBeHyphens() throws IOException {
+        var result = parse("--- = true");
+
+        assertEquals(result, TomlTable.of(List.of(
+            TomlKeyValuePair.of("---", new TomlBool(true))
+        )));
+    }
+
+    @Test
+    public void keyCanBeUnderscores() throws IOException {
+        var result = parse("___ = true");
+
+        assertEquals(result, TomlTable.of(List.of(
+            TomlKeyValuePair.of("___", new TomlBool(true))
+        )));
+    }
+
     // == Booleans ==
 
     @Test
