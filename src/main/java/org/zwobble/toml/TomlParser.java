@@ -71,7 +71,19 @@ public class TomlParser {
     private record KeysValuePair(List<String> keys, TomlValue value) {}
 
     private static KeysValuePair parseKeyValuePair(Reader reader) throws IOException {
+        var keys = parseKeys(reader);
+        reader.skip('=');
+        skipWhitespace(reader);
+        var value = parseValue(reader);
+        skipWhitespace(reader);
+        trySkipComment(reader);
+
+        return new KeysValuePair(keys, value);
+    }
+
+    private static ArrayList<String> parseKeys(Reader reader) throws IOException {
         var keys = new ArrayList<String>();
+
         while (true) {
             var key = parseKey(reader);
 
@@ -87,13 +99,7 @@ public class TomlParser {
             }
         }
 
-        reader.skip('=');
-        skipWhitespace(reader);
-        var value = parseValue(reader);
-        skipWhitespace(reader);
-        trySkipComment(reader);
-
-        return new KeysValuePair(keys, value);
+        return keys;
     }
 
     private static String parseKey(Reader reader) throws IOException {
