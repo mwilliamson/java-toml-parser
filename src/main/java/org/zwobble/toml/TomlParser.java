@@ -40,7 +40,7 @@ public class TomlParser {
                 // Blank line with CRLF
             } else if (isBareKeyCodePoint(reader.codePoint) || reader.codePoint == '\"') {
                 var key = reader.codePoint == '\"'
-                    ? parseStringValue(reader)
+                    ? parseBasicStringValue(reader)
                     : readBareKey(reader);
                 skipWhitespace(reader);
                 reader.skip('=');
@@ -132,7 +132,16 @@ public class TomlParser {
         } else if (reader.codePoint == '"') {
             var start = reader.position();
 
-            var string = parseStringValue(reader);
+            var string = parseBasicStringValue(reader);
+
+            var end = reader.position();
+            var sourceRange = start.to(end);
+
+            return new TomlString(string, sourceRange);
+        } else if (reader.codePoint == '\'') {
+            var start = reader.position();
+
+            var string = parseLiteralStringValue(reader);
 
             var end = reader.position();
             var sourceRange = start.to(end);
@@ -223,7 +232,7 @@ public class TomlParser {
         }
     }
 
-    private static String parseStringValue(Reader reader) throws IOException {
+    private static String parseBasicStringValue(Reader reader) throws IOException {
         reader.skip('"');
 
         var string = new StringBuilder();
@@ -270,6 +279,20 @@ public class TomlParser {
         }
 
         reader.skip('"');
+
+        return string.toString();
+    }
+
+    private static String parseLiteralStringValue(Reader reader) throws IOException {
+        reader.skip('\'');
+
+        var string = new StringBuilder();
+        while (reader.codePoint != '\'') {
+            string.appendCodePoint(reader.codePoint);
+            reader.read();
+        }
+
+        reader.skip('\'');
 
         return string.toString();
     }

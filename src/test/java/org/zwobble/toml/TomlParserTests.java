@@ -297,7 +297,7 @@ public class TomlParserTests {
     // == Strings ==
 
     @Test
-    public void emptyString() throws IOException {
+    public void emptyBasicString() throws IOException {
         var result = parse(
             """
             x = ""
@@ -310,7 +310,7 @@ public class TomlParserTests {
     }
 
     @Test
-    public void stringWithAscii() throws IOException {
+    public void basicStringWithAscii() throws IOException {
         var result = parse(
             """
             x = "abc"
@@ -323,7 +323,7 @@ public class TomlParserTests {
     }
 
     @Test
-    public void stringWithCompactEscapeSequence() throws IOException {
+    public void basicStringWithCompactEscapeSequence() throws IOException {
         var result = parse(
             """
             backspace = "\\b"
@@ -344,6 +344,45 @@ public class TomlParserTests {
             isKeyValuePair("carriagereturn", isString("\r")),
             isKeyValuePair("quote", isString("\"")),
             isKeyValuePair("backslash", isString("\\"))
+        )));
+    }
+
+    @Test
+    public void emptyLiteralString() throws IOException {
+        var result = parse(
+            """
+            x = ''
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("", isSourceRange(4, 6)))
+        )));
+    }
+
+    @Test
+    public void literalStringWithAscii() throws IOException {
+        var result = parse(
+            """
+            x = 'abc'
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("abc", isSourceRange(4, 9)))
+        )));
+    }
+
+    @Test
+    public void literalStringWithCompactEscapeSequence() throws IOException {
+        var result = parse(
+            """
+            backspace = '\\b'
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("backspace", isString("\\b"))
         )));
     }
 
