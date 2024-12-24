@@ -108,6 +108,44 @@ public class TomlParserTests {
         )));
     }
 
+    // == Integers ==
+
+    @Test
+    public void integerZero() throws IOException {
+        var result = parse("x = 0");
+
+        assertEquals(result, TomlTable.of(List.of(
+            TomlKeyValuePair.of("x", new TomlInt(0))
+        )));
+    }
+
+    @Test
+    public void integerPositive() throws IOException {
+        var result = parse("x = 12");
+
+        assertEquals(result, TomlTable.of(List.of(
+            TomlKeyValuePair.of("x", new TomlInt(12))
+        )));
+    }
+
+    @Test
+    public void integerNegative() throws IOException {
+        var result = parse("x = -12");
+
+        assertEquals(result, TomlTable.of(List.of(
+            TomlKeyValuePair.of("x", new TomlInt(-12))
+        )));
+    }
+
+    @Test
+    public void intUnderscores() throws IOException {
+        var result = parse("x = 1_23_4");
+
+        assertEquals(result, TomlTable.of(List.of(
+            TomlKeyValuePair.of("x", new TomlInt(1234))
+        )));
+    }
+
     // == Floats ==
 
     @Test
