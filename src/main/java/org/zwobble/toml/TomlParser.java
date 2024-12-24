@@ -25,6 +25,7 @@ public class TomlParser {
         var reader = new Reader(rawReader);
 
         var rootTable = new TomlTableBuilder();
+        var activeTable = rootTable;
 
         // TODO: handle surrogate pairs
         reader.read();
@@ -42,7 +43,7 @@ public class TomlParser {
                 // Blank line with CRLF
             } else if (isBareKeyCodePoint(reader.codePoint) || reader.codePoint == '\"' || reader.codePoint == '\'') {
                 var keysValuePair = parseKeyValuePair(reader);
-                var table = rootTable;
+                var table = activeTable;
                 for (var i = 0; i < keysValuePair.keys.size() - 1; i++) {
                     var key = keysValuePair.keys.get(i);
                     table = table.getOrCreateSubTable(key);
@@ -51,9 +52,9 @@ public class TomlParser {
             } else if (reader.codePoint == '[') {
                 reader.read();
                 var keys = parseKeys(reader);
-                var table = rootTable;
+                activeTable = rootTable;
                 for (var key : keys) {
-                    table = table.getOrCreateSubTable(key);
+                    activeTable = activeTable.getOrCreateSubTable(key);
                 }
                 reader.skip(']');
             } else {

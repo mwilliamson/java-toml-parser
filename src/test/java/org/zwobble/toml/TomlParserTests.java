@@ -707,6 +707,24 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void afterTableHeaderThenKeyValuePairsBelongToTable() throws IOException {
+        var result = parse("""
+        [x.y.z]
+        a = true
+        """);
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isTable(isSequence(
+                isKeyValuePair("y", isTable(isSequence(
+                    isKeyValuePair("z", isTable(isSequence(
+                        isKeyValuePair("a", isBool(true))
+                    )))
+                )))
+            )))
+        )));
+    }
+
     // == Comments ==
 
     @Test
