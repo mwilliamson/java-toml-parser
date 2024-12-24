@@ -335,6 +335,22 @@ public class TomlParser {
                         string.appendCodePoint('\\');
                         reader.read();
                     }
+                    case 'u' -> {
+                        reader.read();
+                        var codePoint = 0;
+                        for (var i = 0; i < 4; i++) {
+                            codePoint <<= 4;
+                            if (reader.codePoint >= '0' && reader.codePoint <= '9') {
+                                codePoint += reader.codePoint - '0';
+                            } else if (reader.codePoint >= 'a' && reader.codePoint <= 'f') {
+                                codePoint += reader.codePoint - 'a' + 10;
+                            } else {
+                                throw new TomlParseError("TODO");
+                            }
+                            reader.read();
+                        }
+                        string.appendCodePoint(codePoint);
+                    }
                     default -> {
                         throw new TomlParseError("TODO");
                     }
