@@ -37,7 +37,7 @@ public class TomlParserTests {
     // == Keys ==
 
     @Test
-    public void keyCanBeLowercaseAsciiLetters() throws IOException {
+    public void bareKeyCanBeLowercaseAsciiLetters() throws IOException {
         var result = parse("abc = true");
 
         assertEquals(result, TomlTable.of(List.of(
@@ -46,7 +46,7 @@ public class TomlParserTests {
     }
 
     @Test
-    public void keyCanBeUppercaseAsciiLetters() throws IOException {
+    public void bareKeyCanBeUppercaseAsciiLetters() throws IOException {
         var result = parse("ABC = true");
 
         assertEquals(result, TomlTable.of(List.of(
@@ -55,7 +55,7 @@ public class TomlParserTests {
     }
 
     @Test
-    public void keyCanBeAsciiDigits() throws IOException {
+    public void bareKeyCanBeAsciiDigits() throws IOException {
         var result = parse("123 = true");
 
         assertEquals(result, TomlTable.of(List.of(
@@ -64,7 +64,7 @@ public class TomlParserTests {
     }
 
     @Test
-    public void keyCanBeHyphens() throws IOException {
+    public void bareKeyCanBeHyphens() throws IOException {
         var result = parse("--- = true");
 
         assertEquals(result, TomlTable.of(List.of(
@@ -73,7 +73,7 @@ public class TomlParserTests {
     }
 
     @Test
-    public void keyCanBeUnderscores() throws IOException {
+    public void bareKeyCanBeUnderscores() throws IOException {
         var result = parse("___ = true");
 
         assertEquals(result, TomlTable.of(List.of(
