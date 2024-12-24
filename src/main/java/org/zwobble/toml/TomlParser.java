@@ -83,30 +83,9 @@ public class TomlParser {
 
     private static TomlValue readValue(Reader reader) throws IOException {
         if (reader.codePoint == 't') {
-            var start = reader.position();
-
-            reader.skip('t');
-            reader.skip('r');
-            reader.skip('u');
-            reader.skip('e');
-
-            var end = reader.position();
-            var sourceRange = start.to(end);
-
-            return new TomlBool(true, sourceRange);
+            return parseTrue(reader);
         } else if (reader.codePoint == 'f') {
-            var start = reader.position();
-
-            reader.skip('f');
-            reader.skip('a');
-            reader.skip('l');
-            reader.skip('s');
-            reader.skip('e');
-
-            var end = reader.position();
-            var sourceRange = start.to(end);
-
-            return new TomlBool(false, sourceRange);
+            return parseFalse(reader);
         } else if (reader.codePoint == 'n') {
             var start = reader.position();
 
@@ -154,6 +133,35 @@ public class TomlParser {
         } else {
             throw new TomlParseError("??");
         }
+    }
+
+    private static TomlBool parseTrue(Reader reader) throws IOException {
+        var start = reader.position();
+
+        reader.skip('t');
+        reader.skip('r');
+        reader.skip('u');
+        reader.skip('e');
+
+        var end = reader.position();
+        var sourceRange = start.to(end);
+
+        return new TomlBool(true, sourceRange);
+    }
+
+    private static TomlBool parseFalse(Reader reader) throws IOException {
+        var start = reader.position();
+
+        reader.skip('f');
+        reader.skip('a');
+        reader.skip('l');
+        reader.skip('s');
+        reader.skip('e');
+
+        var end = reader.position();
+        var sourceRange = start.to(end);
+
+        return new TomlBool(false, sourceRange);
     }
 
     private static TomlValue parseNumber(Reader reader) throws IOException {
