@@ -168,11 +168,29 @@ public class TomlParserTests {
     }
 
     @Test
+    public void intBinaryUnderscores() throws IOException {
+        var result = parse("x = 0b1_10_1");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isInt(13, isSourceRange(4, 12)))
+        )));
+    }
+
+    @Test
     public void intOctal() throws IOException {
         var result = parse("x = 0o701");
 
         assertThat(result, isTable(isSequence(
             isKeyValuePair("x", isInt(449, isSourceRange(4, 9)))
+        )));
+    }
+
+    @Test
+    public void intOctalUnderscores() throws IOException {
+        var result = parse("x = 0o7_0_1");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isInt(449, isSourceRange(4, 11)))
         )));
     }
 
@@ -191,6 +209,15 @@ public class TomlParserTests {
 
         assertThat(result, isTable(isSequence(
             isKeyValuePair("x", isInt(3841, isSourceRange(4, 9)))
+        )));
+    }
+
+    @Test
+    public void intHexUnderscores() throws IOException {
+        var result = parse("x = 0xf_0_1");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isInt(3841, isSourceRange(4, 11)))
         )));
     }
 

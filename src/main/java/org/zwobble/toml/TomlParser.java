@@ -201,50 +201,62 @@ public class TomlParser {
         if (reader.codePoint == 'b') {
             reader.read();
 
-            while (reader.codePoint == '0' || reader.codePoint == '1') {
-                numberString.appendCodePoint(reader.codePoint);
-                reader.read();
+            while (true) {
+                if (reader.codePoint == '0' || reader.codePoint == '1') {
+                    numberString.appendCodePoint(reader.codePoint);
+                    reader.read();
+                } else if (reader.codePoint == '_') {
+                    reader.read();
+                } else {
+                    var end = reader.position();
+                    var sourceRange = start.to(end);
+
+                    var intValue = Long.parseLong(numberString.toString(), 2);
+                    return new TomlInt(intValue, sourceRange);
+                }
             }
-
-            var end = reader.position();
-            var sourceRange = start.to(end);
-
-            var intValue = Long.parseLong(numberString.toString(), 2);
-            return new TomlInt(intValue, sourceRange);
         }
 
         if (reader.codePoint == 'o') {
             reader.read();
 
-            while (reader.codePoint >= '0' && reader.codePoint <= '7') {
-                numberString.appendCodePoint(reader.codePoint);
-                reader.read();
+            while (true) {
+                if (reader.codePoint >= '0' && reader.codePoint <= '7') {
+                    numberString.appendCodePoint(reader.codePoint);
+                    reader.read();
+                } else if (reader.codePoint == '_') {
+                    reader.read();
+                } else {
+                    var end = reader.position();
+                    var sourceRange = start.to(end);
+
+                    var intValue = Long.parseLong(numberString.toString(), 8);
+                    return new TomlInt(intValue, sourceRange);
+                }
             }
-
-            var end = reader.position();
-            var sourceRange = start.to(end);
-
-            var intValue = Long.parseLong(numberString.toString(), 8);
-            return new TomlInt(intValue, sourceRange);
         }
 
         if (reader.codePoint == 'x') {
             reader.read();
 
-            while (
-                (reader.codePoint >= '0' && reader.codePoint <= '9') ||
-                    (reader.codePoint >= 'a' && reader.codePoint <= 'f') ||
-                    (reader.codePoint >= 'A' && reader.codePoint <= 'F')
-            ) {
-                numberString.appendCodePoint(reader.codePoint);
-                reader.read();
+            while (true) {
+                if (
+                    (reader.codePoint >= '0' && reader.codePoint <= '9') ||
+                        (reader.codePoint >= 'a' && reader.codePoint <= 'f') ||
+                        (reader.codePoint >= 'A' && reader.codePoint <= 'F')
+                ) {
+                    numberString.appendCodePoint(reader.codePoint);
+                    reader.read();
+                } else if (reader.codePoint == '_') {
+                    reader.read();
+                } else {
+                    var end = reader.position();
+                    var sourceRange = start.to(end);
+
+                    var intValue = Long.parseLong(numberString.toString(), 16);
+                    return new TomlInt(intValue, sourceRange);
+                }
             }
-
-            var end = reader.position();
-            var sourceRange = start.to(end);
-
-            var intValue = Long.parseLong(numberString.toString(), 16);
-            return new TomlInt(intValue, sourceRange);
         }
 
         while (
