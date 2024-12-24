@@ -177,8 +177,17 @@ public class TomlParserTests {
     }
 
     @Test
-    public void intHex() throws IOException {
+    public void intHexLowercase() throws IOException {
         var result = parse("x = 0xf01");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isInt(3841, isSourceRange(4, 9)))
+        )));
+    }
+
+    @Test
+    public void intHexUppercase() throws IOException {
+        var result = parse("x = 0xF01");
 
         assertThat(result, isTable(isSequence(
             isKeyValuePair("x", isInt(3841, isSourceRange(4, 9)))

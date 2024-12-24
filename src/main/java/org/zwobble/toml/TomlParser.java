@@ -233,7 +233,8 @@ public class TomlParser {
 
             while (
                 (reader.codePoint >= '0' && reader.codePoint <= '9') ||
-                    (reader.codePoint >= 'a' && reader.codePoint <= 'f')
+                    (reader.codePoint >= 'a' && reader.codePoint <= 'f') ||
+                    (reader.codePoint >= 'A' && reader.codePoint <= 'F')
             ) {
                 numberString.appendCodePoint(reader.codePoint);
                 reader.read();
