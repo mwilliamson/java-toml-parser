@@ -57,6 +57,8 @@ public class TomlParser {
                     activeTable = activeTable.getOrCreateSubTable(key);
                 }
                 reader.skip(']');
+                skipWhitespace(reader);
+                trySkipComment(reader);
             } else {
                 throw new TomlParseError("TODO: " + formatCodePoint(reader.codePoint));
             }

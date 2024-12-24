@@ -768,6 +768,25 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void commentAfterKeyValuePair() throws IOException {
+        var result = parse("a = true\n# a\nb = false");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("a", isBool(true)),
+            isKeyValuePair("b", isBool(false))
+        )));
+    }
+
+    @Test
+    public void commentAfterTableHeader() throws IOException {
+        var result = parse("[a] # a");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("a", isTable(isSequence()))
+        )));
+    }
+
     private TomlTable parse(String text) throws IOException {
         return TomlParser.parseReader(new StringReader(text));
     }
