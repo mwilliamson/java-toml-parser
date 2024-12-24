@@ -9,6 +9,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.StreamSupport;
+
+import static java.lang.System.identityHashCode;
 
 public class TomlParser {
     private TomlParser() {
@@ -22,14 +27,19 @@ public class TomlParser {
 
     public static TomlTable parseReader(java.io.Reader rawReader) throws IOException {
         var reader = new Reader(rawReader);
-        var keyValuePairs = new ArrayList<TomlKeyValuePair>();
+
+        var tableToKeyValuePairs = new HashMap<Integer, ArrayList<TomlKeyValuePair>>();
+
+        var rootKeyValuePairs = new ArrayList<TomlKeyValuePair>();
+        var rootTable = new TomlTable(rootKeyValuePairs);
+        tableToKeyValuePairs.put(identityHashCode(rootTable), rootKeyValuePairs);
 
         // TODO: handle surrogate pairs
         reader.read();
 
         while (true) {
             if (reader.isEndOfFile()) {
-                return new TomlTable(keyValuePairs);
+                return new TomlTable(rootKeyValuePairs);
             }
 
             if (trySkipComment(reader)) {
@@ -39,14 +49,39 @@ public class TomlParser {
             } else if (reader.codePoint == '\r') {
                 // Blank line with CRLF
             } else if (isBareKeyCodePoint(reader.codePoint) || reader.codePoint == '\"' || reader.codePoint == '\'') {
-                var keyValuePair = parseKeyValuePair(reader);
-                keyValuePairs.add(keyValuePair);
+                var keysValuePair = parseKeyValuePair(reader);
+                var table = rootTable;
+                for (var i = 0; i < keysValuePair.keys.size() - 1; i++) {
+                    var key = keysValuePair.keys.get(i);
+                    // TODO: more efficient lookup of keys
+                    var subTable = StreamSupport.stream(
+                        table.keyValuePairs().spliterator(),
+                        false
+                    )
+                        .filter(pair -> pair.key().equals(key))
+                        // TODO: handle not a table
+                        .map(pair -> (TomlTable) pair.value())
+                        .findFirst();
+
+                    if (subTable.isPresent()) {
+                        table = subTable.get();
+                    } else {
+                        var newKeyValuePairs = new ArrayList<TomlKeyValuePair>();
+                        var newSubTable = new TomlTable(newKeyValuePairs);
+                        tableToKeyValuePairs.put(identityHashCode(newSubTable), newKeyValuePairs);
+
+                        tableToKeyValuePairs.get(identityHashCode(table)).add(TomlKeyValuePair.of(key, newSubTable));
+                        table = newSubTable;
+                    }
+                }
+                tableToKeyValuePairs.get(identityHashCode(table))
+                    .add(TomlKeyValuePair.of(keysValuePair.keys.getLast(), keysValuePair.value()));
             } else {
                 throw new TomlParseError("TODO: " + formatCodePoint(reader.codePoint));
             }
 
             if (reader.isEndOfFile()) {
-                return new TomlTable(keyValuePairs);
+                return rootTable;
             }
 
             if (reader.codePoint == '\r') {
@@ -56,11 +91,24 @@ public class TomlParser {
         }
     }
 
-    private static TomlKeyValuePair parseKeyValuePair(Reader reader) throws IOException {
-        var key =
-            reader.codePoint == '\"' ? parseBasicStringValue(reader) :
-            reader.codePoint == '\'' ? parseLiteralStringValue(reader) :
-            parseBareKey(reader);
+    private record KeysValuePair(List<String> keys, TomlValue value) {}
+
+    private static KeysValuePair parseKeyValuePair(Reader reader) throws IOException {
+        var keys = new ArrayList<String>();
+        while (true) {
+            var key =
+                reader.codePoint == '\"' ? parseBasicStringValue(reader) :
+                reader.codePoint == '\'' ? parseLiteralStringValue(reader) :
+                parseBareKey(reader);
+
+            keys.add(key);
+
+            if (reader.codePoint == '.') {
+                reader.read();
+            } else {
+                break;
+            }
+        }
 
         skipWhitespace(reader);
         reader.skip('=');
@@ -68,7 +116,8 @@ public class TomlParser {
         var value = parseValue(reader);
         skipWhitespace(reader);
         trySkipComment(reader);
-        return TomlKeyValuePair.of(key, value);
+
+        return new KeysValuePair(keys, value);
     }
 
     private static void skipWhitespace(Reader reader) throws IOException {

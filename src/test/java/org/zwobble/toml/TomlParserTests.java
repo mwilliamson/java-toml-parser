@@ -645,6 +645,27 @@ public class TomlParserTests {
         )));
     }
 
+    // == Tables ==
+
+    @Test
+    public void dottedKeyInRootTableCreatesSubTable() throws IOException {
+        var result = parse("""
+            a.b = true
+            a.c = false
+            b.a = 1
+            """);
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("a", isTable(isSequence(
+                isKeyValuePair("b", isBool(true)),
+                isKeyValuePair("c", isBool(false))
+            ))),
+            isKeyValuePair("b", isTable(isSequence(
+                isKeyValuePair("a", isInt(1))
+            )))
+        )));
+    }
+
     // == Comments ==
 
     @Test
