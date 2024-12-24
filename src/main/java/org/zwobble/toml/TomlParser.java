@@ -106,12 +106,6 @@ public class TomlParser {
         }
     }
 
-    private static void skipWhitespace(Reader reader) throws IOException {
-        while (isTomlWhitespace(reader.codePoint)) {
-            reader.read();
-        }
-    }
-
     private static String parseBareKey(Reader reader) throws IOException {
         var key = new StringBuilder();
         while (isBareKeyCodePoint(reader.codePoint)) {
@@ -469,6 +463,12 @@ public class TomlParser {
             return true;
         } else {
             return false;
+        }
+    }
+
+    private static void skipWhitespace(Reader reader) throws IOException {
+        while (isTomlWhitespace(reader.codePoint)) {
+            reader.read();
         }
     }
 
