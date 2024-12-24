@@ -28,18 +28,14 @@ public class TomlParser {
     public static TomlTable parseReader(java.io.Reader rawReader) throws IOException {
         var reader = new Reader(rawReader);
 
-        var tableToKeyValuePairs = new HashMap<Integer, ArrayList<TomlKeyValuePair>>();
-
-        var rootKeyValuePairs = new ArrayList<TomlKeyValuePair>();
-        var rootTable = new TomlTable(rootKeyValuePairs);
-        tableToKeyValuePairs.put(identityHashCode(rootTable), rootKeyValuePairs);
+        var rootTable = new TomlTableBuilder();
 
         // TODO: handle surrogate pairs
         reader.read();
 
         while (true) {
             if (reader.isEndOfFile()) {
-                return new TomlTable(rootKeyValuePairs);
+                return rootTable.toTable();
             }
 
             if (trySkipComment(reader)) {
@@ -53,35 +49,15 @@ public class TomlParser {
                 var table = rootTable;
                 for (var i = 0; i < keysValuePair.keys.size() - 1; i++) {
                     var key = keysValuePair.keys.get(i);
-                    // TODO: more efficient lookup of keys
-                    var subTable = StreamSupport.stream(
-                        table.keyValuePairs().spliterator(),
-                        false
-                    )
-                        .filter(pair -> pair.key().equals(key))
-                        // TODO: handle not a table
-                        .map(pair -> (TomlTable) pair.value())
-                        .findFirst();
-
-                    if (subTable.isPresent()) {
-                        table = subTable.get();
-                    } else {
-                        var newKeyValuePairs = new ArrayList<TomlKeyValuePair>();
-                        var newSubTable = new TomlTable(newKeyValuePairs);
-                        tableToKeyValuePairs.put(identityHashCode(newSubTable), newKeyValuePairs);
-
-                        tableToKeyValuePairs.get(identityHashCode(table)).add(TomlKeyValuePair.of(key, newSubTable));
-                        table = newSubTable;
-                    }
+                    table = table.getOrCreateSubTable(key);
                 }
-                tableToKeyValuePairs.get(identityHashCode(table))
-                    .add(TomlKeyValuePair.of(keysValuePair.keys.getLast(), keysValuePair.value()));
+                table.add(keysValuePair.keys.getLast(), keysValuePair.value());
             } else {
                 throw new TomlParseError("TODO: " + formatCodePoint(reader.codePoint));
             }
 
             if (reader.isEndOfFile()) {
-                return rootTable;
+                return rootTable.toTable();
             }
 
             if (reader.codePoint == '\r') {
