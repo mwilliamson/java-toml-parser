@@ -447,6 +447,32 @@ public class TomlParserTests {
     }
 
     @Test
+    public void basicStringWithEightDigitLowercaseUnicodeEscape() throws IOException {
+        var result = parse(
+            """
+            x = "\\U0001f967"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\ud83e\udd67"))
+        )));
+    }
+
+    @Test
+    public void basicStringWithEightDigitUppercaseUnicodeEscape() throws IOException {
+        var result = parse(
+            """
+            x = "\\U0001F967"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\ud83e\udd67"))
+        )));
+    }
+
+    @Test
     public void emptyLiteralString() throws IOException {
         var result = parse(
             """

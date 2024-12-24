@@ -353,6 +353,24 @@ public class TomlParser {
                         }
                         string.appendCodePoint(codePoint);
                     }
+                    case 'U' -> {
+                        reader.read();
+                        var codePoint = 0;
+                        for (var i = 0; i < 8; i++) {
+                            codePoint <<= 4;
+                            if (reader.codePoint >= '0' && reader.codePoint <= '9') {
+                                codePoint += reader.codePoint - '0';
+                            } else if (reader.codePoint >= 'a' && reader.codePoint <= 'f') {
+                                codePoint += reader.codePoint - 'a' + 10;
+                            } else if (reader.codePoint >= 'A' && reader.codePoint <= 'F') {
+                                codePoint += reader.codePoint - 'A' + 10;
+                            } else {
+                                throw new TomlParseError("TODO");
+                            }
+                            reader.read();
+                        }
+                        string.appendCodePoint(codePoint);
+                    }
                     default -> {
                         throw new TomlParseError("TODO");
                     }
