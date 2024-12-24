@@ -48,6 +48,11 @@ public class TomlParser {
                     table = table.getOrCreateSubTable(key);
                 }
                 table.add(keysValuePair.keys.getLast(), keysValuePair.value());
+            } else if (reader.codePoint == '[') {
+                reader.read();
+                var key = parseKey(reader);
+                rootTable.getOrCreateSubTable(key);
+                reader.skip(']');
             } else {
                 throw new TomlParseError("TODO: " + formatCodePoint(reader.codePoint));
             }

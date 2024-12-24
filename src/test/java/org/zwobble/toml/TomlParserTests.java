@@ -685,6 +685,15 @@ public class TomlParserTests {
 
     // == Tables ==
 
+    @Test
+    public void emptyTable() throws IOException {
+        var result = parse("[x]");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isTable(isSequence()))
+        )));
+    }
+
     // == Comments ==
 
     @Test
