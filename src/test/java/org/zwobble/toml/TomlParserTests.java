@@ -572,6 +572,27 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void arrayCanSpanMultipleLines() throws IOException {
+        var result = parse("""
+            x = [
+                true,
+                false
+                
+                ,
+                1,
+            ]
+            """);
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isArray(isSequence(
+                isBool(true),
+                isBool(false),
+                isInt(1)
+            )))
+        )));
+    }
+
     // == Comments ==
 
     @Test

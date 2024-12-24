@@ -394,16 +394,16 @@ public class TomlParser {
 
     private static TomlValue parseArray(Reader reader) throws IOException {
         reader.skip('[');
-        skipWhitespace(reader);
+        skipArrayWhitespace(reader);
         var elements = new ArrayList<TomlValue>();
         while (reader.codePoint != ']') {
             var element = parseValue(reader);
-            skipWhitespace(reader);
+            skipArrayWhitespace(reader);
             elements.add(element);
 
             if (reader.codePoint == ',') {
                 reader.read();
-                skipWhitespace(reader);
+                skipArrayWhitespace(reader);
             } else {
                 break;
             }
@@ -411,6 +411,16 @@ public class TomlParser {
 
         reader.skip(']');
         return TomlArray.of(elements);
+    }
+
+    private static void skipArrayWhitespace(Reader reader) throws IOException {
+        while (isArrayWhitespace(reader.codePoint)) {
+            reader.read();
+        }
+    }
+
+    private static boolean isArrayWhitespace(int codePoint) {
+        return isTomlWhitespace(codePoint) || codePoint == '\r' || codePoint == '\n';
     }
 
     private static boolean trySkipComment(Reader reader) throws IOException {
