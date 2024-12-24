@@ -51,6 +51,7 @@ public class TomlParser {
                 table.add(keysValuePair.keys.getLast(), keysValuePair.value());
             } else if (reader.codePoint == '[') {
                 reader.read();
+                skipWhitespace(reader);
                 var keys = parseKeys(reader);
                 activeTable = rootTable;
                 for (var key : keys) {

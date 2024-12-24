@@ -708,6 +708,19 @@ public class TomlParserTests {
     }
 
     @Test
+    public void tableHeaderWithDottedKeyWithWhitespace() throws IOException {
+        var result = parse("[  x  .  y  .  z  ]");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isTable(isSequence(
+                isKeyValuePair("y", isTable(isSequence(
+                    isKeyValuePair("z", isTable(isSequence()))
+                )))
+            )))
+        )));
+    }
+
+    @Test
     public void afterTableHeaderThenKeyValuePairsBelongToTable() throws IOException {
         var result = parse("""
         [x.y.z]
