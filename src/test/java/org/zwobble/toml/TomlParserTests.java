@@ -666,6 +666,19 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void dottedKeysMayContainWhitespace() throws IOException {
+        var result = parse("""
+            a  .  b = true
+            """);
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("a", isTable(isSequence(
+                isKeyValuePair("b", isBool(true))
+            )))
+        )));
+    }
+
     // == Comments ==
 
     @Test

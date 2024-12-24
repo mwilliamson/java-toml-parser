@@ -101,16 +101,18 @@ public class TomlParser {
                 reader.codePoint == '\'' ? parseLiteralStringValue(reader) :
                 parseBareKey(reader);
 
+            skipWhitespace(reader);
+
             keys.add(key);
 
             if (reader.codePoint == '.') {
                 reader.read();
+                skipWhitespace(reader);
             } else {
                 break;
             }
         }
 
-        skipWhitespace(reader);
         reader.skip('=');
         skipWhitespace(reader);
         var value = parseValue(reader);
