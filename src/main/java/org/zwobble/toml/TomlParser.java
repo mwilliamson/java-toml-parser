@@ -60,7 +60,7 @@ public class TomlParser {
         var key =
             reader.codePoint == '\"' ? parseBasicStringValue(reader) :
             reader.codePoint == '\'' ? parseLiteralStringValue(reader) :
-            readBareKey(reader);
+            parseBareKey(reader);
 
         skipWhitespace(reader);
         reader.skip('=');
@@ -77,7 +77,7 @@ public class TomlParser {
         }
     }
 
-    private static String readBareKey(Reader reader) throws IOException {
+    private static String parseBareKey(Reader reader) throws IOException {
         var key = new StringBuilder();
         while (isBareKeyCodePoint(reader.codePoint)) {
             key.appendCodePoint(reader.codePoint);
