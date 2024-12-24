@@ -125,10 +125,7 @@ public class TomlParser {
     private static TomlBool parseTrue(Reader reader) throws IOException {
         var start = reader.position();
 
-        reader.skip('t');
-        reader.skip('r');
-        reader.skip('u');
-        reader.skip('e');
+        reader.skip(new int[] {'t', 'r', 'u', 'e'});
 
         var end = reader.position();
         var sourceRange = start.to(end);
@@ -139,11 +136,7 @@ public class TomlParser {
     private static TomlBool parseFalse(Reader reader) throws IOException {
         var start = reader.position();
 
-        reader.skip('f');
-        reader.skip('a');
-        reader.skip('l');
-        reader.skip('s');
-        reader.skip('e');
+        reader.skip(new int[] {'f', 'a', 'l', 's', 'e'});
 
         var end = reader.position();
         var sourceRange = start.to(end);
@@ -154,9 +147,7 @@ public class TomlParser {
     private static TomlFloat parseNan(Reader reader) throws IOException {
         var start = reader.position();
 
-        reader.skip('n');
-        reader.skip('a');
-        reader.skip('n');
+        reader.skip(new int[] {'n', 'a', 'n'});
 
         var end = reader.position();
         var sourceRange = start.to(end);
@@ -167,9 +158,7 @@ public class TomlParser {
     private static TomlFloat parseInf(Reader reader) throws IOException {
         var start = reader.position();
 
-        reader.skip('i');
-        reader.skip('n');
-        reader.skip('f');
+        reader.skip(new int[] {'i', 'n', 'f'});
 
         var end = reader.position();
         var sourceRange = start.to(end);
@@ -187,9 +176,7 @@ public class TomlParser {
         reader.read();
 
         if (reader.codePoint == 'n' && (numberString.charAt(0) == '-' || numberString.charAt(0) == '+')) {
-            reader.skip('n');
-            reader.skip('a');
-            reader.skip('n');
+            reader.skip(new int[] {'n', 'a', 'n'});
 
             var end = reader.position();
             var sourceRange = start.to(end);
@@ -198,9 +185,7 @@ public class TomlParser {
         }
 
         if (reader.codePoint == 'i' && numberString.charAt(0) == '-') {
-            reader.skip('i');
-            reader.skip('n');
-            reader.skip('f');
+            reader.skip(new int[] {'i', 'n', 'f'});
 
             var end = reader.position();
             var sourceRange = start.to(end);
@@ -209,9 +194,7 @@ public class TomlParser {
         }
 
         if (reader.codePoint == 'i' && numberString.charAt(0) == '+') {
-            reader.skip('i');
-            reader.skip('n');
-            reader.skip('f');
+            reader.skip(new int[] {'i', 'n', 'f'});
 
             var end = reader.position();
             var sourceRange = start.to(end);
@@ -460,6 +443,12 @@ public class TomlParser {
         public void skip(int expectedCodePoint) throws IOException {
             expect(expectedCodePoint);
             read();
+        }
+
+        public void skip(int[] expectedCodePoints) throws IOException {
+            for (var expectedCodePoint : expectedCodePoints) {
+                skip(expectedCodePoint);
+            }
         }
 
         public void expect(int expectedCodePoint) {
