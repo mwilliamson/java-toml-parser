@@ -197,7 +197,7 @@ public class TomlParserTests {
         );
 
         assertThat(result, isTable(isSequence(
-            isKeyValuePair("x", isString(""))
+            isKeyValuePair("x", isString("", isSourceRange(4, 6)))
         )));
     }
 
@@ -210,7 +210,7 @@ public class TomlParserTests {
         );
 
         assertThat(result, isTable(isSequence(
-            isKeyValuePair("x", isString("abc"))
+            isKeyValuePair("x", isString("abc", isSourceRange(4, 9)))
         )));
     }
 
@@ -396,6 +396,14 @@ public class TomlParserTests {
         return instanceOf(
             TomlString.class,
             has("value", x -> x.value(), equalTo(value))
+        );
+    }
+
+    private Matcher<TomlValue> isString(String value, Matcher<SourceRange> sourceRange) {
+        return instanceOf(
+            TomlString.class,
+            has("value", x -> x.value(), equalTo(value)),
+            has("sourceRange", x -> x.sourceRange(), sourceRange)
         );
     }
 

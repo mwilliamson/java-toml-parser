@@ -108,8 +108,14 @@ public class TomlParser {
         } else if (isAsciiDigitCodePoint(reader.codePoint) || reader.codePoint == '+' || reader.codePoint == '-') {
             return parseNumber(reader);
         } else if (reader.codePoint == '"') {
+            var start = reader.position();
+
             var string = parseStringValue(reader);
-            return new TomlString(string);
+
+            var end = reader.position();
+            var sourceRange = start.to(end);
+
+            return new TomlString(string, sourceRange);
         } else if (reader.codePoint == '[') {
             return parseArray(reader);
         } else {
