@@ -87,16 +87,7 @@ public class TomlParser {
         } else if (reader.codePoint == 'f') {
             return parseFalse(reader);
         } else if (reader.codePoint == 'n') {
-            var start = reader.position();
-
-            reader.skip('n');
-            reader.skip('a');
-            reader.skip('n');
-
-            var end = reader.position();
-            var sourceRange = start.to(end);
-
-            return new TomlFloat(Double.NaN, sourceRange);
+            return parseNan(reader);
         } else if (reader.codePoint == 'i') {
             var start = reader.position();
 
@@ -162,6 +153,19 @@ public class TomlParser {
         var sourceRange = start.to(end);
 
         return new TomlBool(false, sourceRange);
+    }
+
+    private static TomlFloat parseNan(Reader reader) throws IOException {
+        var start = reader.position();
+
+        reader.skip('n');
+        reader.skip('a');
+        reader.skip('n');
+
+        var end = reader.position();
+        var sourceRange = start.to(end);
+
+        return new TomlFloat(Double.NaN, sourceRange);
     }
 
     private static TomlValue parseNumber(Reader reader) throws IOException {
