@@ -161,7 +161,6 @@ public class TomlParser {
 
         var isFloat = false;
         var numberString = new StringBuilder();
-        var intBase = 10;
 
         numberString.appendCodePoint(reader.codePoint);
         reader.read();
@@ -200,13 +199,51 @@ public class TomlParser {
         }
 
         if (reader.codePoint == 'b') {
-            intBase = 2;
             reader.read();
+
+            while (reader.codePoint == '0' || reader.codePoint == '1') {
+                numberString.appendCodePoint(reader.codePoint);
+                reader.read();
+            }
+
+            var end = reader.position();
+            var sourceRange = start.to(end);
+
+            var intValue = Long.parseLong(numberString.toString(), 2);
+            return new TomlInt(intValue, sourceRange);
         }
 
         if (reader.codePoint == 'o') {
-            intBase = 8;
             reader.read();
+
+            while (reader.codePoint >= '0' && reader.codePoint <= '7') {
+                numberString.appendCodePoint(reader.codePoint);
+                reader.read();
+            }
+
+            var end = reader.position();
+            var sourceRange = start.to(end);
+
+            var intValue = Long.parseLong(numberString.toString(), 8);
+            return new TomlInt(intValue, sourceRange);
+        }
+
+        if (reader.codePoint == 'x') {
+            reader.read();
+
+            while (
+                (reader.codePoint >= '0' && reader.codePoint <= '9') ||
+                    (reader.codePoint >= 'a' && reader.codePoint <= 'f')
+            ) {
+                numberString.appendCodePoint(reader.codePoint);
+                reader.read();
+            }
+
+            var end = reader.position();
+            var sourceRange = start.to(end);
+
+            var intValue = Long.parseLong(numberString.toString(), 16);
+            return new TomlInt(intValue, sourceRange);
         }
 
         while (
@@ -240,7 +277,7 @@ public class TomlParser {
             var value = Double.parseDouble(numberString.toString());
             return new TomlFloat(value, sourceRange);
         } else {
-            var integer = Long.parseLong(numberString.toString(), intBase);
+            var integer = Long.parseLong(numberString.toString());
             return new TomlInt(integer, sourceRange);
         }
     }
