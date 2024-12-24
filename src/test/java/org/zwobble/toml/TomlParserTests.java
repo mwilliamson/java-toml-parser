@@ -178,6 +178,15 @@ public class TomlParserTests {
     }
 
     @Test
+    public void floatExponent() throws IOException {
+        var result = parse("x = 5e2");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isFloat(500, isSourceRange(4, 7)))
+        )));
+    }
+
+    @Test
     public void floatUnderscores() throws IOException {
         var result = parse("x = -1_2.3_4");
 

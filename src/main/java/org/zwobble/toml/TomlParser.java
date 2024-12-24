@@ -187,9 +187,9 @@ public class TomlParser {
             return new TomlFloat(Double.POSITIVE_INFINITY, sourceRange);
         }
 
-        while (isAsciiDigitCodePoint(reader.codePoint) || reader.codePoint == '_' || reader.codePoint == '.') {
+        while (isAsciiDigitCodePoint(reader.codePoint) || reader.codePoint == '_' || reader.codePoint == '.' || reader.codePoint == 'e') {
             if (reader.codePoint != '_') {
-                if (reader.codePoint == '.') {
+                if (reader.codePoint == '.' || reader.codePoint == 'e') {
                     isFloat = true;
                 }
                 numberString.appendCodePoint(reader.codePoint);
