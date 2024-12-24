@@ -196,6 +196,42 @@ public class TomlParserTests {
     }
 
     @Test
+    public void floatPositiveExponentLowercase() throws IOException {
+        var result = parse("x = 5e+2");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isFloat(500, isSourceRange(4, 8)))
+        )));
+    }
+
+    @Test
+    public void floatPositiveExponentUppercase() throws IOException {
+        var result = parse("x = 5E+2");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isFloat(500, isSourceRange(4, 8)))
+        )));
+    }
+
+    @Test
+    public void floatNegativeExponentLowercase() throws IOException {
+        var result = parse("x = 5e-2");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isFloat(0.05, isSourceRange(4, 8)))
+        )));
+    }
+
+    @Test
+    public void floatNegativeExponentUppercase() throws IOException {
+        var result = parse("x = 5E-2");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isFloat(0.05, isSourceRange(4, 8)))
+        )));
+    }
+
+    @Test
     public void floatUnderscores() throws IOException {
         var result = parse("x = -1_2.3_4");
 

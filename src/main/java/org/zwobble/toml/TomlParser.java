@@ -194,13 +194,21 @@ public class TomlParser {
                 reader.codePoint == 'e' ||
                 reader.codePoint == 'E'
         ) {
+            var isExponent = reader.codePoint == 'e' || reader.codePoint == 'E';
             if (reader.codePoint != '_') {
-                if (reader.codePoint == '.' || reader.codePoint == 'e' || reader.codePoint == 'E') {
+                if (reader.codePoint == '.' || isExponent) {
                     isFloat = true;
                 }
                 numberString.appendCodePoint(reader.codePoint);
             }
             reader.read();
+
+            if (isExponent) {
+                if (reader.codePoint == '-' || reader.codePoint == '+') {
+                    numberString.appendCodePoint(reader.codePoint);
+                    reader.read();
+                }
+            }
         }
 
         var end = reader.position();
