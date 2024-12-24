@@ -141,7 +141,7 @@ public class TomlParser {
 
         if (isFloat) {
             var value = Double.parseDouble(numberString.toString());
-            return new TomlFloat(value);
+            return new TomlFloat(value, sourceRange);
         } else {
             var integer = Long.parseLong(numberString.toString());
             return new TomlInt(integer, sourceRange);

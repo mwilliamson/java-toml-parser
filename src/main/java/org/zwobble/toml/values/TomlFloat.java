@@ -1,4 +1,6 @@
 package org.zwobble.toml.values;
 
-public record TomlFloat(double value) implements TomlValue {
+import org.zwobble.toml.sources.SourceRange;
+
+public record TomlFloat(double value, SourceRange sourceRange) implements TomlValue {
 }

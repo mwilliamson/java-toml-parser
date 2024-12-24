@@ -155,7 +155,7 @@ public class TomlParserTests {
         var result = parse("x = 0.0");
 
         assertThat(result, isTable(isSequence(
-            isKeyValuePair("x", isFloat(0))
+            isKeyValuePair("x", isFloat(0, isSourceRange(4, 7)))
         )));
     }
 
@@ -164,7 +164,7 @@ public class TomlParserTests {
         var result = parse("x = 12.34");
 
         assertThat(result, isTable(isSequence(
-            isKeyValuePair("x", isFloat(12.34))
+            isKeyValuePair("x", isFloat(12.34, isSourceRange(4, 9)))
         )));
     }
 
@@ -173,7 +173,7 @@ public class TomlParserTests {
         var result = parse("x = -12.34");
 
         assertThat(result, isTable(isSequence(
-            isKeyValuePair("x", isFloat(-12.34))
+            isKeyValuePair("x", isFloat(-12.34, isSourceRange(4, 10)))
         )));
     }
 
@@ -182,7 +182,7 @@ public class TomlParserTests {
         var result = parse("x = -1_2.3_4");
 
         assertThat(result, isTable(isSequence(
-            isKeyValuePair("x", isFloat(-12.34))
+            isKeyValuePair("x", isFloat(-12.34, isSourceRange(4, 12)))
         )));
     }
 
@@ -381,6 +381,14 @@ public class TomlParserTests {
         return instanceOf(
             TomlFloat.class,
             has("value", x -> x.value(), equalTo(value))
+        );
+    }
+
+    private Matcher<TomlValue> isFloat(double value, Matcher<SourceRange> sourceRange) {
+        return instanceOf(
+            TomlFloat.class,
+            has("value", x -> x.value(), equalTo(value)),
+            has("sourceRange", x -> x.sourceRange(), sourceRange)
         );
     }
 
