@@ -172,6 +172,43 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void singletonArray() throws IOException {
+        var result = parse("x = [true]");
+
+        assertEquals(result, TomlTable.of(List.of(
+            TomlKeyValuePair.of("x", TomlArray.of(List.of(
+                new TomlBool(true)
+            )))
+        )));
+    }
+
+    @Test
+    public void arrayWithMultipleValuesAndNoTrailingComma() throws IOException {
+        var result = parse("x = [true,false,1]");
+
+        assertEquals(result, TomlTable.of(List.of(
+            TomlKeyValuePair.of("x", TomlArray.of(List.of(
+                new TomlBool(true),
+                new TomlBool(false),
+                new TomlInt(1)
+            )))
+        )));
+    }
+
+    @Test
+    public void arrayWithMultipleValuesAndTrailingComma() throws IOException {
+        var result = parse("x = [true,false,1,]");
+
+        assertEquals(result, TomlTable.of(List.of(
+            TomlKeyValuePair.of("x", TomlArray.of(List.of(
+                new TomlBool(true),
+                new TomlBool(false),
+                new TomlInt(1)
+            )))
+        )));
+    }
+
     // == Comments ==
 
     @Test
