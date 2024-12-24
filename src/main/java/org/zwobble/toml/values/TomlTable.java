@@ -15,6 +15,10 @@ public final class TomlTable implements TomlValue, Iterable<TomlKeyValuePair> {
         this.pairs = pairs;
     }
 
+    public Iterable<TomlKeyValuePair> keyValuePairs() {
+        return this.pairs;
+    }
+
     @Override
     public Iterator<TomlKeyValuePair> iterator() {
         return this.pairs.iterator();

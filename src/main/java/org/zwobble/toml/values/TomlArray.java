@@ -15,6 +15,10 @@ public final class TomlArray implements TomlValue, Iterable<TomlValue> {
         this.elements = elements;
     }
 
+    public Iterable<TomlValue> elements() {
+        return this.elements;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

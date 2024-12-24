@@ -1,34 +1,35 @@
 package org.zwobble.toml;
 
 import org.junit.jupiter.api.Test;
+import org.zwobble.precisely.Matcher;
 import org.zwobble.toml.values.*;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.zwobble.precisely.AssertThat.assertThat;
+import static org.zwobble.precisely.Matchers.*;
 
 public class TomlParserTests {
     @Test
     public void emptyFile() throws IOException {
         var result = parse("");
 
-        assertEquals(result, TomlTable.of(List.of()));
+        assertThat(result, isTable(isSequence()));
     }
 
     @Test
     public void onlyLf() throws IOException {
         var result = parse("\n");
 
-        assertEquals(result, TomlTable.of(List.of()));
+        assertThat(result, isTable(isSequence()));
     }
 
     @Test
     public void onlyCrLf() throws IOException {
         var result = parse("\r\n");
 
-        assertEquals(result, TomlTable.of(List.of()));
+        assertThat(result, isTable(isSequence()));
     }
 
     // == Keys ==
@@ -37,8 +38,8 @@ public class TomlParserTests {
     public void bareKeyCanBeLowercaseAsciiLetters() throws IOException {
         var result = parse("abc = true");
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("abc", new TomlBool(true))
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("abc", isBool(true))
         )));
     }
 
@@ -46,8 +47,8 @@ public class TomlParserTests {
     public void bareKeyCanBeUppercaseAsciiLetters() throws IOException {
         var result = parse("ABC = true");
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("ABC", new TomlBool(true))
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("ABC", isBool(true))
         )));
     }
 
@@ -55,8 +56,8 @@ public class TomlParserTests {
     public void bareKeyCanBeAsciiDigits() throws IOException {
         var result = parse("123 = true");
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("123", new TomlBool(true))
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("123", isBool(true))
         )));
     }
 
@@ -64,8 +65,8 @@ public class TomlParserTests {
     public void bareKeyCanBeHyphens() throws IOException {
         var result = parse("--- = true");
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("---", new TomlBool(true))
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("---", isBool(true))
         )));
     }
 
@@ -73,8 +74,8 @@ public class TomlParserTests {
     public void bareKeyCanBeUnderscores() throws IOException {
         var result = parse("___ = true");
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("___", new TomlBool(true))
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("___", isBool(true))
         )));
     }
 
@@ -83,8 +84,8 @@ public class TomlParserTests {
         // Leave the testing of escape sequences to the string value tests.
         var result = parse("\"one two\" = true");
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("one two", new TomlBool(true))
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("one two", isBool(true))
         )));
     }
 
@@ -94,8 +95,8 @@ public class TomlParserTests {
     public void valueTrue() throws IOException {
         var result = parse("x = true");
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("x", new TomlBool(true))
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isBool(true))
         )));
     }
 
@@ -103,8 +104,8 @@ public class TomlParserTests {
     public void valueFalse() throws IOException {
         var result = parse("x = false");
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("x", new TomlBool(false))
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isBool(false))
         )));
     }
 
@@ -114,8 +115,8 @@ public class TomlParserTests {
     public void integerZero() throws IOException {
         var result = parse("x = 0");
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("x", new TomlInt(0))
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isInt(0))
         )));
     }
 
@@ -123,8 +124,8 @@ public class TomlParserTests {
     public void integerPositive() throws IOException {
         var result = parse("x = 12");
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("x", new TomlInt(12))
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isInt(12))
         )));
     }
 
@@ -132,8 +133,8 @@ public class TomlParserTests {
     public void integerNegative() throws IOException {
         var result = parse("x = -12");
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("x", new TomlInt(-12))
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isInt(-12))
         )));
     }
 
@@ -141,8 +142,8 @@ public class TomlParserTests {
     public void intUnderscores() throws IOException {
         var result = parse("x = 1_23_4");
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("x", new TomlInt(1234))
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isInt(1234))
         )));
     }
 
@@ -152,8 +153,8 @@ public class TomlParserTests {
     public void floatZero() throws IOException {
         var result = parse("x = 0.0");
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("x", new TomlFloat(0))
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isFloat(0))
         )));
     }
 
@@ -161,8 +162,8 @@ public class TomlParserTests {
     public void floatPositive() throws IOException {
         var result = parse("x = 12.34");
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("x", new TomlFloat(12.34))
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isFloat(12.34))
         )));
     }
 
@@ -170,8 +171,8 @@ public class TomlParserTests {
     public void floatNegative() throws IOException {
         var result = parse("x = -12.34");
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("x", new TomlFloat(-12.34))
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isFloat(-12.34))
         )));
     }
 
@@ -179,8 +180,8 @@ public class TomlParserTests {
     public void floatUnderscores() throws IOException {
         var result = parse("x = -1_2.3_4");
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("x", new TomlFloat(-12.34))
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isFloat(-12.34))
         )));
     }
 
@@ -194,8 +195,8 @@ public class TomlParserTests {
             """
         );
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("x", new TomlString(""))
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString(""))
         )));
     }
 
@@ -207,8 +208,8 @@ public class TomlParserTests {
             """
         );
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("x", new TomlString("abc"))
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("abc"))
         )));
     }
 
@@ -226,14 +227,14 @@ public class TomlParserTests {
             """
         );
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("backspace", new TomlString("\b")),
-            TomlKeyValuePair.of("tab", new TomlString("\t")),
-            TomlKeyValuePair.of("linefeed", new TomlString("\n")),
-            TomlKeyValuePair.of("formfeed", new TomlString("\f")),
-            TomlKeyValuePair.of("carriagereturn", new TomlString("\r")),
-            TomlKeyValuePair.of("quote", new TomlString("\"")),
-            TomlKeyValuePair.of("backslash", new TomlString("\\"))
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("backspace", isString("\b")),
+            isKeyValuePair("tab", isString("\t")),
+            isKeyValuePair("linefeed", isString("\n")),
+            isKeyValuePair("formfeed", isString("\f")),
+            isKeyValuePair("carriagereturn", isString("\r")),
+            isKeyValuePair("quote", isString("\"")),
+            isKeyValuePair("backslash", isString("\\"))
         )));
     }
 
@@ -243,8 +244,8 @@ public class TomlParserTests {
     public void emptyInlineArray() throws IOException {
         var result = parse("x = []");
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("x", TomlArray.of(List.of()))
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isArray(isSequence()))
         )));
     }
 
@@ -252,9 +253,9 @@ public class TomlParserTests {
     public void singletonArray() throws IOException {
         var result = parse("x = [true]");
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("x", TomlArray.of(List.of(
-                new TomlBool(true)
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isArray(isSequence(
+                isBool(true)
             )))
         )));
     }
@@ -263,11 +264,11 @@ public class TomlParserTests {
     public void arrayWithMultipleValuesAndNoTrailingComma() throws IOException {
         var result = parse("x = [true,false,1]");
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("x", TomlArray.of(List.of(
-                new TomlBool(true),
-                new TomlBool(false),
-                new TomlInt(1)
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isArray(isSequence(
+                isBool(true),
+                isBool(false),
+                isInt(1)
             )))
         )));
     }
@@ -276,11 +277,11 @@ public class TomlParserTests {
     public void arrayWithMultipleValuesAndTrailingComma() throws IOException {
         var result = parse("x = [true,false,1,]");
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("x", TomlArray.of(List.of(
-                new TomlBool(true),
-                new TomlBool(false),
-                new TomlInt(1)
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isArray(isSequence(
+                isBool(true),
+                isBool(false),
+                isInt(1)
             )))
         )));
     }
@@ -289,11 +290,11 @@ public class TomlParserTests {
     public void arrayWithWhitespaceAroundCommas() throws IOException {
         var result = parse("x = [  true  , false , 1 , ]");
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("x", TomlArray.of(List.of(
-                new TomlBool(true),
-                new TomlBool(false),
-                new TomlInt(1)
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isArray(isSequence(
+                isBool(true),
+                isBool(false),
+                isInt(1)
             )))
         )));
     }
@@ -304,30 +305,30 @@ public class TomlParserTests {
     public void onlyLineCommentNoEol() throws IOException {
         var result = parse("# a");
 
-        assertEquals(result, TomlTable.of(List.of()));
+        assertThat(result, isTable(isSequence()));
     }
 
     @Test
     public void onlyLineCommentWithLf() throws IOException {
         var result = parse("# a\n");
 
-        assertEquals(result, TomlTable.of(List.of()));
+        assertThat(result, isTable(isSequence()));
     }
 
     @Test
     public void onlyLineCommentWithCrLf() throws IOException {
         var result = parse("# a\r\n");
 
-        assertEquals(result, TomlTable.of(List.of()));
+        assertThat(result, isTable(isSequence()));
     }
 
     @Test
     public void lineCommentWithLf() throws IOException {
         var result = parse("a = true\n# a\nb = false");
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("a", new TomlBool(true)),
-            TomlKeyValuePair.of("b", new TomlBool(false))
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("a", isBool(true)),
+            isKeyValuePair("b", isBool(false))
         )));
     }
 
@@ -335,13 +336,69 @@ public class TomlParserTests {
     public void lineCommentWithCrLf() throws IOException {
         var result = parse("a = true\n# a\r\nb = false");
 
-        assertEquals(result, TomlTable.of(List.of(
-            TomlKeyValuePair.of("a", new TomlBool(true)),
-            TomlKeyValuePair.of("b", new TomlBool(false))
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("a", isBool(true)),
+            isKeyValuePair("b", isBool(false))
         )));
     }
 
     private TomlTable parse(String text) throws IOException {
         return TomlParser.parseReader(new StringReader(text));
+    }
+
+    private Matcher<TomlValue> isBool(boolean value) {
+        return instanceOf(
+            TomlBool.class,
+            has("value", x -> x.value(), equalTo(value))
+        );
+    }
+
+    private Matcher<TomlValue> isInt(long value) {
+        return instanceOf(
+            TomlInt.class,
+            has("value", x -> x.value(), equalTo(value))
+        );
+    }
+
+    private Matcher<TomlValue> isFloat(double value) {
+        return instanceOf(
+            TomlFloat.class,
+            has("value", x -> x.value(), equalTo(value))
+        );
+    }
+
+    private Matcher<TomlValue> isString(String value) {
+        return instanceOf(
+            TomlString.class,
+            has("value", x -> x.value(), equalTo(value))
+        );
+    }
+
+    private Matcher<TomlValue> isArray(
+        Matcher<Iterable<? extends TomlValue>> elements
+    ) {
+        return instanceOf(
+            TomlArray.class,
+            has("elements", x -> x.elements(), elements)
+        );
+    }
+
+    private Matcher<TomlValue> isTable(
+        Matcher<Iterable<? extends TomlKeyValuePair>> keyValuePairs
+    ) {
+        return instanceOf(
+            TomlTable.class,
+            has("keyValuePairs", x -> x.keyValuePairs(), keyValuePairs)
+        );
+    }
+
+    private Matcher<TomlKeyValuePair> isKeyValuePair(
+        String key,
+        Matcher<TomlValue> value
+    ) {
+        return allOf(
+            has("key", x -> x.key(), equalTo(key)),
+            has("value", x -> x.value(), value)
+        );
     }
 }
