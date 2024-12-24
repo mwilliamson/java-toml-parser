@@ -38,10 +38,12 @@ public class TomlParser {
                 // Blank line with LF
             } else if (reader.codePoint == '\r') {
                 // Blank line with CRLF
-            } else if (isBareKeyCodePoint(reader.codePoint) || reader.codePoint == '\"') {
-                var key = reader.codePoint == '\"'
-                    ? parseBasicStringValue(reader)
-                    : readBareKey(reader);
+            } else if (isBareKeyCodePoint(reader.codePoint) || reader.codePoint == '\"' || reader.codePoint == '\'') {
+                var key =
+                    reader.codePoint == '\"' ? parseBasicStringValue(reader) :
+                    reader.codePoint == '\'' ? parseLiteralStringValue(reader) :
+                    readBareKey(reader);
+
                 skipWhitespace(reader);
                 reader.skip('=');
                 skipWhitespace(reader);

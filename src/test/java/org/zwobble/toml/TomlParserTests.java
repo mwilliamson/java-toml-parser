@@ -81,9 +81,19 @@ public class TomlParserTests {
     }
 
     @Test
-    public void keyCanBeQuoted() throws IOException {
-        // Leave the testing of escape sequences to the string value tests.
+    public void keyCanBeBasicString() throws IOException {
+        // Leave the testing of basic string parsing to the string value tests.
         var result = parse("\"one two\" = true");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("one two", isBool(true))
+        )));
+    }
+
+    @Test
+    public void keyCanBeLiteralString() throws IOException {
+        // Leave the testing of literal string parsing to the string value tests.
+        var result = parse("'one two' = true");
 
         assertThat(result, isTable(isSequence(
             isKeyValuePair("one two", isBool(true))
