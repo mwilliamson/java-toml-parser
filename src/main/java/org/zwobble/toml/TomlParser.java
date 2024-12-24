@@ -5,6 +5,7 @@ import org.zwobble.toml.values.*;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
@@ -13,7 +14,7 @@ public class TomlParser {
     }
 
     public static TomlTable parseFile(Path path) throws IOException {
-        try (var fileReader = new FileReader(path.toFile())) {
+        try (var fileReader = new FileReader(path.toFile(), StandardCharsets.UTF_8)) {
             return parseReader(fileReader);
         }
     }
