@@ -213,6 +213,33 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void floatInf() throws IOException {
+        var result = parse("x = inf");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isFloat(Double.POSITIVE_INFINITY, isSourceRange(4, 7)))
+        )));
+    }
+
+    @Test
+    public void floatPositiveInf() throws IOException {
+        var result = parse("x = +inf");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isFloat(Double.POSITIVE_INFINITY, isSourceRange(4, 8)))
+        )));
+    }
+
+    @Test
+    public void floatNegativeInf() throws IOException {
+        var result = parse("x = -inf");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isFloat(Double.NEGATIVE_INFINITY, isSourceRange(4, 8)))
+        )));
+    }
+
     // == Strings ==
 
     @Test

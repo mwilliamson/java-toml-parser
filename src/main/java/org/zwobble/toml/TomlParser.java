@@ -116,6 +116,17 @@ public class TomlParser {
             var sourceRange = start.to(end);
 
             return new TomlFloat(Double.NaN, sourceRange);
+        } else if (reader.codePoint == 'i') {
+            var start = reader.position();
+
+            reader.skip('i');
+            reader.skip('n');
+            reader.skip('f');
+
+            var end = reader.position();
+            var sourceRange = start.to(end);
+
+            return new TomlFloat(Double.POSITIVE_INFINITY, sourceRange);
         } else if (isAsciiDigitCodePoint(reader.codePoint) || reader.codePoint == '+' || reader.codePoint == '-') {
             return parseNumber(reader);
         } else if (reader.codePoint == '"') {
@@ -152,6 +163,28 @@ public class TomlParser {
             var sourceRange = start.to(end);
 
             return new TomlFloat(Double.NaN, sourceRange);
+        }
+
+        if (reader.codePoint == 'i' && numberString.charAt(0) == '-') {
+            reader.skip('i');
+            reader.skip('n');
+            reader.skip('f');
+
+            var end = reader.position();
+            var sourceRange = start.to(end);
+
+            return new TomlFloat(Double.NEGATIVE_INFINITY, sourceRange);
+        }
+
+        if (reader.codePoint == 'i' && numberString.charAt(0) == '+') {
+            reader.skip('i');
+            reader.skip('n');
+            reader.skip('f');
+
+            var end = reader.position();
+            var sourceRange = start.to(end);
+
+            return new TomlFloat(Double.POSITIVE_INFINITY, sourceRange);
         }
 
         while (isAsciiDigitCodePoint(reader.codePoint) || reader.codePoint == '_' || reader.codePoint == '.') {
