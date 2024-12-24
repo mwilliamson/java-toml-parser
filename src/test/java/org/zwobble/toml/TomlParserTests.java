@@ -137,6 +137,15 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void floatUnderscores() throws IOException {
+        var result = parse("x = -1_2.3_4");
+
+        assertEquals(result, TomlTable.of(List.of(
+            TomlKeyValuePair.of("x", new TomlFloat(-12.34))
+        )));
+    }
+
     // == Strings ==
 
     @Test
