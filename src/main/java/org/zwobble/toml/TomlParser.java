@@ -169,17 +169,21 @@ public class TomlParser {
 
     private static TomlValue parseArray(Reader reader) throws IOException {
         reader.skip('[');
+        skipWhitespace(reader);
         var elements = new ArrayList<TomlValue>();
         while (reader.codePoint != ']') {
             var element = readValue(reader);
+            skipWhitespace(reader);
             elements.add(element);
 
             if (reader.codePoint == ',') {
                 reader.read();
+                skipWhitespace(reader);
             } else {
                 break;
             }
         }
+
         reader.skip(']');
         return TomlArray.of(elements);
     }

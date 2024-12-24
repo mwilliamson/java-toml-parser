@@ -1,9 +1,10 @@
 package org.zwobble.toml.values;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
-public final class TomlArray implements TomlValue {
+public final class TomlArray implements TomlValue, Iterable<TomlValue> {
     public static TomlArray of(List<TomlValue> elements) {
         return new TomlArray(elements);
     }
@@ -32,5 +33,10 @@ public final class TomlArray implements TomlValue {
         return "TomlArray(" +
             "elements=" + elements +
             ')';
+    }
+
+    @Override
+    public Iterator<TomlValue> iterator() {
+        return elements.iterator();
     }
 }

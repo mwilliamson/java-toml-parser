@@ -1,5 +1,6 @@
 package org.zwobble.toml;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -70,6 +71,14 @@ public class TomlParserTomlTestTests {
 
     private JsonElement tomlValueToJsonValue(TomlValue tomlValue) {
         return switch (tomlValue) {
+            case TomlArray tomlArray -> {
+                var jsonArray = new JsonArray();
+                for (var tomlElement : tomlArray) {
+                    jsonArray.add(tomlValueToJsonValue(tomlElement));
+                }
+                yield jsonArray;
+            }
+
             case TomlBool tomlBool -> {
                 var jsonObject = new JsonObject();
                 jsonObject.addProperty("type", "bool");

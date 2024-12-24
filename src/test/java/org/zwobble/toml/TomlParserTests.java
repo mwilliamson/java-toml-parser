@@ -209,6 +209,19 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void arrayWithWhitespaceAroundCommas() throws IOException {
+        var result = parse("x = [  true  , false , 1 , ]");
+
+        assertEquals(result, TomlTable.of(List.of(
+            TomlKeyValuePair.of("x", TomlArray.of(List.of(
+                new TomlBool(true),
+                new TomlBool(false),
+                new TomlInt(1)
+            )))
+        )));
+    }
+
     // == Comments ==
 
     @Test
