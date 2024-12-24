@@ -35,6 +35,8 @@ public class TomlParserTests {
 
     // == Keys ==
 
+    // === Bare keys ===
+
     @Test
     public void bareKeyCanBeLowercaseAsciiLetters() throws IOException {
         var result = parse("abc = true");
@@ -80,6 +82,8 @@ public class TomlParserTests {
         )));
     }
 
+    // === Quoted keys ===
+
     @Test
     public void keyCanBeBasicString() throws IOException {
         // Leave the testing of basic string parsing to the string value tests.
@@ -97,6 +101,40 @@ public class TomlParserTests {
 
         assertThat(result, isTable(isSequence(
             isKeyValuePair("one two", isBool(true))
+        )));
+    }
+
+    // === Dotted keys ===
+
+    @Test
+    public void dottedKeyInRootTableCreatesSubTable() throws IOException {
+        var result = parse("""
+            a.b = true
+            a.c = false
+            b.a = 1
+            """);
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("a", isTable(isSequence(
+                isKeyValuePair("b", isBool(true)),
+                isKeyValuePair("c", isBool(false))
+            ))),
+            isKeyValuePair("b", isTable(isSequence(
+                isKeyValuePair("a", isInt(1))
+            )))
+        )));
+    }
+
+    @Test
+    public void dottedKeysMayContainWhitespace() throws IOException {
+        var result = parse("""
+            a  .  b = true
+            """);
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("a", isTable(isSequence(
+                isKeyValuePair("b", isBool(true))
+            )))
         )));
     }
 
@@ -646,38 +684,6 @@ public class TomlParserTests {
     }
 
     // == Tables ==
-
-    @Test
-    public void dottedKeyInRootTableCreatesSubTable() throws IOException {
-        var result = parse("""
-            a.b = true
-            a.c = false
-            b.a = 1
-            """);
-
-        assertThat(result, isTable(isSequence(
-            isKeyValuePair("a", isTable(isSequence(
-                isKeyValuePair("b", isBool(true)),
-                isKeyValuePair("c", isBool(false))
-            ))),
-            isKeyValuePair("b", isTable(isSequence(
-                isKeyValuePair("a", isInt(1))
-            )))
-        )));
-    }
-
-    @Test
-    public void dottedKeysMayContainWhitespace() throws IOException {
-        var result = parse("""
-            a  .  b = true
-            """);
-
-        assertThat(result, isTable(isSequence(
-            isKeyValuePair("a", isTable(isSequence(
-                isKeyValuePair("b", isBool(true))
-            )))
-        )));
-    }
 
     // == Comments ==
 
