@@ -9,11 +9,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.stream.StreamSupport;
-
-import static java.lang.System.identityHashCode;
 
 public class TomlParser {
     private TomlParser() {
@@ -72,10 +68,7 @@ public class TomlParser {
     private static KeysValuePair parseKeyValuePair(Reader reader) throws IOException {
         var keys = new ArrayList<String>();
         while (true) {
-            var key =
-                reader.codePoint == '\"' ? parseBasicStringValue(reader) :
-                reader.codePoint == '\'' ? parseLiteralStringValue(reader) :
-                parseBareKey(reader);
+            var key = parseKey(reader);
 
             skipWhitespace(reader);
 
@@ -96,6 +89,16 @@ public class TomlParser {
         trySkipComment(reader);
 
         return new KeysValuePair(keys, value);
+    }
+
+    private static String parseKey(Reader reader) throws IOException {
+        if (reader.codePoint == '\"') {
+            return parseBasicStringValue(reader);
+        } else if (reader.codePoint == '\'') {
+            return parseLiteralStringValue(reader);
+        } else {
+            return parseBareKey(reader);
+        }
     }
 
     private static void skipWhitespace(Reader reader) throws IOException {
