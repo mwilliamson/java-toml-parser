@@ -204,6 +204,11 @@ public class TomlParser {
             reader.read();
         }
 
+        if (reader.codePoint == 'o') {
+            intBase = 8;
+            reader.read();
+        }
+
         while (
             isAsciiDigitCodePoint(reader.codePoint) ||
                 reader.codePoint == '_' ||

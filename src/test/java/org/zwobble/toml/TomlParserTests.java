@@ -167,6 +167,15 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void intOctal() throws IOException {
+        var result = parse("x = 0o701");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isInt(449, isSourceRange(4, 9)))
+        )));
+    }
+
     // == Floats ==
 
     @Test
