@@ -344,6 +344,8 @@ public class TomlParser {
                                 codePoint += reader.codePoint - '0';
                             } else if (reader.codePoint >= 'a' && reader.codePoint <= 'f') {
                                 codePoint += reader.codePoint - 'a' + 10;
+                            } else if (reader.codePoint >= 'A' && reader.codePoint <= 'F') {
+                                codePoint += reader.codePoint - 'A' + 10;
                             } else {
                                 throw new TomlParseError("TODO");
                             }

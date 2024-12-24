@@ -434,6 +434,19 @@ public class TomlParserTests {
     }
 
     @Test
+    public void basicStringWithFourDigitUppercaseUnicodeEscape() throws IOException {
+        var result = parse(
+            """
+            x = "\\u03C0"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\u03c0"))
+        )));
+    }
+
+    @Test
     public void emptyLiteralString() throws IOException {
         var result = parse(
             """
