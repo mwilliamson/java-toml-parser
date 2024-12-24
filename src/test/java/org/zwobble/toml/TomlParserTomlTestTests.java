@@ -1,9 +1,6 @@
 package org.zwobble.toml;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.zwobble.toml.errors.TomlParseError;
@@ -13,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,8 +38,7 @@ public class TomlParserTomlTestTests {
                             var outputJsonPath = replaceExtension(inputTomlPath, "json");
                             var jsonValue = tomlValueToJsonValue(tomlValue);
 
-                            var expectedJsonText = Files.readString(outputJsonPath);
-                            var expectedJsonValue = JsonParser.parseString(expectedJsonText);
+                            var expectedJsonValue = readTomlTestJson(outputJsonPath);
                             assertEquals(expectedJsonValue, jsonValue);
 
                             break;
@@ -70,6 +67,46 @@ public class TomlParserTomlTestTests {
             .resolve(newFileName);
     }
 
+    private static JsonElement readTomlTestJson(Path outputJsonPath) throws IOException {
+        var jsonText = Files.readString(outputJsonPath);
+        var jsonValue = JsonParser.parseString(jsonText);
+        return normalizeTomlTestJson(jsonValue);
+    }
+
+    private static JsonElement normalizeTomlTestJson(JsonElement value) {
+        if (value.isJsonArray()) {
+            var normalizedArray = new JsonArray();
+            for (var element : value.getAsJsonArray()) {
+                normalizedArray.add(normalizeTomlTestJson(element));
+            }
+            return normalizedArray;
+        } else if (value.isJsonObject()) {
+            var jsonObject = value.getAsJsonObject();
+            if (Objects.equals(jsonObject.get("type"), new JsonPrimitive("float"))) {
+                var floatValueString = jsonObject.get("value").getAsString();
+                if (floatValueString.contains("inf") || floatValueString.contains("nan")) {
+                    return value;
+                }
+                var floatValue = Double.parseDouble(floatValueString);
+                var normalizedObject = new JsonObject();
+                normalizedObject.addProperty("type", "float");
+                normalizedObject.addProperty("value", floatToString(floatValue));
+                return normalizedObject;
+            } else {
+                var normalizedObject = new JsonObject();
+                for (var property : jsonObject.entrySet()) {
+                    normalizedObject.add(
+                        property.getKey(),
+                        normalizeTomlTestJson(property.getValue())
+                    );
+                }
+                return normalizedObject;
+            }
+        } else {
+            return value;
+        }
+    }
+
     private JsonElement tomlValueToJsonValue(TomlValue tomlValue) {
         return switch (tomlValue) {
             case TomlArray tomlArray -> {
@@ -90,8 +127,7 @@ public class TomlParserTomlTestTests {
             case TomlFloat tomlFloat -> {
                 var jsonObject = new JsonObject();
                 jsonObject.addProperty("type", "float");
-                var decimalFormat = new DecimalFormat("0");
-                jsonObject.addProperty("value", floatToTomlTestString(tomlFloat, decimalFormat));
+                jsonObject.addProperty("value", floatToString(tomlFloat.value()));
                 yield jsonObject;
             }
 
@@ -119,13 +155,15 @@ public class TomlParserTomlTestTests {
         };
     }
 
-    private static String floatToTomlTestString(TomlFloat tomlFloat, DecimalFormat decimalFormat) {
-        if (Double.isNaN(tomlFloat.value())) {
+    private static String floatToString(double value) {
+        var decimalFormat = new DecimalFormat("0");
+
+        if (Double.isNaN(value)) {
             return "nan";
         }
 
-        if (Double.isInfinite(tomlFloat.value())) {
-            if (tomlFloat.value() > 0) {
+        if (Double.isInfinite(value)) {
+            if (value > 0) {
                 return "inf";
             } else {
                 return "-inf";
@@ -133,6 +171,6 @@ public class TomlParserTomlTestTests {
         }
 
         decimalFormat.setMaximumFractionDigits(Integer.MAX_VALUE);
-        return decimalFormat.format(tomlFloat.value());
+        return decimalFormat.format(value);
     }
 }
