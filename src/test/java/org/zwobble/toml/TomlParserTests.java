@@ -473,6 +473,32 @@ public class TomlParserTests {
     }
 
     @Test
+    public void basicStringWithUnicodeCodePointInBmp() throws IOException {
+        var result = parse(
+            """
+            x = "\u03c0"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\u03c0"))
+        )));
+    }
+
+    @Test
+    public void basicStringWithUnicodeCodePointOutsideBmp() throws IOException {
+        var result = parse(
+            """
+            x = "\ud83e\udd67"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\ud83e\udd67"))
+        )));
+    }
+
+    @Test
     public void emptyLiteralString() throws IOException {
         var result = parse(
             """
@@ -508,6 +534,32 @@ public class TomlParserTests {
 
         assertThat(result, isTable(isSequence(
             isKeyValuePair("backspace", isString("\\b"))
+        )));
+    }
+
+    @Test
+    public void literalStringWithUnicodeCodePointInBmp() throws IOException {
+        var result = parse(
+            """
+            x = '\u03c0'
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\u03c0"))
+        )));
+    }
+
+    @Test
+    public void literalStringWithUnicodeCodePointOutsideBmp() throws IOException {
+        var result = parse(
+            """
+            x = '\ud83e\udd67'
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\ud83e\udd67"))
         )));
     }
 
