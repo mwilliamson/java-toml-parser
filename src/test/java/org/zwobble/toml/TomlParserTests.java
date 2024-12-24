@@ -1,10 +1,7 @@
 package org.zwobble.toml;
 
 import org.junit.jupiter.api.Test;
-import org.zwobble.toml.values.TomlBool;
-import org.zwobble.toml.values.TomlKeyValuePair;
-import org.zwobble.toml.values.TomlString;
-import org.zwobble.toml.values.TomlTable;
+import org.zwobble.toml.values.*;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -161,6 +158,17 @@ public class TomlParserTests {
             TomlKeyValuePair.of("carriagereturn", new TomlString("\r")),
             TomlKeyValuePair.of("quote", new TomlString("\"")),
             TomlKeyValuePair.of("backslash", new TomlString("\\"))
+        )));
+    }
+
+    // == Arrays ==
+
+    @Test
+    public void emptyInlineArray() throws IOException {
+        var result = parse("x = []");
+
+        assertEquals(result, TomlTable.of(List.of(
+            TomlKeyValuePair.of("x", TomlArray.of(List.of()))
         )));
     }
 

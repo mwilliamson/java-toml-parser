@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
 
 public class TomlParser {
     private TomlParser() {
@@ -109,6 +110,8 @@ public class TomlParser {
         } else if (reader.codePoint == '"') {
             var string = parseStringValue(reader);
             return new TomlString(string);
+        } else if (reader.codePoint == '[') {
+            return parseArray(reader);
         } else {
             throw new TomlParseError("??");
         }
@@ -163,6 +166,12 @@ public class TomlParser {
         reader.skip('"');
 
         return string.toString();
+    }
+
+    private static TomlValue parseArray(Reader reader) throws IOException {
+        reader.skip('[');
+        reader.skip(']');
+        return TomlArray.of(List.of());
     }
 
     private static boolean trySkipComment(Reader reader) throws IOException {
