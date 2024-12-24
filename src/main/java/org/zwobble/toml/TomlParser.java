@@ -92,20 +92,29 @@ public class TomlParser {
             reader.skip('e');
             return new TomlBool(false);
         } else if (isAsciiDigitCodePoint(reader.codePoint) || reader.codePoint == '+' || reader.codePoint == '-') {
-            var integerString = new StringBuilder();
+            var isFloat = false;
+            var numberString = new StringBuilder();
 
-            integerString.appendCodePoint(reader.codePoint);
+            numberString.appendCodePoint(reader.codePoint);
             reader.read();
 
-            while (isAsciiDigitCodePoint(reader.codePoint) || reader.codePoint == '_') {
+            while (isAsciiDigitCodePoint(reader.codePoint) || reader.codePoint == '_' || reader.codePoint == '.') {
                 if (reader.codePoint != '_') {
-                    integerString.appendCodePoint(reader.codePoint);
+                    if (reader.codePoint == '.') {
+                        isFloat = true;
+                    }
+                    numberString.appendCodePoint(reader.codePoint);
                 }
                 reader.read();
             }
 
-            var integer = Long.parseLong(integerString.toString());
-            return new TomlInt(integer);
+            if (isFloat) {
+                var value = Double.parseDouble(numberString.toString());
+                return new TomlFloat(value);
+            } else {
+                var integer = Long.parseLong(numberString.toString());
+                return new TomlInt(integer);
+            }
         } else if (reader.codePoint == '"') {
             var string = parseStringValue(reader);
             return new TomlString(string);

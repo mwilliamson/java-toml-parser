@@ -86,6 +86,13 @@ public class TomlParserTomlTestTests {
                 yield jsonObject;
             }
 
+            case TomlFloat tomlFloat -> {
+                var jsonObject = new JsonObject();
+                jsonObject.addProperty("type", "float");
+                jsonObject.addProperty("value", Double.toString(tomlFloat.value()));
+                yield jsonObject;
+            }
+
             case TomlInt tomlInt -> {
                 var jsonObject = new JsonObject();
                 jsonObject.addProperty("type", "integer");

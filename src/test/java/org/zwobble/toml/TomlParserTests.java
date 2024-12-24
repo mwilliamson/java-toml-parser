@@ -108,6 +108,35 @@ public class TomlParserTests {
         )));
     }
 
+    // == Floats ==
+
+    @Test
+    public void floatZero() throws IOException {
+        var result = parse("x = 0.0");
+
+        assertEquals(result, TomlTable.of(List.of(
+            TomlKeyValuePair.of("x", new TomlFloat(0))
+        )));
+    }
+
+    @Test
+    public void floatPositive() throws IOException {
+        var result = parse("x = 12.34");
+
+        assertEquals(result, TomlTable.of(List.of(
+            TomlKeyValuePair.of("x", new TomlFloat(12.34))
+        )));
+    }
+
+    @Test
+    public void floatNegative() throws IOException {
+        var result = parse("x = -12.34");
+
+        assertEquals(result, TomlTable.of(List.of(
+            TomlKeyValuePair.of("x", new TomlFloat(-12.34))
+        )));
+    }
+
     // == Strings ==
 
     @Test
