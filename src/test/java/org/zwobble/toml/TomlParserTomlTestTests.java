@@ -91,8 +91,7 @@ public class TomlParserTomlTestTests {
                 var jsonObject = new JsonObject();
                 jsonObject.addProperty("type", "float");
                 var decimalFormat = new DecimalFormat("0");
-                decimalFormat.setMaximumFractionDigits(Integer.MAX_VALUE);
-                jsonObject.addProperty("value", decimalFormat.format(tomlFloat.value()));
+                jsonObject.addProperty("value", floatToTomlTestString(tomlFloat, decimalFormat));
                 yield jsonObject;
             }
 
@@ -118,5 +117,22 @@ public class TomlParserTomlTestTests {
                 yield jsonObject;
             }
         };
+    }
+
+    private static String floatToTomlTestString(TomlFloat tomlFloat, DecimalFormat decimalFormat) {
+        if (Double.isNaN(tomlFloat.value())) {
+            return "nan";
+        }
+
+        if (Double.isInfinite(tomlFloat.value())) {
+            if (tomlFloat.value() > 0) {
+                return "inf";
+            } else {
+                return "-inf";
+            }
+        }
+
+        decimalFormat.setMaximumFractionDigits(Integer.MAX_VALUE);
+        return decimalFormat.format(tomlFloat.value());
     }
 }
