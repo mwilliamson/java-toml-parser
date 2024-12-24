@@ -12,6 +12,7 @@ import org.zwobble.toml.values.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.DecimalFormat;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -89,7 +90,9 @@ public class TomlParserTomlTestTests {
             case TomlFloat tomlFloat -> {
                 var jsonObject = new JsonObject();
                 jsonObject.addProperty("type", "float");
-                jsonObject.addProperty("value", Double.toString(tomlFloat.value()));
+                var decimalFormat = new DecimalFormat("0");
+                decimalFormat.setMaximumFractionDigits(Integer.MAX_VALUE);
+                jsonObject.addProperty("value", decimalFormat.format(tomlFloat.value()));
                 yield jsonObject;
             }
 
