@@ -195,6 +195,24 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void floatPositiveNan() throws IOException {
+        var result = parse("x = +nan");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isFloat(Double.NaN, isSourceRange(4, 8)))
+        )));
+    }
+
+    @Test
+    public void floatNegativeNan() throws IOException {
+        var result = parse("x = -nan");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isFloat(Double.NaN, isSourceRange(4, 8)))
+        )));
+    }
+
     // == Strings ==
 
     @Test

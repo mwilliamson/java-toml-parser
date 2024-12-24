@@ -143,6 +143,17 @@ public class TomlParser {
         numberString.appendCodePoint(reader.codePoint);
         reader.read();
 
+        if (reader.codePoint == 'n' && (numberString.charAt(0) == '-' || numberString.charAt(0) == '+')) {
+            reader.skip('n');
+            reader.skip('a');
+            reader.skip('n');
+
+            var end = reader.position();
+            var sourceRange = start.to(end);
+
+            return new TomlFloat(Double.NaN, sourceRange);
+        }
+
         while (isAsciiDigitCodePoint(reader.codePoint) || reader.codePoint == '_' || reader.codePoint == '.') {
             if (reader.codePoint != '_') {
                 if (reader.codePoint == '.') {
