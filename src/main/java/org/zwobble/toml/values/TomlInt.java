@@ -1,5 +1,7 @@
 package org.zwobble.toml.values;
 
-public record TomlInt(long value) implements TomlValue {
+import org.zwobble.toml.sources.SourceRange;
+
+public record TomlInt(long value, SourceRange sourceRange) implements TomlValue {
 
 }

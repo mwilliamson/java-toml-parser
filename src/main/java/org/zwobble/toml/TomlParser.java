@@ -118,6 +118,8 @@ public class TomlParser {
     }
 
     private static TomlValue parseNumber(Reader reader) throws IOException {
+        var start = reader.position();
+
         var isFloat = false;
         var numberString = new StringBuilder();
 
@@ -134,12 +136,15 @@ public class TomlParser {
             reader.read();
         }
 
+        var end = reader.position();
+        var sourceRange = start.to(end);
+
         if (isFloat) {
             var value = Double.parseDouble(numberString.toString());
             return new TomlFloat(value);
         } else {
             var integer = Long.parseLong(numberString.toString());
-            return new TomlInt(integer);
+            return new TomlInt(integer, sourceRange);
         }
     }
 

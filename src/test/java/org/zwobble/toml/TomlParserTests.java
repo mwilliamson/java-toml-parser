@@ -117,7 +117,7 @@ public class TomlParserTests {
         var result = parse("x = 0");
 
         assertThat(result, isTable(isSequence(
-            isKeyValuePair("x", isInt(0))
+            isKeyValuePair("x", isInt(0, isSourceRange(4, 5)))
         )));
     }
 
@@ -126,7 +126,7 @@ public class TomlParserTests {
         var result = parse("x = 12");
 
         assertThat(result, isTable(isSequence(
-            isKeyValuePair("x", isInt(12))
+            isKeyValuePair("x", isInt(12, isSourceRange(4, 6)))
         )));
     }
 
@@ -135,7 +135,7 @@ public class TomlParserTests {
         var result = parse("x = -12");
 
         assertThat(result, isTable(isSequence(
-            isKeyValuePair("x", isInt(-12))
+            isKeyValuePair("x", isInt(-12, isSourceRange(4, 7)))
         )));
     }
 
@@ -144,7 +144,7 @@ public class TomlParserTests {
         var result = parse("x = 1_23_4");
 
         assertThat(result, isTable(isSequence(
-            isKeyValuePair("x", isInt(1234))
+            isKeyValuePair("x", isInt(1234, isSourceRange(4, 10)))
         )));
     }
 
@@ -366,6 +366,14 @@ public class TomlParserTests {
         return instanceOf(
             TomlInt.class,
             has("value", x -> x.value(), equalTo(value))
+        );
+    }
+
+    private Matcher<TomlValue> isInt(long value, Matcher<SourceRange> sourceRange) {
+        return instanceOf(
+            TomlInt.class,
+            has("value", x -> x.value(), equalTo(value)),
+            has("sourceRange", x -> x.sourceRange(), sourceRange)
         );
     }
 
