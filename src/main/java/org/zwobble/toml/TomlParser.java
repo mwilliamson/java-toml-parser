@@ -50,8 +50,11 @@ public class TomlParser {
                 table.add(keysValuePair.keys.getLast(), keysValuePair.value());
             } else if (reader.codePoint == '[') {
                 reader.read();
-                var key = parseKey(reader);
-                rootTable.getOrCreateSubTable(key);
+                var keys = parseKeys(reader);
+                var table = rootTable;
+                for (var key : keys) {
+                    table = table.getOrCreateSubTable(key);
+                }
                 reader.skip(']');
             } else {
                 throw new TomlParseError("TODO: " + formatCodePoint(reader.codePoint));

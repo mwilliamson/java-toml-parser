@@ -694,6 +694,19 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void tableHeaderWithDottedKey() throws IOException {
+        var result = parse("[x.y.z]");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isTable(isSequence(
+                isKeyValuePair("y", isTable(isSequence(
+                    isKeyValuePair("z", isTable(isSequence()))
+                )))
+            )))
+        )));
+    }
+
     // == Comments ==
 
     @Test
