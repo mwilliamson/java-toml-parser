@@ -81,6 +81,16 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void keyCanBeQuoted() throws IOException {
+        // Leave the testing of escape sequences to the string value tests.
+        var result = parse("\"one two\" = true");
+
+        assertEquals(result, TomlTable.of(List.of(
+            TomlKeyValuePair.of("one two", new TomlBool(true))
+        )));
+    }
+
     // == Booleans ==
 
     @Test
