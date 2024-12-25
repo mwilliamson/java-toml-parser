@@ -211,7 +211,6 @@ public class TomlParser {
     private static TomlValue parseNumber(Reader reader) throws IOException {
         var start = reader.position();
 
-        var isFloat = false;
         var numberString = new StringBuilder();
 
         numberString.appendCodePoint(reader.codePoint);
@@ -305,27 +304,27 @@ public class TomlParser {
             }
         }
 
-        while (
-            isAsciiDigitCodePoint(reader.codePoint) ||
-                reader.codePoint == '_' ||
-                reader.codePoint == '.' ||
-                reader.codePoint == 'e' ||
-                reader.codePoint == 'E'
-        ) {
-            var isExponent = reader.codePoint == 'e' || reader.codePoint == 'E';
-            if (reader.codePoint != '_') {
-                if (reader.codePoint == '.' || isExponent) {
-                    isFloat = true;
-                }
+        var isFloat = false;
+        while (true) {
+            if (reader.codePoint == 'e' || reader.codePoint == 'E') {
                 numberString.appendCodePoint(reader.codePoint);
-            }
-            reader.read();
-
-            if (isExponent) {
+                reader.read();
                 if (reader.codePoint == '-' || reader.codePoint == '+') {
                     numberString.appendCodePoint(reader.codePoint);
                     reader.read();
                 }
+                isFloat = true;
+            } else if (reader.codePoint == '_') {
+                reader.read();
+            } else if (isAsciiDigitCodePoint(reader.codePoint)) {
+                numberString.appendCodePoint(reader.codePoint);
+                reader.read();
+            } else if (reader.codePoint == '.') {
+                numberString.appendCodePoint(reader.codePoint);
+                reader.read();
+                isFloat = true;
+            } else {
+                break;
             }
         }
 
