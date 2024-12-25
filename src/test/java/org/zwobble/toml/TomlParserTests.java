@@ -1004,6 +1004,40 @@ public class TomlParserTests {
     }
 
     @Test
+    public void multipleCommentsAfterKeyValuePair() throws IOException {
+        var result = parse("a = true\n# a\n#b\nb = false");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("a", isBool(true)),
+            isKeyValuePair("b", isBool(false))
+        )));
+    }
+
+    @Test
+    public void multipleCommentsAfterArrayElement() throws IOException {
+        var result = parse("a = [true# a\n#b\n,false]");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("a", isArray(isSequence(
+                isBool(true),
+                isBool(false)
+            )))
+        )));
+    }
+
+    @Test
+    public void commentAfterArrayElementSeparator() throws IOException {
+        var result = parse("a = [true,# a\nfalse]");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("a", isArray(isSequence(
+                isBool(true),
+                isBool(false)
+            )))
+        )));
+    }
+
+    @Test
     public void commentAfterTableHeader() throws IOException {
         var result = parse("[a] # a");
 

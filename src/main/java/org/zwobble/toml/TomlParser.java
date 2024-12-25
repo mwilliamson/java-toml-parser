@@ -617,8 +617,14 @@ public class TomlParser {
     }
 
     private static void skipArrayWhitespace(Reader reader) throws IOException {
-        while (isArrayWhitespace(reader.codePoint)) {
-            reader.read();
+        while (true) {
+            while (isArrayWhitespace(reader.codePoint)) {
+                reader.read();
+            }
+
+            if (!trySkipComment(reader)) {
+                return;
+            }
         }
     }
 
