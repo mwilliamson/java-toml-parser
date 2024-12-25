@@ -318,6 +318,7 @@ public class TomlParser {
                 valueString.appendCodePoint(reader.codePoint);
                 reader.read();
 
+                // Separator or end of local date
                 if (reader.codePoint == ' ') {
                     // This could be ignorable whitespace, in which case we have
                     // a local date, or the separator between the date and time.
