@@ -381,6 +381,31 @@ public class TomlParser {
                 if (reader.codePoint == 'z' || reader.codePoint == 'Z') {
                     valueString.appendCodePoint(reader.codePoint);
                     reader.read();
+
+                    var end = reader.position();
+                    var sourceRange = start.to(end);
+                    var value = OffsetDateTime.parse(valueString.toString());
+                    return new TomlOffsetDateTime(value, sourceRange);
+                } else if (reader.codePoint == '+' || reader.codePoint == '-') {
+                    valueString.appendCodePoint(reader.codePoint);
+                    reader.read();
+
+                    // Hours
+                    valueString.appendCodePoint(reader.codePoint);
+                    reader.read();
+                    valueString.appendCodePoint(reader.codePoint);
+                    reader.read();
+
+                    // Colon
+                    valueString.appendCodePoint(reader.codePoint);
+                    reader.skip(':');
+
+                    // Minutes
+                    valueString.appendCodePoint(reader.codePoint);
+                    reader.read();
+                    valueString.appendCodePoint(reader.codePoint);
+                    reader.read();
+
                     var end = reader.position();
                     var sourceRange = start.to(end);
                     var value = OffsetDateTime.parse(valueString.toString());

@@ -666,6 +666,30 @@ public class TomlParserTests {
     }
 
     @Test
+    public void offsetDateTimePositiveOffsetTimezone() throws IOException {
+        var result = parse("x = 1979-05-27t07:32:00+01:00");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isOffsetDateTime(
+                OffsetDateTime.parse("1979-05-27T07:32:00+01:00"),
+                isSourceRange(4, 29)
+            ))
+        )));
+    }
+
+    @Test
+    public void offsetDateTimeNegativeOffsetTimezone() throws IOException {
+        var result = parse("x = 1979-05-27t07:32:00-01:00");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isOffsetDateTime(
+                OffsetDateTime.parse("1979-05-27T07:32:00-01:00"),
+                isSourceRange(4, 29)
+            ))
+        )));
+    }
+
+    @Test
     public void offsetDateTimeUppercaseFractionalSeconds() throws IOException {
         var result = parse("x = 1979-05-27T07:32:00.123Z");
 
