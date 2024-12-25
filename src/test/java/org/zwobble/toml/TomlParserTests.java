@@ -962,6 +962,16 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void emptyInlineTableWithWhitespace() throws IOException {
+        var result = parse("""
+            x = {  }""");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isTable(isSequence()))
+        )));
+    }
+
     // == Comments ==
 
     @Test

@@ -620,6 +620,7 @@ public class TomlParser {
 
     private static TomlValue parseInlineTable(Reader reader) throws IOException {
         reader.skip('{');
+        skipWhitespace(reader);
         reader.skip('}');
 
         return TomlTable.of(List.of());
