@@ -318,7 +318,19 @@ public class TomlParser {
                 valueString.appendCodePoint(reader.codePoint);
                 reader.read();
 
-                if (reader.codePoint != 'T' && reader.codePoint != 't') {
+                if (reader.codePoint == ' ') {
+                    // This could be ignorable whitespace, in which case we have
+                    // a local date, or the separator between the date and time.
+                    var end = reader.position();
+                    reader.read();
+                    if (isAsciiDigitCodePoint(reader.codePoint)) {
+                        valueString.appendCodePoint('T');
+                    } else {
+                        var value = LocalDate.parse(valueString.toString());
+                        var sourceRange = start.to(end);
+                        return new TomlLocalDate(value, sourceRange);
+                    }
+                } else if (reader.codePoint != 'T' && reader.codePoint != 't') {
                     var end = reader.position();
                     var sourceRange = start.to(end);
                     var value = LocalDate.parse(valueString.toString());

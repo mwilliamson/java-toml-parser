@@ -629,6 +629,18 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void offsetDateTimeSpaceSeparator() throws IOException {
+        var result = parse("x = 1979-05-27 07:32:00Z");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isOffsetDateTime(
+                OffsetDateTime.parse("1979-05-27T07:32:00Z"),
+                isSourceRange(4, 24)
+            ))
+        )));
+    }
+
     // == Local Date ==
 
     @Test
