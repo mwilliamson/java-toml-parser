@@ -606,8 +606,20 @@ public class TomlParserTests {
     // == Offset Date-Times ==
 
     @Test
-    public void offsetDateTimeUtc() throws IOException {
+    public void offsetDateTimeUtcUppercase() throws IOException {
         var result = parse("x = 1979-05-27T07:32:00Z");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isOffsetDateTime(
+                OffsetDateTime.parse("1979-05-27T07:32:00Z"),
+                isSourceRange(4, 24)
+            ))
+        )));
+    }
+
+    @Test
+    public void offsetDateTimeUtcLowercase() throws IOException {
+        var result = parse("x = 1979-05-27t07:32:00z");
 
         assertThat(result, isTable(isSequence(
             isKeyValuePair("x", isOffsetDateTime(

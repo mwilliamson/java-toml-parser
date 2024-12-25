@@ -318,7 +318,7 @@ public class TomlParser {
                 valueString.appendCodePoint(reader.codePoint);
                 reader.read();
 
-                if (reader.codePoint != 'T') {
+                if (reader.codePoint != 'T' && reader.codePoint != 't') {
                     var end = reader.position();
                     var sourceRange = start.to(end);
                     var value = LocalDate.parse(valueString.toString());
