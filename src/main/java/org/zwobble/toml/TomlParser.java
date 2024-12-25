@@ -367,6 +367,16 @@ public class TomlParser {
                 valueString.appendCodePoint(reader.codePoint);
                 reader.read();
 
+                // Fractional seconds
+                if (reader.codePoint == '.') {
+                    valueString.appendCodePoint(reader.codePoint);
+                    reader.read();
+                    while (isAsciiDigitCodePoint(reader.codePoint)) {
+                        valueString.appendCodePoint(reader.codePoint);
+                        reader.read();
+                    }
+                }
+
                 // Try to parse a timezone
                 if (reader.codePoint == 'z' || reader.codePoint == 'Z') {
                     valueString.appendCodePoint(reader.codePoint);

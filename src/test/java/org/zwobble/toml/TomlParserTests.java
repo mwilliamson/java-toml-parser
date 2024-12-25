@@ -665,6 +665,18 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void offsetDateTimeUppercaseFractionalSeconds() throws IOException {
+        var result = parse("x = 1979-05-27T07:32:00.123Z");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isOffsetDateTime(
+                OffsetDateTime.parse("1979-05-27T07:32:00.123Z"),
+                isSourceRange(4, 28)
+            ))
+        )));
+    }
+
     // == Local Date ==
 
     @Test
