@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -211,12 +212,12 @@ public class TomlParser {
     private static TomlValue parseNumber(Reader reader) throws IOException {
         var start = reader.position();
 
-        var numberString = new StringBuilder();
+        var valueString = new StringBuilder();
 
-        numberString.appendCodePoint(reader.codePoint);
+        valueString.appendCodePoint(reader.codePoint);
         reader.read();
 
-        if (reader.codePoint == 'n' && (numberString.charAt(0) == '-' || numberString.charAt(0) == '+')) {
+        if (reader.codePoint == 'n' && (valueString.charAt(0) == '-' || valueString.charAt(0) == '+')) {
             reader.skip(new int[] {'n', 'a', 'n'});
 
             var end = reader.position();
@@ -225,7 +226,7 @@ public class TomlParser {
             return new TomlFloat(Double.NaN, sourceRange);
         }
 
-        if (reader.codePoint == 'i' && numberString.charAt(0) == '-') {
+        if (reader.codePoint == 'i' && valueString.charAt(0) == '-') {
             reader.skip(new int[] {'i', 'n', 'f'});
 
             var end = reader.position();
@@ -234,7 +235,7 @@ public class TomlParser {
             return new TomlFloat(Double.NEGATIVE_INFINITY, sourceRange);
         }
 
-        if (reader.codePoint == 'i' && numberString.charAt(0) == '+') {
+        if (reader.codePoint == 'i' && valueString.charAt(0) == '+') {
             reader.skip(new int[] {'i', 'n', 'f'});
 
             var end = reader.position();
@@ -279,22 +280,36 @@ public class TomlParser {
         var isFloat = false;
         while (true) {
             if (reader.codePoint == 'e' || reader.codePoint == 'E') {
-                numberString.appendCodePoint(reader.codePoint);
+                valueString.appendCodePoint(reader.codePoint);
                 reader.read();
                 if (reader.codePoint == '-' || reader.codePoint == '+') {
-                    numberString.appendCodePoint(reader.codePoint);
+                    valueString.appendCodePoint(reader.codePoint);
                     reader.read();
                 }
                 isFloat = true;
             } else if (reader.codePoint == '_') {
                 reader.read();
             } else if (isAsciiDigitCodePoint(reader.codePoint)) {
-                numberString.appendCodePoint(reader.codePoint);
+                valueString.appendCodePoint(reader.codePoint);
                 reader.read();
             } else if (reader.codePoint == '.') {
-                numberString.appendCodePoint(reader.codePoint);
+                valueString.appendCodePoint(reader.codePoint);
                 reader.read();
                 isFloat = true;
+            } else if (reader.codePoint == '-') {
+                while (true) {
+                    if (reader.codePoint == '#' || reader.codePoint == '\r' || reader.codePoint == '\n' || reader.codePoint == -1 || reader.codePoint == ',') {
+                        var value = OffsetDateTime.parse(valueString.toString());
+
+                        var end = reader.position();
+                        var sourceRange = start.to(end);
+
+                        return new TomlOffsetDateTime(value, sourceRange);
+                    } else {
+                        valueString.appendCodePoint(reader.codePoint);
+                        reader.read();
+                    }
+                }
             } else {
                 break;
             }
@@ -304,10 +319,10 @@ public class TomlParser {
         var sourceRange = start.to(end);
 
         if (isFloat) {
-            var value = Double.parseDouble(numberString.toString());
+            var value = Double.parseDouble(valueString.toString());
             return new TomlFloat(value, sourceRange);
         } else {
-            var integer = Long.parseLong(numberString.toString());
+            var integer = Long.parseLong(valueString.toString());
             return new TomlInt(integer, sourceRange);
         }
     }

@@ -7,6 +7,7 @@ import org.zwobble.toml.values.*;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.time.OffsetDateTime;
 
 import static org.zwobble.precisely.AssertThat.assertThat;
 import static org.zwobble.precisely.Matchers.*;
@@ -601,6 +602,20 @@ public class TomlParserTests {
         )));
     }
 
+    // == Offset Date-Times ==
+
+    @Test
+    public void offsetDateTimeUtc() throws IOException {
+        var result = parse("x = 1979-05-27T07:32:00Z");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isOffsetDateTime(
+                OffsetDateTime.parse("1979-05-27T07:32:00Z"),
+                isSourceRange(4, 24)
+            ))
+        )));
+    }
+
     // == Arrays ==
 
     @Test
@@ -859,6 +874,17 @@ public class TomlParserTests {
     private Matcher<TomlValue> isString(String value, Matcher<SourceRange> sourceRange) {
         return instanceOf(
             TomlString.class,
+            has("value", x -> x.value(), equalTo(value)),
+            has("sourceRange", x -> x.sourceRange(), sourceRange)
+        );
+    }
+
+    private Matcher<TomlValue> isOffsetDateTime(
+        OffsetDateTime value,
+        Matcher<SourceRange> sourceRange
+    ) {
+        return instanceOf(
+            TomlOffsetDateTime.class,
             has("value", x -> x.value(), equalTo(value)),
             has("sourceRange", x -> x.sourceRange(), sourceRange)
         );

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -92,6 +93,12 @@ public class TomlParserTomlTestTests {
                 normalizedObject.addProperty("type", "float");
                 normalizedObject.addProperty("value", floatToString(floatValue));
                 return normalizedObject;
+            } else if (Objects.equals(jsonObject.get("type"), new JsonPrimitive("datetime"))) {
+                var offsetDateTimeValue = OffsetDateTime.parse(jsonObject.get("value").getAsString());
+                var normalizedObject = new JsonObject();
+                normalizedObject.addProperty("type", "datetime");
+                normalizedObject.addProperty("value", offsetDateTimeValue.toString());
+                return normalizedObject;
             } else {
                 var normalizedObject = new JsonObject();
                 for (var property : jsonObject.entrySet()) {
@@ -135,6 +142,13 @@ public class TomlParserTomlTestTests {
                 var jsonObject = new JsonObject();
                 jsonObject.addProperty("type", "integer");
                 jsonObject.addProperty("value", Long.toString(tomlInt.value()));
+                yield jsonObject;
+            }
+
+            case TomlOffsetDateTime tomlOffsetDateTime -> {
+                var jsonObject = new JsonObject();
+                jsonObject.addProperty("type", "datetime");
+                jsonObject.addProperty("value", tomlOffsetDateTime.value().toString());
                 yield jsonObject;
             }
 
