@@ -165,6 +165,8 @@ public class TomlParser {
             return new TomlString(string, sourceRange);
         } else if (reader.codePoint == '[') {
             return parseArray(reader);
+        } else if (reader.codePoint == '{') {
+            return parseInlineTable(reader);
         } else {
             throw new TomlParseError("??");
         }
@@ -614,6 +616,13 @@ public class TomlParser {
 
         reader.skip(']');
         return TomlArray.of(elements);
+    }
+
+    private static TomlValue parseInlineTable(Reader reader) throws IOException {
+        reader.skip('{');
+        reader.skip('}');
+
+        return TomlTable.of(List.of());
     }
 
     private static void skipArrayWhitespace(Reader reader) throws IOException {

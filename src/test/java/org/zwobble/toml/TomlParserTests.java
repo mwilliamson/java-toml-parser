@@ -950,6 +950,18 @@ public class TomlParserTests {
         )));
     }
 
+    // == Inline Tables ==
+
+    @Test
+    public void emptyInlineTable() throws IOException {
+        var result = parse("""
+            x = {}""");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isTable(isSequence()))
+        )));
+    }
+
     // == Comments ==
 
     @Test
