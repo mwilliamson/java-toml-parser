@@ -331,12 +331,41 @@ public class TomlParser {
                         var sourceRange = start.to(end);
                         return new TomlLocalDate(value, sourceRange);
                     }
-                } else if (reader.codePoint != 'T' && reader.codePoint != 't') {
+                } else if (reader.codePoint == 'T' || reader.codePoint == 't') {
+                    valueString.appendCodePoint(reader.codePoint);
+                    reader.read();
+                } else {
                     var end = reader.position();
                     var sourceRange = start.to(end);
                     var value = LocalDate.parse(valueString.toString());
                     return new TomlLocalDate(value, sourceRange);
                 }
+
+                // Hours
+                valueString.appendCodePoint(reader.codePoint);
+                reader.read();
+                valueString.appendCodePoint(reader.codePoint);
+                reader.read();
+
+                // Colon
+                valueString.appendCodePoint(reader.codePoint);
+                reader.skip(':');
+
+                // Minutes
+                valueString.appendCodePoint(reader.codePoint);
+                reader.read();
+                valueString.appendCodePoint(reader.codePoint);
+                reader.read();
+
+                // Colon
+                valueString.appendCodePoint(reader.codePoint);
+                reader.skip(':');
+
+                // Seconds
+                valueString.appendCodePoint(reader.codePoint);
+                reader.read();
+                valueString.appendCodePoint(reader.codePoint);
+                reader.read();
 
                 while (true) {
                     if (reader.codePoint == '#' || reader.codePoint == '\r' || reader.codePoint == '\n' || reader.codePoint == -1 || reader.codePoint == ',') {
