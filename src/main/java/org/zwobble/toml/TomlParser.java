@@ -35,6 +35,8 @@ public class TomlParser {
         reader.read();
 
         while (true) {
+            skipWhitespace(reader);
+
             if (reader.isEndOfFile()) {
                 return rootTable.toTable();
             }

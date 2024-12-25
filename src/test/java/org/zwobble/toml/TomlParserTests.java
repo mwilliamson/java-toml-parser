@@ -39,6 +39,24 @@ public class TomlParserTests {
 
     // == Keys ==
 
+    @Test
+    public void keySurroundedByNoWhitespace() throws IOException {
+        var result = parse("abc=true");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("abc", isBool(true))
+        )));
+    }
+
+    @Test
+    public void keySurroundedByWhitespace() throws IOException {
+        var result = parse("  abc  =true");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("abc", isBool(true))
+        )));
+    }
+
     // === Bare keys ===
 
     @Test
