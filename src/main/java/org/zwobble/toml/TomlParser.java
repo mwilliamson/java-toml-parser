@@ -342,41 +342,7 @@ public class TomlParser {
                     return new TomlLocalDate(value, sourceRange);
                 }
 
-                // Hours
-                valueString.appendCodePoint(reader.codePoint);
-                reader.read();
-                valueString.appendCodePoint(reader.codePoint);
-                reader.read();
-
-                // Colon
-                valueString.appendCodePoint(reader.codePoint);
-                reader.skip(':');
-
-                // Minutes
-                valueString.appendCodePoint(reader.codePoint);
-                reader.read();
-                valueString.appendCodePoint(reader.codePoint);
-                reader.read();
-
-                // Colon
-                valueString.appendCodePoint(reader.codePoint);
-                reader.skip(':');
-
-                // Seconds
-                valueString.appendCodePoint(reader.codePoint);
-                reader.read();
-                valueString.appendCodePoint(reader.codePoint);
-                reader.read();
-
-                // Fractional seconds
-                if (reader.codePoint == '.') {
-                    valueString.appendCodePoint(reader.codePoint);
-                    reader.read();
-                    while (isAsciiDigitCodePoint(reader.codePoint)) {
-                        valueString.appendCodePoint(reader.codePoint);
-                        reader.read();
-                    }
-                }
+                readTime(reader, valueString);
 
                 // Try to parse a timezone
                 if (reader.codePoint == 'z' || reader.codePoint == 'Z') {
@@ -431,6 +397,44 @@ public class TomlParser {
         } else {
             var integer = Long.parseLong(valueString.toString());
             return new TomlInt(integer, sourceRange);
+        }
+    }
+
+    private static void readTime(Reader reader, StringBuilder valueString) throws IOException {
+        // Hours
+        valueString.appendCodePoint(reader.codePoint);
+        reader.read();
+        valueString.appendCodePoint(reader.codePoint);
+        reader.read();
+
+        // Colon
+        valueString.appendCodePoint(reader.codePoint);
+        reader.skip(':');
+
+        // Minutes
+        valueString.appendCodePoint(reader.codePoint);
+        reader.read();
+        valueString.appendCodePoint(reader.codePoint);
+        reader.read();
+
+        // Colon
+        valueString.appendCodePoint(reader.codePoint);
+        reader.skip(':');
+
+        // Seconds
+        valueString.appendCodePoint(reader.codePoint);
+        reader.read();
+        valueString.appendCodePoint(reader.codePoint);
+        reader.read();
+
+        // Fractional seconds
+        if (reader.codePoint == '.') {
+            valueString.appendCodePoint(reader.codePoint);
+            reader.read();
+            while (isAsciiDigitCodePoint(reader.codePoint)) {
+                valueString.appendCodePoint(reader.codePoint);
+                reader.read();
+            }
         }
     }
 
