@@ -1029,6 +1029,26 @@ public class TomlParserTests {
     }
 
     @Test
+    public void arrayOfTablesHeadersAreRelativeToRoot() throws IOException {
+        var result = parse("""
+            [[a.b]]
+            [[c.d]]""");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("a", isTable(isSequence(
+                isKeyValuePair("b", isArray(isSequence(
+                    isTable(isSequence())
+                )))
+            ))),
+            isKeyValuePair("c", isTable(isSequence(
+                isKeyValuePair("d", isArray(isSequence(
+                    isTable(isSequence())
+                )))
+            )))
+        )));
+    }
+
+    @Test
     public void arrayOfTablesHeaderWhitespace() throws IOException {
         var result = parse("""
             [[  x  ]]""");
