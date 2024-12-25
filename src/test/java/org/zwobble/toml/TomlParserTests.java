@@ -8,6 +8,7 @@ import org.zwobble.toml.values.*;
 import java.io.IOException;
 import java.io.StringReader;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 import static org.zwobble.precisely.AssertThat.assertThat;
@@ -701,6 +702,58 @@ public class TomlParserTests {
         )));
     }
 
+
+
+    // == Local Date-Times ==
+
+    @Test
+    public void localDateTimeUppercaseTSeparator() throws IOException {
+        var result = parse("x = 1979-05-27T07:32:00");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isLocalDateTime(
+                LocalDateTime.parse("1979-05-27T07:32:00"),
+                isSourceRange(4, 23)
+            ))
+        )));
+    }
+
+    @Test
+    public void localDateTimeLowercaseTSeparator() throws IOException {
+        var result = parse("x = 1979-05-27t07:32:00");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isLocalDateTime(
+                LocalDateTime.parse("1979-05-27T07:32:00"),
+                isSourceRange(4, 23)
+            ))
+        )));
+    }
+
+    @Test
+    public void localDateTimeSpaceSeparator() throws IOException {
+        var result = parse("x = 1979-05-27 07:32:00");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isLocalDateTime(
+                LocalDateTime.parse("1979-05-27T07:32:00"),
+                isSourceRange(4, 23)
+            ))
+        )));
+    }
+
+    @Test
+    public void localDateTimeUppercaseFractionalSeconds() throws IOException {
+        var result = parse("x = 1979-05-27T07:32:00.123");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isLocalDateTime(
+                LocalDateTime.parse("1979-05-27T07:32:00.123"),
+                isSourceRange(4, 27)
+            ))
+        )));
+    }
+
     // == Local Date ==
 
     @Test
@@ -984,6 +1037,17 @@ public class TomlParserTests {
     ) {
         return instanceOf(
             TomlOffsetDateTime.class,
+            has("value", x -> x.value(), equalTo(value)),
+            has("sourceRange", x -> x.sourceRange(), sourceRange)
+        );
+    }
+
+    private Matcher<TomlValue> isLocalDateTime(
+        LocalDateTime value,
+        Matcher<SourceRange> sourceRange
+    ) {
+        return instanceOf(
+            TomlLocalDateTime.class,
             has("value", x -> x.value(), equalTo(value)),
             has("sourceRange", x -> x.sourceRange(), sourceRange)
         );

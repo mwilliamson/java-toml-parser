@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -410,9 +411,12 @@ public class TomlParser {
                     var sourceRange = start.to(end);
                     var value = OffsetDateTime.parse(valueString.toString());
                     return new TomlOffsetDateTime(value, sourceRange);
+                } else {
+                    var end = reader.position();
+                    var sourceRange = start.to(end);
+                    var value = LocalDateTime.parse(valueString.toString());
+                    return new TomlLocalDateTime(value, sourceRange);
                 }
-
-                throw new TomlParseError("TODO");
             } else {
                 break;
             }
