@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -383,6 +384,17 @@ public class TomlParser {
                     var value = LocalDateTime.parse(valueString.toString());
                     return new TomlLocalDateTime(value, sourceRange);
                 }
+            } else if (reader.codePoint == ':') {
+                valueString.appendCodePoint(reader.codePoint);
+                reader.read();
+
+                readTimeFromMinutes(reader, valueString);
+
+                var end = reader.position();
+                var sourceRange = start.to(end);
+                var value = LocalTime.parse(valueString.toString());
+                return new TomlLocalTime(value, sourceRange);
+
             } else {
                 break;
             }
@@ -411,6 +423,10 @@ public class TomlParser {
         valueString.appendCodePoint(reader.codePoint);
         reader.skip(':');
 
+        readTimeFromMinutes(reader, valueString);
+    }
+
+    private static void readTimeFromMinutes(Reader reader, StringBuilder valueString) throws IOException {
         // Minutes
         valueString.appendCodePoint(reader.codePoint);
         reader.read();

@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -106,6 +107,12 @@ public class TomlParserTomlTestTests {
                 normalizedObject.addProperty("type", "datetime-local");
                 normalizedObject.addProperty("value", localDateTimeValue.toString());
                 return normalizedObject;
+            } else if (Objects.equals(jsonObject.get("type"), new JsonPrimitive("time-local"))) {
+                var localTimeValue = LocalTime.parse(jsonObject.get("value").getAsString());
+                var normalizedObject = new JsonObject();
+                normalizedObject.addProperty("type", "time-local");
+                normalizedObject.addProperty("value", localTimeValue.toString());
+                return normalizedObject;
             } else {
                 var normalizedObject = new JsonObject();
                 for (var property : jsonObject.entrySet()) {
@@ -163,6 +170,13 @@ public class TomlParserTomlTestTests {
                 var jsonObject = new JsonObject();
                 jsonObject.addProperty("type", "datetime-local");
                 jsonObject.addProperty("value", tomlLocalDateTime.value().toString());
+                yield jsonObject;
+            }
+
+            case TomlLocalTime tomlLocalTime -> {
+                var jsonObject = new JsonObject();
+                jsonObject.addProperty("type", "time-local");
+                jsonObject.addProperty("value", tomlLocalTime.value().toString());
                 yield jsonObject;
             }
 

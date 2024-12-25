@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 
 import static org.zwobble.precisely.AssertThat.assertThat;
@@ -768,6 +769,32 @@ public class TomlParserTests {
         )));
     }
 
+    // == Local Date ==
+
+    @Test
+    public void localTimeWithoutFractionalSeconds() throws IOException {
+        var result = parse("x = 01:02:03");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isLocalTime(
+                LocalTime.parse("01:02:03"),
+                isSourceRange(4, 12)
+            ))
+        )));
+    }
+
+    @Test
+    public void localTimeWithFractionalSeconds() throws IOException {
+        var result = parse("x = 01:02:03.456");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isLocalTime(
+                LocalTime.parse("01:02:03.456"),
+                isSourceRange(4, 16)
+            ))
+        )));
+    }
+
     // == Arrays ==
 
     @Test
@@ -1059,6 +1086,17 @@ public class TomlParserTests {
     ) {
         return instanceOf(
             TomlLocalDate.class,
+            has("value", x -> x.value(), equalTo(value)),
+            has("sourceRange", x -> x.sourceRange(), sourceRange)
+        );
+    }
+
+    private Matcher<TomlValue> isLocalTime(
+        LocalTime value,
+        Matcher<SourceRange> sourceRange
+    ) {
+        return instanceOf(
+            TomlLocalTime.class,
             has("value", x -> x.value(), equalTo(value)),
             has("sourceRange", x -> x.sourceRange(), sourceRange)
         );
