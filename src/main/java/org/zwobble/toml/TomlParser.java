@@ -49,12 +49,7 @@ public class TomlParser {
                 // Blank line with CRLF
             } else if (isBareKeyCodePoint(reader.codePoint) || reader.codePoint == '\"' || reader.codePoint == '\'') {
                 var keysValuePair = parseKeyValuePair(reader);
-                var table = activeTable;
-                for (var i = 0; i < keysValuePair.keys.size() - 1; i++) {
-                    var key = keysValuePair.keys.get(i);
-                    table = table.getOrCreateSubTable(key);
-                }
-                table.add(keysValuePair.keys.getLast(), keysValuePair.value());
+                addKeysValuePair(activeTable, keysValuePair);
             } else if (reader.codePoint == '[') {
                 reader.read();
                 skipWhitespace(reader);
@@ -82,6 +77,15 @@ public class TomlParser {
     }
 
     private record KeysValuePair(List<String> keys, TomlValue value) {}
+
+    private static void addKeysValuePair(TomlTableBuilder activeTable, KeysValuePair keysValuePair) {
+        var table = activeTable;
+        for (var i = 0; i < keysValuePair.keys.size() - 1; i++) {
+            var key = keysValuePair.keys.get(i);
+            table = table.getOrCreateSubTable(key);
+        }
+        table.add(keysValuePair.keys.getLast(), keysValuePair.value());
+    }
 
     private static KeysValuePair parseKeyValuePair(Reader reader) throws IOException {
         var keys = parseKeys(reader);
@@ -619,11 +623,19 @@ public class TomlParser {
     }
 
     private static TomlValue parseInlineTable(Reader reader) throws IOException {
+        var table = new TomlTableBuilder();
+
         reader.skip('{');
         skipWhitespace(reader);
+
+        if (reader.codePoint != '}') {
+            var keysValuePair = parseKeyValuePair(reader);
+            addKeysValuePair(table, keysValuePair);
+        }
+
         reader.skip('}');
 
-        return TomlTable.of(List.of());
+        return table.toTable();
     }
 
     private static void skipArrayWhitespace(Reader reader) throws IOException {

@@ -972,6 +972,18 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void inlineTableWithSingleKeyValuePair() throws IOException {
+        var result = parse("""
+            x = { a = true }""");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isTable(isSequence(
+                isKeyValuePair("a", isBool(true))
+            )))
+        )));
+    }
+
     // == Comments ==
 
     @Test
