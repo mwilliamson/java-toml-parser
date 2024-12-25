@@ -627,10 +627,22 @@ public class TomlParser {
 
         reader.skip('{');
         skipWhitespace(reader);
+        var isFirstKeyValuePair = true;
 
-        if (reader.codePoint != '}') {
-            var keysValuePair = parseKeyValuePair(reader);
-            addKeysValuePair(table, keysValuePair);
+        while (reader.codePoint != '}') {
+            if (!isFirstKeyValuePair) {
+                reader.skip(',');
+                skipWhitespace(reader);
+            }
+
+            var keys = parseKeys(reader);
+            reader.skip('=');
+            skipWhitespace(reader);
+            var value = parseValue(reader);
+            skipWhitespace(reader);
+            addKeysValuePair(table, new KeysValuePair(keys, value));
+
+            isFirstKeyValuePair = false;
         }
 
         reader.skip('}');

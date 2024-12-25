@@ -984,6 +984,20 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void inlineTableWithMultipleKeyValuePairs() throws IOException {
+        var result = parse("""
+            x = { a = true, b = false, c = 1 }""");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isTable(isSequence(
+                isKeyValuePair("a", isBool(true)),
+                isKeyValuePair("b", isBool(false)),
+                isKeyValuePair("c", isInt(1))
+            )))
+        )));
+    }
+
     // == Comments ==
 
     @Test
