@@ -606,7 +606,7 @@ public class TomlParserTests {
     // == Offset Date-Times ==
 
     @Test
-    public void offsetDateTimeUtcUppercase() throws IOException {
+    public void offsetDateTimeUppercaseTSeparator() throws IOException {
         var result = parse("x = 1979-05-27T07:32:00Z");
 
         assertThat(result, isTable(isSequence(
@@ -618,7 +618,7 @@ public class TomlParserTests {
     }
 
     @Test
-    public void offsetDateTimeUtcLowercase() throws IOException {
+    public void offsetDateTimeLowercaseTSeparator() throws IOException {
         var result = parse("x = 1979-05-27t07:32:00z");
 
         assertThat(result, isTable(isSequence(
@@ -632,6 +632,30 @@ public class TomlParserTests {
     @Test
     public void offsetDateTimeSpaceSeparator() throws IOException {
         var result = parse("x = 1979-05-27 07:32:00Z");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isOffsetDateTime(
+                OffsetDateTime.parse("1979-05-27T07:32:00Z"),
+                isSourceRange(4, 24)
+            ))
+        )));
+    }
+
+    @Test
+    public void offsetDateTimeUppercaseZTimezone() throws IOException {
+        var result = parse("x = 1979-05-27T07:32:00Z");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isOffsetDateTime(
+                OffsetDateTime.parse("1979-05-27T07:32:00Z"),
+                isSourceRange(4, 24)
+            ))
+        )));
+    }
+
+    @Test
+    public void offsetDateTimeLowercaseZTimezone() throws IOException {
+        var result = parse("x = 1979-05-27t07:32:00z");
 
         assertThat(result, isTable(isSequence(
             isKeyValuePair("x", isOffsetDateTime(

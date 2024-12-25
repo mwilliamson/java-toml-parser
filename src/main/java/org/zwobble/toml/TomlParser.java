@@ -367,23 +367,17 @@ public class TomlParser {
                 valueString.appendCodePoint(reader.codePoint);
                 reader.read();
 
-                while (true) {
-                    if (reader.codePoint == '#' || reader.codePoint == '\r' || reader.codePoint == '\n' || reader.codePoint == -1 || reader.codePoint == ',') {
-                        var end = reader.position();
-                        var sourceRange = start.to(end);
-
-                        if (valueString.length() == 10) {
-                            var value = LocalDate.parse(valueString.toString());
-                            return new TomlLocalDate(value, sourceRange);
-                        }
-
-                        var value = OffsetDateTime.parse(valueString.toString());
-                        return new TomlOffsetDateTime(value, sourceRange);
-                    } else {
-                        valueString.appendCodePoint(reader.codePoint);
-                        reader.read();
-                    }
+                // Try to parse a timezone
+                if (reader.codePoint == 'z' || reader.codePoint == 'Z') {
+                    valueString.appendCodePoint(reader.codePoint);
+                    reader.read();
+                    var end = reader.position();
+                    var sourceRange = start.to(end);
+                    var value = OffsetDateTime.parse(valueString.toString());
+                    return new TomlOffsetDateTime(value, sourceRange);
                 }
+
+                throw new TomlParseError("TODO");
             } else {
                 break;
             }
