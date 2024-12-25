@@ -298,6 +298,33 @@ public class TomlParser {
                 reader.read();
                 isFloat = true;
             } else if (reader.codePoint == '-') {
+                // Offset date-time, local date-time or local date
+                valueString.appendCodePoint(reader.codePoint);
+                reader.read();
+
+                // Month
+                valueString.appendCodePoint(reader.codePoint);
+                reader.read();
+                valueString.appendCodePoint(reader.codePoint);
+                reader.read();
+
+                // Hyphen
+                valueString.appendCodePoint(reader.codePoint);
+                reader.skip('-');
+
+                // Day
+                valueString.appendCodePoint(reader.codePoint);
+                reader.read();
+                valueString.appendCodePoint(reader.codePoint);
+                reader.read();
+
+                if (reader.codePoint != 'T') {
+                    var end = reader.position();
+                    var sourceRange = start.to(end);
+                    var value = LocalDate.parse(valueString.toString());
+                    return new TomlLocalDate(value, sourceRange);
+                }
+
                 while (true) {
                     if (reader.codePoint == '#' || reader.codePoint == '\r' || reader.codePoint == '\n' || reader.codePoint == -1 || reader.codePoint == ',') {
                         var end = reader.position();
