@@ -246,62 +246,34 @@ public class TomlParser {
         if (reader.codePoint == 'b') {
             reader.read();
 
-            while (true) {
-                if (reader.codePoint == '0' || reader.codePoint == '1') {
-                    numberString.appendCodePoint(reader.codePoint);
-                    reader.read();
-                } else if (reader.codePoint == '_') {
-                    reader.read();
-                } else {
-                    var end = reader.position();
-                    var sourceRange = start.to(end);
+            var intValue = parseBinaryDigits(reader);
 
-                    var intValue = Long.parseLong(numberString.toString(), 2);
-                    return new TomlInt(intValue, sourceRange);
-                }
-            }
+            var end = reader.position();
+            var sourceRange = start.to(end);
+
+            return new TomlInt(intValue, sourceRange);
         }
 
         if (reader.codePoint == 'o') {
             reader.read();
 
-            while (true) {
-                if (reader.codePoint >= '0' && reader.codePoint <= '7') {
-                    numberString.appendCodePoint(reader.codePoint);
-                    reader.read();
-                } else if (reader.codePoint == '_') {
-                    reader.read();
-                } else {
-                    var end = reader.position();
-                    var sourceRange = start.to(end);
+            var intValue = parseOctalDigits(reader);
 
-                    var intValue = Long.parseLong(numberString.toString(), 8);
-                    return new TomlInt(intValue, sourceRange);
-                }
-            }
+            var end = reader.position();
+            var sourceRange = start.to(end);
+
+            return new TomlInt(intValue, sourceRange);
         }
 
         if (reader.codePoint == 'x') {
             reader.read();
 
-            while (true) {
-                if (
-                    (reader.codePoint >= '0' && reader.codePoint <= '9') ||
-                        (reader.codePoint >= 'a' && reader.codePoint <= 'f') ||
-                        (reader.codePoint >= 'A' && reader.codePoint <= 'F')
-                ) {
-                    numberString.appendCodePoint(reader.codePoint);
-                    reader.read();
-                } else if (reader.codePoint == '_') {
-                    reader.read();
-                } else {
-                    var end = reader.position();
-                    var sourceRange = start.to(end);
+            var intValue = parseHexDigits(reader);
 
-                    var intValue = Long.parseLong(numberString.toString(), 16);
-                    return new TomlInt(intValue, sourceRange);
-                }
-            }
+            var end = reader.position();
+            var sourceRange = start.to(end);
+
+            return new TomlInt(intValue, sourceRange);
         }
 
         var isFloat = false;
@@ -337,6 +309,52 @@ public class TomlParser {
         } else {
             var integer = Long.parseLong(numberString.toString());
             return new TomlInt(integer, sourceRange);
+        }
+    }
+
+    private static long parseBinaryDigits(Reader reader) throws IOException {
+        var numberString = new StringBuilder();
+        while (true) {
+            if (reader.codePoint == '0' || reader.codePoint == '1') {
+                numberString.appendCodePoint(reader.codePoint);
+                reader.read();
+            } else if (reader.codePoint == '_') {
+                reader.read();
+            } else {
+                return Long.parseLong(numberString.toString(), 2);
+            }
+        }
+    }
+
+    private static long parseOctalDigits(Reader reader) throws IOException {
+        var numberString = new StringBuilder();
+        while (true) {
+            if (reader.codePoint >= '0' && reader.codePoint <= '7') {
+                numberString.appendCodePoint(reader.codePoint);
+                reader.read();
+            } else if (reader.codePoint == '_') {
+                reader.read();
+            } else {
+                return Long.parseLong(numberString.toString(), 8);
+            }
+        }
+    }
+
+    private static long parseHexDigits(Reader reader) throws IOException {
+        var numberString = new StringBuilder();
+        while (true) {
+            if (
+                (reader.codePoint >= '0' && reader.codePoint <= '9') ||
+                    (reader.codePoint >= 'a' && reader.codePoint <= 'f') ||
+                    (reader.codePoint >= 'A' && reader.codePoint <= 'F')
+            ) {
+                numberString.appendCodePoint(reader.codePoint);
+                reader.read();
+            } else if (reader.codePoint == '_') {
+                reader.read();
+            } else {
+                return Long.parseLong(numberString.toString(), 16);
+            }
         }
     }
 
