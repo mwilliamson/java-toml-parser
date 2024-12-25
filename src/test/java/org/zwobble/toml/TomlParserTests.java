@@ -1049,6 +1049,23 @@ public class TomlParserTests {
     }
 
     @Test
+    public void arrayOfTablesSingleTableKeyValuePairs() throws IOException {
+        var result = parse("""
+            [[a]]
+            b = true
+            c = false""");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("a", isArray(isSequence(
+                isTable(isSequence(
+                    isKeyValuePair("b", isBool(true)),
+                    isKeyValuePair("c", isBool(false))
+                )))
+            ))
+        )));
+    }
+
+    @Test
     public void arrayOfTablesHeaderWhitespace() throws IOException {
         var result = parse("""
             [[  x  ]]""");
