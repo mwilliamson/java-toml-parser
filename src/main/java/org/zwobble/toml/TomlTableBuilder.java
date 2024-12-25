@@ -51,6 +51,7 @@ class TomlTableBuilder {
 
         var subTable = new TomlTableBuilder();
         this.arrayOfTables.get(key).add(subTable.table);
+        this.subTableBuilders.put(key, subTable);
         return subTable;
     }
 

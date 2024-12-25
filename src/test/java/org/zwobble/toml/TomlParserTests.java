@@ -1090,6 +1090,32 @@ public class TomlParserTests {
     }
 
     @Test
+    public void tableHeaderCanReferToExistingTableInArrayOfTables() throws IOException {
+        var result = parse("""
+            [[a]]
+            [a.b]
+            c = true
+            [[a]]
+            [a.b]
+            c = false""");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("a", isArray(isSequence(
+                isTable(isSequence(
+                    isKeyValuePair("b", isTable(isSequence(
+                        isKeyValuePair("c", isBool(true))
+                    )))
+                )),
+                isTable(isSequence(
+                    isKeyValuePair("b", isTable(isSequence(
+                        isKeyValuePair("c", isBool(false))
+                    )))
+                ))
+            )))
+        )));
+    }
+
+    @Test
     public void arrayOfTablesHeaderWhitespace() throws IOException {
         var result = parse("""
             [[  x  ]]""");
