@@ -52,15 +52,29 @@ public class TomlParser {
                 addKeysValuePair(activeTable, keysValuePair);
             } else if (reader.codePoint == '[') {
                 reader.read();
-                skipWhitespace(reader);
-                var keys = parseKeys(reader);
-                activeTable = rootTable;
-                for (var key : keys) {
-                    activeTable = activeTable.getOrCreateSubTable(key);
+
+                if (reader.codePoint == '[') {
+                    reader.read();
+                    skipWhitespace(reader);
+
+                    var keys = parseKeys(reader);
+                    rootTable.getOrCreateArraySubTable(keys.getLast());
+
+                    reader.skip(']');
+                    reader.skip(']');
+                    skipWhitespace(reader);
+                    trySkipComment(reader);
+                } else {
+                    skipWhitespace(reader);
+                    var keys = parseKeys(reader);
+                    activeTable = rootTable;
+                    for (var key : keys) {
+                        activeTable = activeTable.getOrCreateSubTable(key);
+                    }
+                    reader.skip(']');
+                    skipWhitespace(reader);
+                    trySkipComment(reader);
                 }
-                reader.skip(']');
-                skipWhitespace(reader);
-                trySkipComment(reader);
             } else {
                 throw new TomlParseError("TODO: " + formatCodePoint(reader.codePoint));
             }

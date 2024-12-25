@@ -1,5 +1,6 @@
 package org.zwobble.toml;
 
+import org.zwobble.toml.values.TomlArray;
 import org.zwobble.toml.values.TomlKeyValuePair;
 import org.zwobble.toml.values.TomlTable;
 import org.zwobble.toml.values.TomlValue;
@@ -31,9 +32,18 @@ class TomlTableBuilder {
         if (subTable == null) {
             subTable = new TomlTableBuilder();
             this.subTableBuilders.put(key, subTable);
-            this.keyValuePairs.add(TomlKeyValuePair.of(key, subTable.table  ));
+            this.keyValuePairs.add(TomlKeyValuePair.of(key, subTable.table));
         }
 
+        return subTable;
+    }
+
+    TomlTableBuilder getOrCreateArraySubTable(String key) {
+        // TODO: handle inline array or not a array
+
+        var subTable = new TomlTableBuilder();
+        var array = TomlArray.of(List.of(subTable.table));
+        this.keyValuePairs.add(TomlKeyValuePair.of(key, array));
         return subTable;
     }
 

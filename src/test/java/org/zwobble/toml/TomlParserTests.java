@@ -998,6 +998,32 @@ public class TomlParserTests {
         )));
     }
 
+    // == Arrays of Tables ==
+
+    @Test
+    public void emptyArrayOfTables() throws IOException {
+        var result = parse("""
+            [[x]]""");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isArray(isSequence(
+                isTable(isSequence())
+            )))
+        )));
+    }
+
+    @Test
+    public void arrayOfTablesHeaderWhitespace() throws IOException {
+        var result = parse("""
+            [[  x  ]]""");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isArray(isSequence(
+                isTable(isSequence())
+            )))
+        )));
+    }
+
     // == Comments ==
 
     @Test
@@ -1091,6 +1117,18 @@ public class TomlParserTests {
 
         assertThat(result, isTable(isSequence(
             isKeyValuePair("a", isTable(isSequence()))
+        )));
+    }
+
+    @Test
+    public void commentAfterArrayOfTablesHeader() throws IOException {
+        var result = parse("""
+            [[x]] # x""");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isArray(isSequence(
+                isTable(isSequence())
+            )))
         )));
     }
 
