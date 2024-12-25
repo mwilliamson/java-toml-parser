@@ -1060,8 +1060,32 @@ public class TomlParserTests {
                 isTable(isSequence(
                     isKeyValuePair("b", isBool(true)),
                     isKeyValuePair("c", isBool(false))
-                )))
-            ))
+                ))
+            )))
+        )));
+    }
+
+    @Test
+    public void arrayOfTablesMultipleTablesKeyValuePairs() throws IOException {
+        var result = parse("""
+            [[a]]
+            b = true
+            c = false
+            [[a]]
+            b = false
+            c = true""");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("a", isArray(isSequence(
+                isTable(isSequence(
+                    isKeyValuePair("b", isBool(true)),
+                    isKeyValuePair("c", isBool(false))
+                )),
+                isTable(isSequence(
+                    isKeyValuePair("b", isBool(false)),
+                    isKeyValuePair("c", isBool(true))
+                ))
+            )))
         )));
     }
 

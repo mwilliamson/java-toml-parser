@@ -62,7 +62,7 @@ public class TomlParser {
                     for (var key : keys.subList(0, keys.size() - 1)) {
                         activeTable = activeTable.getOrCreateSubTable(key);
                     }
-                    activeTable = activeTable.getOrCreateArraySubTable(keys.getLast());
+                    activeTable = activeTable.createArraySubTable(keys.getLast());
 
                     reader.skip(']');
                     reader.skip(']');

@@ -14,11 +14,13 @@ class TomlTableBuilder {
     private final TomlTable table;
     private final List<TomlKeyValuePair> keyValuePairs;
     private final Map<String, TomlTableBuilder> subTableBuilders;
+    private final Map<String, List<TomlValue>> arrayOfTables;
 
     TomlTableBuilder() {
         this.keyValuePairs = new ArrayList<>();
         this.table = new TomlTable(this.keyValuePairs);
         this.subTableBuilders = new HashMap<>();
+        this.arrayOfTables = new HashMap<>();
     }
 
     TomlTable toTable() {
@@ -38,12 +40,17 @@ class TomlTableBuilder {
         return subTable;
     }
 
-    TomlTableBuilder getOrCreateArraySubTable(String key) {
+    TomlTableBuilder createArraySubTable(String key) {
         // TODO: handle inline array or not a array
 
+        if (!this.arrayOfTables.containsKey(key)) {
+            var arrayOfTables = new ArrayList<TomlValue>();
+            this.arrayOfTables.put(key, arrayOfTables);
+            this.keyValuePairs.add(TomlKeyValuePair.of(key, TomlArray.of(arrayOfTables)));
+        }
+
         var subTable = new TomlTableBuilder();
-        var array = TomlArray.of(List.of(subTable.table));
-        this.keyValuePairs.add(TomlKeyValuePair.of(key, array));
+        this.arrayOfTables.get(key).add(subTable.table);
         return subTable;
     }
 
