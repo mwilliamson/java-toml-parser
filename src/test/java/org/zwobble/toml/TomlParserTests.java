@@ -7,6 +7,7 @@ import org.zwobble.toml.values.*;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 import static org.zwobble.precisely.AssertThat.assertThat;
@@ -616,6 +617,20 @@ public class TomlParserTests {
         )));
     }
 
+    // == Local Date ==
+
+    @Test
+    public void localDate() throws IOException {
+        var result = parse("x = 1979-05-27");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isLocalDate(
+                LocalDate.parse("1979-05-27"),
+                isSourceRange(4, 14)
+            ))
+        )));
+    }
+
     // == Arrays ==
 
     @Test
@@ -885,6 +900,17 @@ public class TomlParserTests {
     ) {
         return instanceOf(
             TomlOffsetDateTime.class,
+            has("value", x -> x.value(), equalTo(value)),
+            has("sourceRange", x -> x.sourceRange(), sourceRange)
+        );
+    }
+
+    private Matcher<TomlValue> isLocalDate(
+        LocalDate value,
+        Matcher<SourceRange> sourceRange
+    ) {
+        return instanceOf(
+            TomlLocalDate.class,
             has("value", x -> x.value(), equalTo(value)),
             has("sourceRange", x -> x.sourceRange(), sourceRange)
         );

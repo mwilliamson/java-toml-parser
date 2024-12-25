@@ -145,6 +145,13 @@ public class TomlParserTomlTestTests {
                 yield jsonObject;
             }
 
+            case TomlLocalDate tomlLocalDate -> {
+                var jsonObject = new JsonObject();
+                jsonObject.addProperty("type", "date-local");
+                jsonObject.addProperty("value", tomlLocalDate.value().toString());
+                yield jsonObject;
+            }
+
             case TomlOffsetDateTime tomlOffsetDateTime -> {
                 var jsonObject = new JsonObject();
                 jsonObject.addProperty("type", "datetime");

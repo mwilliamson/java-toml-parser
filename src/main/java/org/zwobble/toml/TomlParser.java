@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -299,11 +300,15 @@ public class TomlParser {
             } else if (reader.codePoint == '-') {
                 while (true) {
                     if (reader.codePoint == '#' || reader.codePoint == '\r' || reader.codePoint == '\n' || reader.codePoint == -1 || reader.codePoint == ',') {
-                        var value = OffsetDateTime.parse(valueString.toString());
-
                         var end = reader.position();
                         var sourceRange = start.to(end);
 
+                        if (valueString.length() == 10) {
+                            var value = LocalDate.parse(valueString.toString());
+                            return new TomlLocalDate(value, sourceRange);
+                        }
+
+                        var value = OffsetDateTime.parse(valueString.toString());
                         return new TomlOffsetDateTime(value, sourceRange);
                     } else {
                         valueString.appendCodePoint(reader.codePoint);
