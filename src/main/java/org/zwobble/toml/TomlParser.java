@@ -464,9 +464,16 @@ public class TomlParser {
 
                 var end = reader.position();
                 var sourceRange = start.to(end);
-                var value = LocalTime.parse(valueString.toString());
-                return new TomlLocalTime(value, sourceRange);
-
+                var localTimeString = valueString.toString();
+                try {
+                    var value = LocalTime.parse(localTimeString);
+                    return new TomlLocalTime(value, sourceRange);
+                } catch (DateTimeParseException exception) {
+                    throw new TomlInvalidLocalTimeError(
+                        localTimeString,
+                        sourceRange
+                    );
+                }
             } else {
                 break;
             }

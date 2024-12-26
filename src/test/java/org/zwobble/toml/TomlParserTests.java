@@ -1565,6 +1565,17 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void whenLocalTimeIsInvalidThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlInvalidLocalTimeError.class,
+            () -> parse("x = 99:99:99")
+        );
+
+        assertThat(error.localTimeString(), equalTo("99:99:99"));
+        assertThat(error.sourceRange(), isSourceRange(4, 12));
+    }
+
     // == Arrays ==
 
     @Test
