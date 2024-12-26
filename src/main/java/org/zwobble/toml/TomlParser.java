@@ -495,7 +495,7 @@ public class TomlParser {
             }
         } else {
             var integerString = valueString.toString();
-            if (integerString.length() > 1 && integerString.charAt(0) == '0') {
+            if (integerStringHasLeadingZeroes(integerString)) {
                 throw new TomlInvalidNumberError(
                     integerString,
                     sourceRange
@@ -511,6 +511,23 @@ public class TomlParser {
                 );
             }
         }
+    }
+
+    private static boolean integerStringHasLeadingZeroes(String integerString) {
+        if (integerString.length() > 1 && integerString.charAt(0) == '0') {
+            return true;
+        }
+
+        if (integerString.length() < 2) {
+            return false;
+        }
+
+        var hasSign = integerString.charAt(0) == '+' || integerString.charAt(0) == '-';
+        if (hasSign && integerString.charAt(1) == '0') {
+            return true;
+        }
+
+        return false;
     }
 
     private static boolean readDateTimeOffset(
