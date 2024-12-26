@@ -419,13 +419,13 @@ public class TomlParser {
 
                 readTime(reader, valueString);
 
-                // Try to parse a timezone
-                if (reader.codePoint == 'z' || reader.codePoint == 'Z') {
-                    valueString.appendCodePoint(reader.codePoint);
-                    reader.read();
+                // Try to parse an offset
+                var isOffset = readDateTimeOffset(reader, valueString);
 
-                    var end = reader.position();
-                    var sourceRange = start.to(end);
+                var end = reader.position();
+                var sourceRange = start.to(end);
+
+                if (isOffset) {
                     var offsetDateTimeString = valueString.toString();
                     try {
                         var value = OffsetDateTime.parse(offsetDateTimeString);
@@ -436,33 +436,7 @@ public class TomlParser {
                             sourceRange
                         );
                     }
-                } else if (reader.codePoint == '+' || reader.codePoint == '-') {
-                    valueString.appendCodePoint(reader.codePoint);
-                    reader.read();
-
-                    // Hours
-                    valueString.appendCodePoint(reader.codePoint);
-                    reader.read();
-                    valueString.appendCodePoint(reader.codePoint);
-                    reader.read();
-
-                    // Colon
-                    valueString.appendCodePoint(reader.codePoint);
-                    reader.skip(':');
-
-                    // Minutes
-                    valueString.appendCodePoint(reader.codePoint);
-                    reader.read();
-                    valueString.appendCodePoint(reader.codePoint);
-                    reader.read();
-
-                    var end = reader.position();
-                    var sourceRange = start.to(end);
-                    var value = OffsetDateTime.parse(valueString.toString());
-                    return new TomlOffsetDateTime(value, sourceRange);
                 } else {
-                    var end = reader.position();
-                    var sourceRange = start.to(end);
                     var value = LocalDateTime.parse(valueString.toString());
                     return new TomlLocalDateTime(value, sourceRange);
                 }
@@ -491,6 +465,41 @@ public class TomlParser {
         } else {
             var integer = Long.parseLong(valueString.toString());
             return new TomlInt(integer, sourceRange);
+        }
+    }
+
+    private static boolean readDateTimeOffset(
+        Reader reader,
+        StringBuilder valueString
+    ) throws IOException {
+        if (reader.codePoint == 'z' || reader.codePoint == 'Z') {
+            valueString.appendCodePoint(reader.codePoint);
+            reader.read();
+
+            return true;
+        } else if (reader.codePoint == '+' || reader.codePoint == '-') {
+            valueString.appendCodePoint(reader.codePoint);
+            reader.read();
+
+            // Hours
+            valueString.appendCodePoint(reader.codePoint);
+            reader.read();
+            valueString.appendCodePoint(reader.codePoint);
+            reader.read();
+
+            // Colon
+            valueString.appendCodePoint(reader.codePoint);
+            reader.skip(':');
+
+            // Minutes
+            valueString.appendCodePoint(reader.codePoint);
+            reader.read();
+            valueString.appendCodePoint(reader.codePoint);
+            reader.read();
+
+            return true;
+        } else {
+            return false;
         }
     }
 
