@@ -81,7 +81,12 @@ public class TomlParser {
                     trySkipComment(reader);
                 }
             } else {
-                throw new TomlParseError("TODO: " + formatCodePoint(reader.codePoint));
+                var position = reader.position();
+                var sourceRange = position.to(position);
+                throw new TomlParseError(
+                    "TODO: " + formatCodePoint(reader.codePoint),
+                    sourceRange
+                );
             }
 
             if (reader.isEndOfFile()) {
@@ -612,7 +617,9 @@ public class TomlParser {
                         ) {
                             reader.read();
                         } else {
-                            throw new TomlParseError("TODO");
+                            var position = reader.position();
+                            var sourceRange = position.to(position);
+                            throw new TomlParseError("TODO", sourceRange);
                         }
                     }
                 } else {
@@ -656,7 +663,9 @@ public class TomlParser {
                             string.appendCodePoint(codePoint);
                         }
                         default -> {
-                            throw new TomlParseError("TODO");
+                            var position = reader.position();
+                            var sourceRange = position.to(position);
+                            throw new TomlParseError("TODO", sourceRange);
                         }
                     }
                 }
@@ -688,7 +697,9 @@ public class TomlParser {
             } else if (reader.codePoint >= 'A' && reader.codePoint <= 'F') {
                 codePoint += reader.codePoint - 'A' + 10;
             } else {
-                throw new TomlParseError("TODO");
+                var position = reader.position();
+                var sourceRange = position.to(position);
+                throw new TomlParseError("TODO", sourceRange);
             }
             reader.read();
         }
@@ -834,11 +845,13 @@ public class TomlParser {
 
         public void expect(int expectedCodePoint) {
             if (this.codePoint != expectedCodePoint) {
+                var position = this.position();
+                var sourceRange = position.to(position);
                 throw new TomlParseError(String.format(
                     "Expected %s but got %s",
                     formatCodePoint(expectedCodePoint),
                     formatCodePoint(this.codePoint)
-                ));
+                ), sourceRange);
             }
         }
 
