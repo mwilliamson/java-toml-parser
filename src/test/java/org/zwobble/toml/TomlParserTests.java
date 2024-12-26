@@ -1528,6 +1528,17 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void whenLocalDateIsInvalidThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlInvalidLocalDateError.class,
+            () -> parse("x = 1979-00-27")
+        );
+
+        assertThat(error.localDateString(), equalTo("1979-00-27"));
+        assertThat(error.sourceRange(), isSourceRange(4, 14));
+    }
+
     // == Local Time ==
 
     @Test

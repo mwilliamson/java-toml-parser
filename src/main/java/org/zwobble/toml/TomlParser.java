@@ -413,8 +413,16 @@ public class TomlParser {
                 } else {
                     var end = reader.position();
                     var sourceRange = start.to(end);
-                    var value = LocalDate.parse(valueString.toString());
-                    return new TomlLocalDate(value, sourceRange);
+                    var localDateString = valueString.toString();
+                    try {
+                        var value = LocalDate.parse(localDateString);
+                        return new TomlLocalDate(value, sourceRange);
+                    } catch (DateTimeParseException exception) {
+                        throw new TomlInvalidLocalDateError(
+                            localDateString,
+                            sourceRange
+                        );
+                    }
                 }
 
                 readTime(reader, valueString);
