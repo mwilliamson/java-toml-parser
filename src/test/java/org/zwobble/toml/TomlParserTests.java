@@ -712,6 +712,19 @@ public class TomlParserTests {
     }
 
     @Test
+    public void multiLineBasicStringWithLineEndingBackslashesFollowedByWhitespaceBeforeLf() throws IOException {
+        var result = parse(
+            "x = \"\"\"\n" +
+                "a\\  \n" +
+                "b\"\"\""
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("ab", isSourceRange(4, 17)))
+        )));
+    }
+
+    @Test
     public void initialNewLineIsIgnored() throws IOException {
         var result = parse("x = \"\"\"\na\"\"\"");
 

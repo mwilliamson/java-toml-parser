@@ -580,68 +580,69 @@ public class TomlParser {
 
             } else if (reader.codePoint == '\\') {
                 reader.read();
-                switch (reader.codePoint) {
-                    case 'b' -> {
-                        string.appendCodePoint('\b');
-                        reader.read();
-                    }
-                    case 't' -> {
-                        string.appendCodePoint('\t');
-                        reader.read();
-                    }
-                    case 'n' -> {
-                        string.appendCodePoint('\n');
-                        reader.read();
-                    }
-                    case 'f' -> {
-                        string.appendCodePoint('\f');
-                        reader.read();
-                    }
-                    case 'r' -> {
-                        string.appendCodePoint('\r');
-                        reader.read();
-                    }
-                    case '"' -> {
-                        string.appendCodePoint('"');
-                        reader.read();
-                    }
-                    case '\\' -> {
-                        string.appendCodePoint('\\');
-                        reader.read();
-                    }
-                    case 'u' -> {
-                        reader.read();
-                        var codePoint = parseHex(reader, 4);
-                        string.appendCodePoint(codePoint);
-                    }
-                    case 'U' -> {
-                        reader.read();
-                        var codePoint = parseHex(reader, 8);
-                        string.appendCodePoint(codePoint);
-                    }
-                    case '\r' -> {
-                        if (isMultiLine) {
-                            reader.read();
-                            if (reader.codePoint == '\n') {
-                                reader.read();
-                                skipMultiLineStringWhitespace(reader);
-                            } else {
-                                throw new TomlParseError("TODO");
-                            }
-                        } else {
-                            throw new TomlParseError("TODO");
-                        }
-                    }
-                    case '\n' -> {
-                        if (isMultiLine) {
+
+                if (
+                    isTomlWhitespace(reader.codePoint) ||
+                        reader.codePoint == '\r' ||
+                        reader.codePoint == '\n'
+                ) {
+                    while (true) {
+                        if (reader.codePoint == '\n') {
                             reader.read();
                             skipMultiLineStringWhitespace(reader);
+                            break;
+                        } else if (
+                            isTomlWhitespace(reader.codePoint) ||
+                                reader.codePoint == '\r'
+                        ) {
+                            reader.read();
                         } else {
                             throw new TomlParseError("TODO");
                         }
                     }
-                    default -> {
-                        throw new TomlParseError("TODO");
+                } else {
+                    switch (reader.codePoint) {
+                        case 'b' -> {
+                            string.appendCodePoint('\b');
+                            reader.read();
+                        }
+                        case 't' -> {
+                            string.appendCodePoint('\t');
+                            reader.read();
+                        }
+                        case 'n' -> {
+                            string.appendCodePoint('\n');
+                            reader.read();
+                        }
+                        case 'f' -> {
+                            string.appendCodePoint('\f');
+                            reader.read();
+                        }
+                        case 'r' -> {
+                            string.appendCodePoint('\r');
+                            reader.read();
+                        }
+                        case '"' -> {
+                            string.appendCodePoint('"');
+                            reader.read();
+                        }
+                        case '\\' -> {
+                            string.appendCodePoint('\\');
+                            reader.read();
+                        }
+                        case 'u' -> {
+                            reader.read();
+                            var codePoint = parseHex(reader, 4);
+                            string.appendCodePoint(codePoint);
+                        }
+                        case 'U' -> {
+                            reader.read();
+                            var codePoint = parseHex(reader, 8);
+                            string.appendCodePoint(codePoint);
+                        }
+                        default -> {
+                            throw new TomlParseError("TODO");
+                        }
                     }
                 }
             } else {
