@@ -608,6 +608,27 @@ public class TomlParser {
                         var codePoint = parseHex(reader, 8);
                         string.appendCodePoint(codePoint);
                     }
+                    case '\r' -> {
+                        if (isMultiLine) {
+                            reader.read();
+                            if (reader.codePoint == '\n') {
+                                reader.read();
+                                skipNewLines(reader);
+                            } else {
+                                throw new TomlParseError("TODO");
+                            }
+                        } else {
+                            throw new TomlParseError("TODO");
+                        }
+                    }
+                    case '\n' -> {
+                        if (isMultiLine) {
+                            reader.read();
+                            skipNewLines(reader);
+                        } else {
+                            throw new TomlParseError("TODO");
+                        }
+                    }
                     default -> {
                         throw new TomlParseError("TODO");
                     }
@@ -615,6 +636,23 @@ public class TomlParser {
             } else {
                 string.appendCodePoint(reader.codePoint);
                 reader.read();
+            }
+        }
+    }
+
+    private static void skipNewLines(Reader reader) throws IOException {
+        while (true) {
+            if (reader.codePoint == '\r') {
+                reader.read();
+                if (reader.codePoint == '\n') {
+                    reader.read();
+                } else {
+                    throw new TomlParseError("TODO");
+                }
+            } else if (reader.codePoint == '\n') {
+                reader.read();
+            } else {
+                break;
             }
         }
     }

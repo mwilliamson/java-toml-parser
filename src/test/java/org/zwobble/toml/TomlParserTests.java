@@ -576,6 +576,20 @@ public class TomlParserTests {
     }
 
     @Test
+    public void emptyMultiLineBasicStringOnTwoLines() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\"\\
+            \"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("", isSourceRange(4, 12)))
+        )));
+    }
+
+    @Test
     public void multiLineBasicStringWithAscii() throws IOException {
         var result = parse(
             """
@@ -585,6 +599,46 @@ public class TomlParserTests {
 
         assertThat(result, isTable(isSequence(
             isKeyValuePair("x", isString("abc", isSourceRange(4, 13)))
+        )));
+    }
+
+    @Test
+    public void multiLineBasicStringWithLineEndingBackslashesAndLfs() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\"\\
+            
+            abc
+            
+            def\\
+            
+            ghi
+            \\
+            
+            j\"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("abc\n\ndefghi\nj", isSourceRange(4, 32)))
+        )));
+    }
+
+    @Test
+    public void multiLineBasicStringWithLineEndingBackslashesAndCrLfsAfterLf() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\"a\\
+            \r
+            
+            \r
+            \r
+            b\"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("ab", isSourceRange(4, 21)))
         )));
     }
 
