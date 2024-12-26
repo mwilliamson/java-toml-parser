@@ -529,9 +529,45 @@ public class TomlParser {
     private static String parseBasicStringValue(Reader reader) throws IOException {
         reader.skip('"');
 
+        var isMultiLine = false;
+
+        if (reader.codePoint == '"') {
+            reader.read();
+
+            if (reader.codePoint == '"') {
+                reader.read();
+                isMultiLine = true;
+            } else {
+                return "";
+            }
+        }
+
         var string = new StringBuilder();
-        while (reader.codePoint != '"') {
-            if (reader.codePoint == '\\') {
+        while (true) {
+            if (reader.codePoint == '"') {
+                reader.read();
+                if (!isMultiLine) {
+                    return string.toString();
+                }
+
+                var quoteCount = 1;
+                while (quoteCount < 5 && reader.codePoint == '"') {
+                    quoteCount += 1;
+                    reader.read();
+                }
+
+                if (quoteCount <= 2) {
+                    for (var i = 0; i < quoteCount; i++) {
+                        string.appendCodePoint('"');
+                    }
+                } else {
+                    for (var i = 0; i < quoteCount - 3; i++) {
+                        string.appendCodePoint('"');
+                    }
+                    return string.toString();
+                }
+
+            } else if (reader.codePoint == '\\') {
                 reader.read();
                 switch (reader.codePoint) {
                     case 'b' -> {
@@ -581,10 +617,6 @@ public class TomlParser {
                 reader.read();
             }
         }
-
-        reader.skip('"');
-
-        return string.toString();
     }
 
     private static int parseHex(Reader reader, int codePointCount) throws IOException {

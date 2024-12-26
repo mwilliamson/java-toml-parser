@@ -560,6 +560,244 @@ public class TomlParserTests {
         )));
     }
 
+    // === Multi-line Basic Strings ===
+
+    @Test
+    public void emptyMultiLineBasicStringOnOneLine() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\"\"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("", isSourceRange(4, 10)))
+        )));
+    }
+
+    @Test
+    public void multiLineBasicStringWithAscii() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\"abc\"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("abc", isSourceRange(4, 13)))
+        )));
+    }
+
+    @Test
+    public void multiLineBasicStringWithOneUnescapedDoubleQuoteInMiddle() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\"a"c\"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("a\"c", isSourceRange(4, 13)))
+        )));
+    }
+
+    @Test
+    public void multiLineBasicStringWithTwoUnescapedDoubleQuotesInMiddle() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\"a""c\"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("a\"\"c", isSourceRange(4, 14)))
+        )));
+    }
+
+    @Test
+    public void multiLineBasicStringWithOneUnescapedDoubleQuoteAtStart() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\""ac\"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\"ac", isSourceRange(4, 13)))
+        )));
+    }
+
+    @Test
+    public void multiLineBasicStringWithTwoUnescapedDoubleQuotesAtStart() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\"""ac\"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\"\"ac", isSourceRange(4, 14)))
+        )));
+    }
+
+    @Test
+    public void multiLineBasicStringWithOneUnescapedDoubleQuoteAtEnd() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\"ac"\"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("ac\"", isSourceRange(4, 13)))
+        )));
+    }
+
+    @Test
+    public void multiLineBasicStringWithTwoUnescapedDoubleQuotesAtEnd() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\"ac""\"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("ac\"\"", isSourceRange(4, 14)))
+        )));
+    }
+
+    @Test
+    public void multiLineBasicStringOnOneLine() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\"abc\"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("abc", isSourceRange(4, 13)))
+        )));
+    }
+
+    @Test
+    public void multiLineBasicStringOnMultipleLines() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\"abc
+            def
+            
+            gh\"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("abc\ndef\n\ngh", isSourceRange(4, 21)))
+        )));
+    }
+
+    @Test
+    public void multiLineBasicStringWithCompactEscapeSequence() throws IOException {
+        var result = parse(
+            """
+            backspace = \"\"\"\\b\"\"\"
+            tab = \"\"\"\\t\"\"\"
+            linefeed = \"\"\"\\n\"\"\"
+            formfeed = \"\"\"\\f\"\"\"
+            carriagereturn = \"\"\"\\r\"\"\"
+            quote = \"\"\"\\"\"\"\"
+            backslash = \"\"\"\\\\\"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("backspace", isString("\b")),
+            isKeyValuePair("tab", isString("\t")),
+            isKeyValuePair("linefeed", isString("\n")),
+            isKeyValuePair("formfeed", isString("\f")),
+            isKeyValuePair("carriagereturn", isString("\r")),
+            isKeyValuePair("quote", isString("\"")),
+            isKeyValuePair("backslash", isString("\\"))
+        )));
+    }
+
+    @Test
+    public void multiLineBasicStringWithFourDigitLowercaseUnicodeEscape() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\"\\u03c0\"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\u03c0"))
+        )));
+    }
+
+    @Test
+    public void multiLineBasicStringWithFourDigitUppercaseUnicodeEscape() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\"\\u03C0\"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\u03c0"))
+        )));
+    }
+
+    @Test
+    public void multiLineBasicStringWithEightDigitLowercaseUnicodeEscape() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\"\\U0001f967\"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\ud83e\udd67"))
+        )));
+    }
+
+    @Test
+    public void multiLineBasicStringWithEightDigitUppercaseUnicodeEscape() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\"\\U0001F967\"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\ud83e\udd67"))
+        )));
+    }
+
+    @Test
+    public void multiLineBasicStringWithUnicodeCodePointInBmp() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\"\u03c0\"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\u03c0"))
+        )));
+    }
+
+    @Test
+    public void multiLineBasicStringWithUnicodeCodePointOutsideBmp() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\"\ud83e\udd67\"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\ud83e\udd67"))
+        )));
+    }
+
     // === Literal Strings ===
 
     @Test
