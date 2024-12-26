@@ -4,4 +4,8 @@ public record SourcePosition(int codePointIndex) {
     public SourceRange to(SourcePosition end) {
         return new SourceRange(this, end);
     }
+
+    public SourceRange toSourceRange() {
+        return to(this);
+    }
 }

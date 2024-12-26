@@ -1,5 +1,6 @@
 package org.zwobble.toml;
 
+import org.zwobble.toml.errors.TomlKeyValuePairMissingEqualsSignError;
 import org.zwobble.toml.errors.TomlParseError;
 import org.zwobble.toml.errors.TomlUnspecifiedValueError;
 import org.zwobble.toml.sources.SourcePosition;
@@ -113,7 +114,15 @@ public class TomlParser {
 
     private static KeysValuePair parseKeyValuePair(Reader reader) throws IOException {
         var keys = parseKeys(reader);
-        reader.skip('=');
+
+        if (reader.codePoint != '=') {
+            throw new TomlKeyValuePairMissingEqualsSignError(
+                formatCodePoint(reader.codePoint),
+                reader.position().toSourceRange()
+            );
+        }
+        reader.read();
+
         skipWhitespace(reader);
         var value = parseValue(reader);
         skipWhitespace(reader);

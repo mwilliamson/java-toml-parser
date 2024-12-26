@@ -2,6 +2,7 @@ package org.zwobble.toml;
 
 import org.junit.jupiter.api.Test;
 import org.zwobble.precisely.Matcher;
+import org.zwobble.toml.errors.TomlKeyValuePairMissingEqualsSignError;
 import org.zwobble.toml.errors.TomlUnspecifiedValueError;
 import org.zwobble.toml.sources.SourceRange;
 import org.zwobble.toml.values.*;
@@ -57,6 +58,17 @@ public class TomlParserTests {
         assertThat(result, isTable(isSequence(
             isKeyValuePair("abc", isBool(true))
         )));
+    }
+
+    @Test
+    public void whenKeyHasNoSubsequentTokensThenErrorIsThrown()  throws IOException {
+        var error = assertThrows(
+            TomlKeyValuePairMissingEqualsSignError.class,
+            () -> parse("x\ny = 1")
+        );
+
+        assertThat(error.actual(), equalTo("LF"));
+        assertThat(error.sourceRange(), isSourceRange(1, 1));
     }
 
     @Test
