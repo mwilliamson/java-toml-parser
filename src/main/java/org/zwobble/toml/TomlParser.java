@@ -1,9 +1,6 @@
 package org.zwobble.toml;
 
-import org.zwobble.toml.errors.TomlKeyValuePairMissingEqualsSignError;
-import org.zwobble.toml.errors.TomlParseError;
-import org.zwobble.toml.errors.TomlUnexpectedTextAtEolError;
-import org.zwobble.toml.errors.TomlUnspecifiedValueError;
+import org.zwobble.toml.errors.*;
 import org.zwobble.toml.sources.SourcePosition;
 import org.zwobble.toml.values.*;
 
@@ -15,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -428,8 +426,16 @@ public class TomlParser {
 
                     var end = reader.position();
                     var sourceRange = start.to(end);
-                    var value = OffsetDateTime.parse(valueString.toString());
-                    return new TomlOffsetDateTime(value, sourceRange);
+                    var offsetDateTimeString = valueString.toString();
+                    try {
+                        var value = OffsetDateTime.parse(offsetDateTimeString);
+                        return new TomlOffsetDateTime(value, sourceRange);
+                    } catch (DateTimeParseException exception) {
+                        throw new TomlInvalidOffsetDateTimeError(
+                            offsetDateTimeString,
+                            sourceRange
+                        );
+                    }
                 } else if (reader.codePoint == '+' || reader.codePoint == '-') {
                     valueString.appendCodePoint(reader.codePoint);
                     reader.read();
