@@ -1528,7 +1528,7 @@ public class TomlParserTests {
         )));
     }
 
-    // == Local Date ==
+    // == Local Time ==
 
     @Test
     public void localTimeWithoutFractionalSeconds() throws IOException {
