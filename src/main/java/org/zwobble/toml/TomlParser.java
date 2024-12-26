@@ -2,6 +2,7 @@ package org.zwobble.toml;
 
 import org.zwobble.toml.errors.TomlKeyValuePairMissingEqualsSignError;
 import org.zwobble.toml.errors.TomlParseError;
+import org.zwobble.toml.errors.TomlUnexpectedTextAtEolError;
 import org.zwobble.toml.errors.TomlUnspecifiedValueError;
 import org.zwobble.toml.sources.SourcePosition;
 import org.zwobble.toml.values.*;
@@ -97,7 +98,29 @@ public class TomlParser {
             if (reader.codePoint == '\r') {
                 reader.skip('\r');
             }
-            reader.skip('\n');
+
+            if (reader.codePoint == '\n') {
+                reader.skip('\n');
+            } else {
+                var unexpectedTextStart = reader.position();
+                var unexpectedText = new StringBuilder();
+
+                while (
+                    reader.codePoint != -1 &&
+                        reader.codePoint != '#' &&
+                        reader.codePoint != '\n'
+                ) {
+                    unexpectedText.appendCodePoint(reader.codePoint);
+                    reader.read();
+                }
+
+                var unexpectedTextEnd = reader.position();
+
+                throw new TomlUnexpectedTextAtEolError(
+                    unexpectedText.toString(),
+                    unexpectedTextStart.to(unexpectedTextEnd)
+                );
+            }
         }
     }
 

@@ -3,6 +3,7 @@ package org.zwobble.toml;
 import org.junit.jupiter.api.Test;
 import org.zwobble.precisely.Matcher;
 import org.zwobble.toml.errors.TomlKeyValuePairMissingEqualsSignError;
+import org.zwobble.toml.errors.TomlUnexpectedTextAtEolError;
 import org.zwobble.toml.errors.TomlUnspecifiedValueError;
 import org.zwobble.toml.sources.SourceRange;
 import org.zwobble.toml.values.*;
@@ -40,7 +41,7 @@ public class TomlParserTests {
         assertThat(result, isTable(isSequence()));
     }
 
-    // == Keys ==
+    // == Key/Value Pairs ==
 
     @Test
     public void keySurroundedByNoWhitespace() throws IOException {
@@ -91,6 +92,42 @@ public class TomlParserTests {
 
         assertThat(error.sourceRange(), isSourceRange(3, 3));
     }
+
+    @Test
+    public void whenTextFollowsKeyValuePairBeforeEofThenErrorIsThrown()  throws IOException {
+        var error = assertThrows(
+            TomlUnexpectedTextAtEolError.class,
+            () -> parse("x = 1 y = 2")
+        );
+
+        assertThat(error.unexpectedText(), equalTo("y = 2"));
+        assertThat(error.sourceRange(), isSourceRange(6, 11));
+    }
+
+    @Test
+    public void whenTextFollowsKeyValuePairBeforeNewLineThenErrorIsThrown()  throws IOException {
+        var error = assertThrows(
+            TomlUnexpectedTextAtEolError.class,
+            () -> parse("x = 1 y = 2\nz = 3")
+        );
+
+        assertThat(error.unexpectedText(), equalTo("y = 2"));
+        assertThat(error.sourceRange(), isSourceRange(6, 11));
+    }
+
+    @Test
+    public void whenTextFollowsKeyValuePairBeforeCommentThenErrorIsThrown()  throws IOException {
+        var error = assertThrows(
+            TomlUnexpectedTextAtEolError.class,
+            () -> parse("x = 1 y = 2 # Invalid")
+        );
+
+        // TODO: remove trailing whitespace
+        assertThat(error.unexpectedText(), equalTo("y = 2 "));
+        assertThat(error.sourceRange(), isSourceRange(6, 12));
+    }
+
+    // == Keys ==
 
     // === Bare keys ===
 
