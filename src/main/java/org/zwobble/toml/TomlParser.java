@@ -437,8 +437,16 @@ public class TomlParser {
                         );
                     }
                 } else {
-                    var value = LocalDateTime.parse(valueString.toString());
-                    return new TomlLocalDateTime(value, sourceRange);
+                    var localDateTimeString = valueString.toString();
+                    try {
+                        var value = LocalDateTime.parse(localDateTimeString);
+                        return new TomlLocalDateTime(value, sourceRange);
+                    } catch (DateTimeParseException exception) {
+                        throw new TomlInvalidLocalDateTimeError(
+                            localDateTimeString,
+                            sourceRange
+                        );
+                    }
                 }
             } else if (reader.codePoint == ':') {
                 valueString.appendCodePoint(reader.codePoint);

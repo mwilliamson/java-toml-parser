@@ -2,10 +2,7 @@ package org.zwobble.toml;
 
 import org.junit.jupiter.api.Test;
 import org.zwobble.precisely.Matcher;
-import org.zwobble.toml.errors.TomlInvalidOffsetDateTimeError;
-import org.zwobble.toml.errors.TomlKeyValuePairMissingEqualsSignError;
-import org.zwobble.toml.errors.TomlUnexpectedTextAtEolError;
-import org.zwobble.toml.errors.TomlUnspecifiedValueError;
+import org.zwobble.toml.errors.*;
 import org.zwobble.toml.sources.SourceRange;
 import org.zwobble.toml.values.*;
 
@@ -1504,6 +1501,17 @@ public class TomlParserTests {
                 isSourceRange(4, 27)
             ))
         )));
+    }
+
+    @Test
+    public void whenLocalDateTimeIsInvalidThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlInvalidLocalDateTimeError.class,
+            () -> parse("x = 1979-00-27T07:32:00.123")
+        );
+
+        assertThat(error.localDateTimeString(), equalTo("1979-00-27T07:32:00.123"));
+        assertThat(error.sourceRange(), isSourceRange(4, 27));
     }
 
     // == Local Date ==
