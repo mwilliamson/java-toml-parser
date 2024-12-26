@@ -670,6 +670,48 @@ public class TomlParserTests {
     }
 
     @Test
+    public void multiLineBasicStringWithLineEndingBackslashesAndCrLfs() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\"\\\r
+            \r
+            abc\r
+            \r
+            def\\\r
+            \r
+            ghi\r
+            \\\r
+            \r
+            j\"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("abc\r\n\r\ndefghi\r\nj", isSourceRange(4, 41)))
+        )));
+    }
+
+    @Test
+    public void multiLineBasicStringWithLineEndingBackslashesAndLfsAndWhitespace() throws IOException {
+        var result = parse(
+            "x = \"\"\"\\\n" +
+            "\n" +
+            "abc\n" +
+            " \n" +
+            "def\\\n" +
+            "   \n" +
+            "ghi\n" +
+            "\\\n" +
+            "   \n" +
+            "j\"\"\""
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("abc\n \ndefghi\nj", isSourceRange(4, 39)))
+        )));
+    }
+
+    @Test
     public void multiLineBasicStringWithOneUnescapedDoubleQuoteInMiddle() throws IOException {
         var result = parse(
             """

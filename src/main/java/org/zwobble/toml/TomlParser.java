@@ -624,7 +624,7 @@ public class TomlParser {
                             reader.read();
                             if (reader.codePoint == '\n') {
                                 reader.read();
-                                skipNewLines(reader);
+                                skipMultiLineStringWhitespace(reader);
                             } else {
                                 throw new TomlParseError("TODO");
                             }
@@ -635,7 +635,7 @@ public class TomlParser {
                     case '\n' -> {
                         if (isMultiLine) {
                             reader.read();
-                            skipNewLines(reader);
+                            skipMultiLineStringWhitespace(reader);
                         } else {
                             throw new TomlParseError("TODO");
                         }
@@ -651,20 +651,13 @@ public class TomlParser {
         }
     }
 
-    private static void skipNewLines(Reader reader) throws IOException {
-        while (true) {
-            if (reader.codePoint == '\r') {
-                reader.read();
-                if (reader.codePoint == '\n') {
-                    reader.read();
-                } else {
-                    throw new TomlParseError("TODO");
-                }
-            } else if (reader.codePoint == '\n') {
-                reader.read();
-            } else {
-                break;
-            }
+    private static void skipMultiLineStringWhitespace(Reader reader) throws IOException {
+        while (
+            isTomlWhitespace(reader.codePoint) ||
+                reader.codePoint == '\r' ||
+                reader.codePoint == '\n'
+        ) {
+            reader.read();
         }
     }
 
