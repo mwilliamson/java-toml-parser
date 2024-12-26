@@ -483,8 +483,16 @@ public class TomlParser {
         var sourceRange = start.to(end);
 
         if (isFloat) {
-            var value = Double.parseDouble(valueString.toString());
-            return new TomlFloat(value, sourceRange);
+            var floatString = valueString.toString();
+            try {
+                var value = Double.parseDouble(floatString);
+                return new TomlFloat(value, sourceRange);
+            } catch (NumberFormatException exception) {
+                throw new TomlInvalidNumberError(
+                    floatString,
+                    sourceRange
+                );
+            }
         } else {
             var integer = Long.parseLong(valueString.toString());
             return new TomlInt(integer, sourceRange);

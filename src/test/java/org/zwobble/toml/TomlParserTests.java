@@ -496,6 +496,17 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void whenFloatIsInvalidThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlInvalidNumberError.class,
+            () -> parse("x = 1.2.3")
+        );
+
+        assertThat(error.numberString(), equalTo("1.2.3"));
+        assertThat(error.sourceRange(), isSourceRange(4, 9));
+    }
+
     // == Strings ==
 
     // === Basic Strings ===
