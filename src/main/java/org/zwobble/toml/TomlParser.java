@@ -114,15 +114,7 @@ public class TomlParser {
 
     private static KeysValuePair parseKeyValuePair(Reader reader) throws IOException {
         var keys = parseKeys(reader);
-
-        if (reader.codePoint != '=') {
-            throw new TomlKeyValuePairMissingEqualsSignError(
-                formatCodePoint(reader.codePoint),
-                reader.position().toSourceRange()
-            );
-        }
-        reader.read();
-
+        parseKeyValuePairEqualsSign(reader);
         skipWhitespace(reader);
         var value = parseValue(reader);
         skipWhitespace(reader);
@@ -169,6 +161,16 @@ public class TomlParser {
             reader.read();
         }
         return key.toString();
+    }
+
+    private static void parseKeyValuePairEqualsSign(Reader reader) throws IOException {
+        if (reader.codePoint != '=') {
+            throw new TomlKeyValuePairMissingEqualsSignError(
+                formatCodePoint(reader.codePoint),
+                reader.position().toSourceRange()
+            );
+        }
+        reader.read();
     }
 
     private static TomlValue parseValue(Reader reader) throws IOException {
