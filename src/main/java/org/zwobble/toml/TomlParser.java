@@ -103,18 +103,26 @@ public class TomlParser {
                 reader.skip('\n');
             } else {
                 var unexpectedTextStart = reader.position();
+                var unexpectedTextEnd = reader.position();
                 var unexpectedText = new StringBuilder();
+                var unexpectedWhitespace = new StringBuilder();
 
                 while (
                     reader.codePoint != -1 &&
                         reader.codePoint != '#' &&
                         reader.codePoint != '\n'
                 ) {
+                    unexpectedText.append(unexpectedWhitespace);
+                    unexpectedWhitespace.setLength(0);
                     unexpectedText.appendCodePoint(reader.codePoint);
                     reader.read();
-                }
+                    unexpectedTextEnd = reader.position();
 
-                var unexpectedTextEnd = reader.position();
+                    while (isTomlWhitespace(reader.codePoint)) {
+                        unexpectedWhitespace.appendCodePoint(reader.codePoint);
+                        reader.read();
+                    }
+                }
 
                 throw new TomlUnexpectedTextAtEolError(
                     unexpectedText.toString(),

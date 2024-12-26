@@ -122,9 +122,8 @@ public class TomlParserTests {
             () -> parse("x = 1 y = 2 # Invalid")
         );
 
-        // TODO: remove trailing whitespace
-        assertThat(error.unexpectedText(), equalTo("y = 2 "));
-        assertThat(error.sourceRange(), isSourceRange(6, 12));
+        assertThat(error.unexpectedText(), equalTo("y = 2"));
+        assertThat(error.sourceRange(), isSourceRange(6, 11));
     }
 
     // == Keys ==
