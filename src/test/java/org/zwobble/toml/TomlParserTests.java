@@ -61,7 +61,7 @@ public class TomlParserTests {
     }
 
     @Test
-    public void whenKeyHasNoSubsequentTokensThenErrorIsThrown()  throws IOException {
+    public void whenKeyHasNoSubsequentTokensOnLineThenErrorIsThrown()  throws IOException {
         var error = assertThrows(
             TomlKeyValuePairMissingEqualsSignError.class,
             () -> parse("x\ny = 1")
@@ -69,6 +69,17 @@ public class TomlParserTests {
 
         assertThat(error.actual(), equalTo("LF"));
         assertThat(error.sourceRange(), isSourceRange(1, 1));
+    }
+
+    @Test
+    public void whenKeyIsFollowedByNonEqualsSignThenErrorIsThrown()  throws IOException {
+        var error = assertThrows(
+            TomlKeyValuePairMissingEqualsSignError.class,
+            () -> parse("x + 1\ny = 1")
+        );
+
+        assertThat(error.actual(), equalTo("+"));
+        assertThat(error.sourceRange(), isSourceRange(2, 2));
     }
 
     @Test
