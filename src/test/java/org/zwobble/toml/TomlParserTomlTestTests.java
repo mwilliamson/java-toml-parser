@@ -30,7 +30,6 @@ public class TomlParserTomlTestTests {
 
         return testTomlFilePaths.stream()
             .filter(testTomlFilePath -> testTomlFilePath.endsWith(".toml"))
-            .filter(testTomlFilePath -> testTomlFilePath.startsWith("valid"))
             .map(testTomlFilePath -> {
                 return DynamicTest.dynamicTest(testTomlFilePath, () -> {
                     var inputTomlPath = tomlTestPath.resolve(testTomlFilePath);

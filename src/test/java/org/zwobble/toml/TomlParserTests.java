@@ -2,6 +2,7 @@ package org.zwobble.toml;
 
 import org.junit.jupiter.api.Test;
 import org.zwobble.precisely.Matcher;
+import org.zwobble.toml.errors.TomlUnspecifiedValueError;
 import org.zwobble.toml.sources.SourceRange;
 import org.zwobble.toml.values.*;
 
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.zwobble.precisely.AssertThat.assertThat;
 import static org.zwobble.precisely.Matchers.*;
 
@@ -55,6 +57,14 @@ public class TomlParserTests {
         assertThat(result, isTable(isSequence(
             isKeyValuePair("abc", isBool(true))
         )));
+    }
+
+    @Test
+    public void whenKeyHasUnspecifiedValueThenErrorIsThrow()  throws IOException {
+        var error = assertThrows(
+            TomlUnspecifiedValueError.class,
+            () -> parse("x =")
+        );
     }
 
     // === Bare keys ===

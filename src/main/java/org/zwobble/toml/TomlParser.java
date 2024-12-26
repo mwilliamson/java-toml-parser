@@ -1,6 +1,7 @@
 package org.zwobble.toml;
 
 import org.zwobble.toml.errors.TomlParseError;
+import org.zwobble.toml.errors.TomlUnspecifiedValueError;
 import org.zwobble.toml.sources.SourcePosition;
 import org.zwobble.toml.values.*;
 
@@ -190,7 +191,7 @@ public class TomlParser {
         } else if (reader.codePoint == '{') {
             return parseInlineTable(reader);
         } else {
-            throw new TomlParseError("??");
+            throw new TomlUnspecifiedValueError();
         }
     }
 
