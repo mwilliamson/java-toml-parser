@@ -495,6 +495,12 @@ public class TomlParser {
             }
         } else {
             var integerString = valueString.toString();
+            if (integerString.length() > 1 && integerString.charAt(0) == '0') {
+                throw new TomlInvalidNumberError(
+                    integerString,
+                    sourceRange
+                );
+            }
             try {
                 var integer = Long.parseLong(integerString);
                 return new TomlInt(integer, sourceRange);

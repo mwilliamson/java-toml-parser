@@ -361,6 +361,17 @@ public class TomlParserTests {
         assertThat(error.sourceRange(), isSourceRange(4, 40));
     }
 
+    @Test
+    public void whenIntHasLeadingZeroThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlInvalidNumberError.class,
+            () -> parse("x = 01")
+        );
+
+        assertThat(error.numberString(), equalTo("01"));
+        assertThat(error.sourceRange(), isSourceRange(4, 6));
+    }
+
     // == Floats ==
 
     @Test
