@@ -712,6 +712,24 @@ public class TomlParserTests {
     }
 
     @Test
+    public void initialNewLineIsIgnored() throws IOException {
+        var result = parse("x = \"\"\"\na\"\"\"");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("a", isSourceRange(4, 12)))
+        )));
+    }
+
+    @Test
+    public void onlyFirstOfInitialNewLinesIsIgnored() throws IOException {
+        var result = parse("x = \"\"\"\n\n\na\"\"\"");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\n\na", isSourceRange(4, 14)))
+        )));
+    }
+
+    @Test
     public void multiLineBasicStringWithOneUnescapedDoubleQuoteInMiddle() throws IOException {
         var result = parse(
             """
