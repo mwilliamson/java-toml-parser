@@ -65,6 +65,8 @@ public class TomlParserTests {
             TomlUnspecifiedValueError.class,
             () -> parse("x =")
         );
+
+        assertThat(error.sourceRange(), isSourceRange(3, 3));
     }
 
     // === Bare keys ===

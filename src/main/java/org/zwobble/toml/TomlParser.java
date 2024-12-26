@@ -191,7 +191,9 @@ public class TomlParser {
         } else if (reader.codePoint == '{') {
             return parseInlineTable(reader);
         } else {
-            throw new TomlUnspecifiedValueError();
+            var position = reader.position();
+            var sourceRange = position.to(position);
+            throw new TomlUnspecifiedValueError(sourceRange);
         }
     }
 
