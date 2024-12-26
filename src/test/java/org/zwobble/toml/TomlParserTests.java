@@ -429,6 +429,8 @@ public class TomlParserTests {
 
     // == Strings ==
 
+    // === Basic Strings ===
+
     @Test
     public void emptyBasicString() throws IOException {
         var result = parse(
@@ -557,6 +559,8 @@ public class TomlParserTests {
             isKeyValuePair("x", isString("\ud83e\udd67"))
         )));
     }
+
+    // === Literal Strings ===
 
     @Test
     public void emptyLiteralString() throws IOException {
