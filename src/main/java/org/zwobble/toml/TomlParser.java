@@ -527,15 +527,27 @@ public class TomlParser {
     }
 
     private static String parseBasicStringValue(Reader reader) throws IOException {
-        reader.skip('"');
+        return parseStringValue(reader, '"', true);
+    }
+
+    private static String parseLiteralStringValue(Reader reader) throws IOException {
+        return parseStringValue(reader, '\'', false);
+    }
+
+    private static String parseStringValue(
+        Reader reader,
+        char quote,
+        boolean allowEscaping
+    ) throws IOException {
+        reader.skip(quote);
 
         var isMultiLine = false;
 
         var string = new StringBuilder();
-        if (reader.codePoint == '"') {
+        if (reader.codePoint == quote) {
             reader.read();
 
-            if (reader.codePoint == '"') {
+            if (reader.codePoint == quote) {
                 reader.read();
                 isMultiLine = true;
 
@@ -555,30 +567,30 @@ public class TomlParser {
         }
 
         while (true) {
-            if (reader.codePoint == '"') {
+            if (reader.codePoint == quote) {
                 reader.read();
                 if (!isMultiLine) {
                     return string.toString();
                 }
 
                 var quoteCount = 1;
-                while (quoteCount < 5 && reader.codePoint == '"') {
+                while (quoteCount < 5 && reader.codePoint == quote) {
                     quoteCount += 1;
                     reader.read();
                 }
 
                 if (quoteCount <= 2) {
                     for (var i = 0; i < quoteCount; i++) {
-                        string.appendCodePoint('"');
+                        string.appendCodePoint(quote);
                     }
                 } else {
                     for (var i = 0; i < quoteCount - 3; i++) {
-                        string.appendCodePoint('"');
+                        string.appendCodePoint(quote);
                     }
                     return string.toString();
                 }
 
-            } else if (reader.codePoint == '\\') {
+            } else if (reader.codePoint == '\\' && allowEscaping) {
                 reader.read();
 
                 if (
@@ -678,20 +690,6 @@ public class TomlParser {
             reader.read();
         }
         return codePoint;
-    }
-
-    private static String parseLiteralStringValue(Reader reader) throws IOException {
-        reader.skip('\'');
-
-        var string = new StringBuilder();
-        while (reader.codePoint != '\'') {
-            string.appendCodePoint(reader.codePoint);
-            reader.read();
-        }
-
-        reader.skip('\'');
-
-        return string.toString();
     }
 
     private static TomlValue parseArray(Reader reader) throws IOException {

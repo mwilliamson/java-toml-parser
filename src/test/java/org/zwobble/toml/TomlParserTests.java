@@ -758,7 +758,7 @@ public class TomlParserTests {
     }
 
     @Test
-    public void initialNewLineIsIgnored() throws IOException {
+    public void multiLineBasicStringInitialNewLineIsIgnored() throws IOException {
         var result = parse("x = \"\"\"\na\"\"\"");
 
         assertThat(result, isTable(isSequence(
@@ -767,7 +767,7 @@ public class TomlParserTests {
     }
 
     @Test
-    public void onlyFirstOfInitialNewLinesIsIgnored() throws IOException {
+    public void multiLineBasicStringOnlyFirstOfInitialNewLinesIsIgnored() throws IOException {
         var result = parse("x = \"\"\"\n\n\na\"\"\"");
 
         assertThat(result, isTable(isSequence(
@@ -1044,6 +1044,229 @@ public class TomlParserTests {
         var result = parse(
             """
             x = '\ud83e\udd67'
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\ud83e\udd67"))
+        )));
+    }
+
+    // == Multi-Line Literal Strings ==
+
+    @Test
+    public void emptyMultiLineLiteralStringOnOneLine() throws IOException {
+        var result = parse(
+            """
+            x = ''''''
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("", isSourceRange(4, 10)))
+        )));
+    }
+
+    @Test
+    public void emptyMultiLineLiteralStringOnTwoLines() throws IOException {
+        var result = parse(
+            """
+            x = '''
+            '''
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("", isSourceRange(4, 11)))
+        )));
+    }
+
+    @Test
+    public void multiLineLiteralStringWithOnlyNewLines() throws IOException {
+        var result = parse(
+            """
+            x = '''
+            
+            
+            '''
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\n\n", isSourceRange(4, 13)))
+        )));
+    }
+
+    @Test
+    public void multiLineLiteralStringWithAscii() throws IOException {
+        var result = parse(
+            """
+            x = '''abc'''
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("abc", isSourceRange(4, 13)))
+        )));
+    }
+
+
+    @Test
+    public void multiLineLiteralStringInitialNewLineIsIgnored() throws IOException {
+        var result = parse("x = '''\na'''");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("a", isSourceRange(4, 12)))
+        )));
+    }
+
+    @Test
+    public void multiLineLiteralStringOnlyFirstOfInitialNewLinesIsIgnored() throws IOException {
+        var result = parse("x = '''\n\n\na'''");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\n\na", isSourceRange(4, 14)))
+        )));
+    }
+
+    @Test
+    public void multiLineLiteralStringWithOneUnescapedSingleQuoteInMiddle() throws IOException {
+        var result = parse(
+            """
+            x = '''a'c'''
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("a'c", isSourceRange(4, 13)))
+        )));
+    }
+
+    @Test
+    public void multiLineLiteralStringWithTwoUnescapedSingleQuotesInMiddle() throws IOException {
+        var result = parse(
+            """
+            x = '''a''c'''
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("a''c", isSourceRange(4, 14)))
+        )));
+    }
+
+    @Test
+    public void multiLineLiteralStringWithOneUnescapedSingleQuoteAtStart() throws IOException {
+        var result = parse(
+            """
+            x = ''''ac'''
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("'ac", isSourceRange(4, 13)))
+        )));
+    }
+
+    @Test
+    public void multiLineLiteralStringWithTwoUnescapedSingleQuotesAtStart() throws IOException {
+        var result = parse(
+            """
+            x = '''''ac'''
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("''ac", isSourceRange(4, 14)))
+        )));
+    }
+
+    @Test
+    public void multiLineLiteralStringWithOneUnescapedSingleQuoteAtEnd() throws IOException {
+        var result = parse(
+            """
+            x = '''ac''''
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("ac'", isSourceRange(4, 13)))
+        )));
+    }
+
+    @Test
+    public void multiLineLiteralStringWithTwoUnescapedSingleQuotesAtEnd() throws IOException {
+        var result = parse(
+            """
+            x = '''ac'''''
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("ac''", isSourceRange(4, 14)))
+        )));
+    }
+
+    @Test
+    public void multiLineLiteralStringOnOneLine() throws IOException {
+        var result = parse(
+            """
+            x = '''abc'''
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("abc", isSourceRange(4, 13)))
+        )));
+    }
+
+    @Test
+    public void multiLineLiteralStringOnMultipleLines() throws IOException {
+        var result = parse(
+            """
+            x = '''abc
+            def
+            
+            gh'''
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("abc\ndef\n\ngh", isSourceRange(4, 21)))
+        )));
+    }
+
+    @Test
+    public void multiLineLiteralStringWithCompactEscapeSequence() throws IOException {
+        var result = parse(
+            """
+            backspace = '''\\b'''
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("backspace", isString("\\b"))
+        )));
+    }
+
+    @Test
+    public void multiLineLiteralStringWithUnicodeCodePointInBmp() throws IOException {
+        var result = parse(
+            """
+            x = '''\u03c0'''
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\u03c0"))
+        )));
+    }
+
+    @Test
+    public void multiLineLiteralStringWithUnicodeCodePointOutsideBmp() throws IOException {
+        var result = parse(
+            """
+            x = '''\ud83e\udd67'''
             """
         );
 
