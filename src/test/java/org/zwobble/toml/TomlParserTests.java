@@ -630,6 +630,26 @@ public class TomlParserTests {
     }
 
     @Test
+    public void multiLineBasicStringWithNewLines() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\"
+            abc
+            
+            def
+            
+            
+            ghi
+            \"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("abc\n\ndef\n\n\nghi\n", isSourceRange(4, 26)))
+        )));
+    }
+
+    @Test
     public void multiLineBasicStringWithLineEndingBackslashesAndLfs() throws IOException {
         var result = parse(
             """
