@@ -350,6 +350,17 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void whenIntIsLargerThan64BitsThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlInvalidNumberError.class,
+            () -> parse("x = 999999999999999999999999999999999999")
+        );
+
+        assertThat(error.numberString(), equalTo("999999999999999999999999999999999999"));
+        assertThat(error.sourceRange(), isSourceRange(4, 40));
+    }
+
     // == Floats ==
 
     @Test

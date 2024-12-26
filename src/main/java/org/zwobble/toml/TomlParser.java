@@ -494,8 +494,16 @@ public class TomlParser {
                 );
             }
         } else {
-            var integer = Long.parseLong(valueString.toString());
-            return new TomlInt(integer, sourceRange);
+            var integerString = valueString.toString();
+            try {
+                var integer = Long.parseLong(integerString);
+                return new TomlInt(integer, sourceRange);
+            } catch (NumberFormatException exception) {
+                throw new TomlInvalidNumberError(
+                    integerString,
+                    sourceRange
+                );
+            }
         }
     }
 
