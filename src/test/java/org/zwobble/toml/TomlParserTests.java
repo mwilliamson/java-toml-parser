@@ -576,16 +576,43 @@ public class TomlParserTests {
     }
 
     @Test
-    public void emptyMultiLineBasicStringOnTwoLines() throws IOException {
+    public void emptyMultiLineBasicStringOnTwoLinesUsingLf() throws IOException {
         var result = parse(
             """
-            x = \"\"\"\\
+            x = \"\"\"
+            \"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("", isSourceRange(4, 11)))
+        )));
+    }
+
+    @Test
+    public void emptyMultiLineBasicStringOnTwoLinesUsingCrLf() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\"\r
             \"\"\"
             """
         );
 
         assertThat(result, isTable(isSequence(
             isKeyValuePair("x", isString("", isSourceRange(4, 12)))
+        )));
+    }
+
+    @Test
+    public void multiLineBasicStringStartingWithCrNoLf() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\"\r\"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\r", isSourceRange(4, 11)))
         )));
     }
 

@@ -531,18 +531,29 @@ public class TomlParser {
 
         var isMultiLine = false;
 
+        var string = new StringBuilder();
         if (reader.codePoint == '"') {
             reader.read();
 
             if (reader.codePoint == '"') {
                 reader.read();
                 isMultiLine = true;
+
+                if (reader.codePoint == '\n') {
+                    reader.read();
+                } else if (reader.codePoint == '\r') {
+                    reader.read();
+                    if (reader.codePoint == '\n') {
+                        reader.read();
+                    } else {
+                        string.appendCodePoint('\r');
+                    }
+                }
             } else {
                 return "";
             }
         }
 
-        var string = new StringBuilder();
         while (true) {
             if (reader.codePoint == '"') {
                 reader.read();
