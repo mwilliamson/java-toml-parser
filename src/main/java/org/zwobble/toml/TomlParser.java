@@ -818,7 +818,7 @@ public class TomlParser {
 
     private static void skipArrayWhitespace(Reader reader) throws IOException {
         while (true) {
-            while (isArrayWhitespace(reader.codePoint)) {
+            while (isTomlWhitespace(reader.codePoint)) {
                 reader.read();
             }
 
@@ -826,10 +826,6 @@ public class TomlParser {
                 return;
             }
         }
-    }
-
-    private static boolean isArrayWhitespace(int codePoint) {
-        return isTomlWhitespace(codePoint) || codePoint == '\r' || codePoint == '\n';
     }
 
     private static void skipToNextLine(Reader reader) throws IOException {
