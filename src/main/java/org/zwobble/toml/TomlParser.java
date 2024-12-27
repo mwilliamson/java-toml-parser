@@ -44,12 +44,8 @@ public class TomlParser {
                 return rootTable.toTable();
             }
 
-            if (trySkipComment(reader)) {
-                // Comment for the entire line
-            } else if (reader.codePoint == '\n') {
-                // Blank line with LF
-            } else if (reader.codePoint == '\r') {
-                // Blank line with CRLF
+            if (trySkipToNextLine(reader)) {
+                // Blank line
             } else if (isBareKeyCodePoint(reader.codePoint) || reader.codePoint == '\"' || reader.codePoint == '\'') {
                 var keysValuePair = parseKeyValuePair(reader);
                 addKeysValuePair(activeTable, keysValuePair);
@@ -70,7 +66,7 @@ public class TomlParser {
                     reader.skip(']');
                     reader.skip(']');
                     skipWhitespace(reader);
-                    trySkipComment(reader);
+                    skipToNextLine(reader);
                 } else {
                     skipWhitespace(reader);
                     var keys = parseKeys(reader);
@@ -80,7 +76,7 @@ public class TomlParser {
                     }
                     reader.skip(']');
                     skipWhitespace(reader);
-                    trySkipComment(reader);
+                    skipToNextLine(reader);
                 }
             } else {
                 var position = reader.position();
@@ -93,41 +89,6 @@ public class TomlParser {
 
             if (reader.isEndOfFile()) {
                 return rootTable.toTable();
-            }
-
-            if (reader.codePoint == '\r') {
-                reader.skip('\r');
-            }
-
-            if (reader.codePoint == '\n') {
-                reader.skip('\n');
-            } else {
-                var unexpectedTextStart = reader.position();
-                var unexpectedTextEnd = reader.position();
-                var unexpectedText = new StringBuilder();
-                var unexpectedWhitespace = new StringBuilder();
-
-                while (
-                    reader.codePoint != -1 &&
-                        reader.codePoint != '#' &&
-                        reader.codePoint != '\n'
-                ) {
-                    unexpectedText.append(unexpectedWhitespace);
-                    unexpectedWhitespace.setLength(0);
-                    unexpectedText.appendCodePoint(reader.codePoint);
-                    reader.read();
-                    unexpectedTextEnd = reader.position();
-
-                    while (isTomlWhitespace(reader.codePoint)) {
-                        unexpectedWhitespace.appendCodePoint(reader.codePoint);
-                        reader.read();
-                    }
-                }
-
-                throw new TomlUnexpectedTextAtEolError(
-                    unexpectedText.toString(),
-                    unexpectedTextStart.to(unexpectedTextEnd)
-                );
             }
         }
     }
@@ -149,7 +110,7 @@ public class TomlParser {
         skipWhitespace(reader);
         var value = parseValue(reader);
         skipWhitespace(reader);
-        trySkipComment(reader);
+        skipToNextLine(reader);
 
         return new KeysValuePair(keys, value);
     }
@@ -882,7 +843,7 @@ public class TomlParser {
                 reader.read();
             }
 
-            if (!trySkipComment(reader)) {
+            if (!trySkipToNextLine(reader) || reader.isEndOfFile()) {
                 return;
             }
         }
@@ -892,18 +853,106 @@ public class TomlParser {
         return isTomlWhitespace(codePoint) || codePoint == '\r' || codePoint == '\n';
     }
 
-    private static boolean trySkipComment(Reader reader) throws IOException {
+    private static void skipToNextLine(Reader reader) throws IOException {
+        if (trySkipToNextLine(reader)) {
+            return;
+        }
+
+        var unexpectedTextStart = reader.position();
+        var unexpectedTextEnd = reader.position();
+        var unexpectedText = new StringBuilder();
+        var unexpectedWhitespace = new StringBuilder();
+
+        while (
+            reader.codePoint != -1 &&
+                reader.codePoint != '#' &&
+                reader.codePoint != '\n'
+        ) {
+            unexpectedText.append(unexpectedWhitespace);
+            unexpectedWhitespace.setLength(0);
+            unexpectedText.appendCodePoint(reader.codePoint);
+            reader.read();
+            unexpectedTextEnd = reader.position();
+
+            while (isTomlWhitespace(reader.codePoint)) {
+                unexpectedWhitespace.appendCodePoint(reader.codePoint);
+                reader.read();
+            }
+        }
+
+        throw new TomlUnexpectedTextAtEolError(
+            unexpectedText.toString(),
+            unexpectedTextStart.to(unexpectedTextEnd)
+        );
+    }
+
+    private static boolean trySkipToNextLine(Reader reader) throws IOException {
+        if (trySkipLineEnd(reader)) {
+            return true;
+        }
+
         if (reader.codePoint == '#') {
             reader.read();
 
-            while (reader.codePoint != '\n' && reader.codePoint != -1) {
+            while (true) {
+                if (trySkipLineEnd(reader)) {
+                    return true;
+                }
+
+                if (reader.codePoint != '\t' && isControlCharacter(reader.codePoint)) {
+                    var controlCharacter = reader.codePoint;
+                    var start = reader.position();
+                    reader.read();
+                    var end = reader.position();
+                    var sourceRange = start.to(end);
+
+                    throw new TomlUnexpectedControlCharacterError(
+                        controlCharacter,
+                        sourceRange
+                    );
+                }
                 reader.read();
             }
-
-            return true;
         } else {
             return false;
         }
+    }
+
+    private static boolean trySkipLineEnd(Reader reader) throws IOException {
+        if (reader.isEndOfFile()) {
+            return true;
+        }
+
+        return trySkipNewLine(reader);
+    }
+
+    private static boolean trySkipNewLine(Reader reader) throws IOException {
+        if (reader.codePoint == '\n') {
+            reader.read();
+            return true;
+        }
+
+        if (reader.codePoint == '\r') {
+            var start = reader.position();
+            reader.read();
+            var end = reader.position();
+            var sourceRange = start.to(end);
+
+            if (reader.codePoint == '\n') {
+                reader.read();
+                return true;
+            } else {
+                throw new TomlUnexpectedControlCharacterError(
+                    '\r',
+                    sourceRange
+                );
+            }
+        }
+        return false;
+    }
+
+    private static boolean isControlCharacter(int codePoint) {
+        return (codePoint >= 0 && codePoint <= 0x1f) || codePoint == 0x7f;
     }
 
     private static void skipWhitespace(Reader reader) throws IOException {

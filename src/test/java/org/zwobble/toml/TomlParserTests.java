@@ -2053,6 +2053,35 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void tabsArePermittedInComments() throws IOException {
+        var result = parse("#\t");
+
+        assertThat(result, isTable(isSequence()));
+    }
+
+    @Test
+    public void crWithoutLfIsNotPermittedInComments() throws IOException {
+        var error = assertThrows(
+            TomlUnexpectedControlCharacterError.class,
+            () -> parse("#\r")
+        );
+
+        assertThat(error.controlCharacter(), equalTo(Integer.valueOf('\r')));
+        assertThat(error.sourceRange(), isSourceRange(1, 2));
+    }
+
+    @Test
+    public void controlCharactersBesidesTabAreNotPermittedInComments() throws IOException {
+        var error = assertThrows(
+            TomlUnexpectedControlCharacterError.class,
+            () -> parse("#\u0007")
+        );
+
+        assertThat(error.controlCharacter(), equalTo(Integer.valueOf('\u0007')));
+        assertThat(error.sourceRange(), isSourceRange(1, 2));
+    }
+
     private TomlTable parse(String text) throws IOException {
         return TomlParser.parseReader(new StringReader(text));
     }
