@@ -641,16 +641,7 @@ public class TomlParser {
                 reader.read();
                 isMultiLine = true;
 
-                if (reader.codePoint == '\n') {
-                    reader.read();
-                } else if (reader.codePoint == '\r') {
-                    reader.read();
-                    if (reader.codePoint == '\n') {
-                        reader.read();
-                    } else {
-                        string.appendCodePoint('\r');
-                    }
-                }
+                trySkipNewLine(reader);
             } else {
                 return "";
             }

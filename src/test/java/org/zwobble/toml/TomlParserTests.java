@@ -728,16 +728,18 @@ public class TomlParserTests {
     }
 
     @Test
-    public void multiLineBasicStringStartingWithCrNoLf() throws IOException {
-        var result = parse(
-            """
-            x = \"\"\"\r\"\"\"
-            """
+    public void multiLineBasicStringStartingWithCrNoLfIsNotPermitted() throws IOException {
+        var error = assertThrows(
+            TomlUnexpectedControlCharacterError.class,
+            () -> parse(
+                """
+                x = \"\"\"\r\"\"\"
+                """
+            )
         );
 
-        assertThat(result, isTable(isSequence(
-            isKeyValuePair("x", isString("\r", isSourceRange(4, 11)))
-        )));
+        assertThat(error.controlCharacter(), equalTo((int) '\r'));
+        assertThat(error.sourceRange(), isSourceRange(7, 8));
     }
 
     @Test
