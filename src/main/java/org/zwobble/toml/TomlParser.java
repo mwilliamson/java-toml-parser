@@ -44,7 +44,7 @@ public class TomlParser {
                 return rootTable.toTable();
             }
 
-            if (trySkipToNextLine(reader)) {
+            if (trySkipToNextLineOrEndOfFile(reader)) {
                 // Blank line
             } else if (isBareKeyCodePoint(reader.codePoint) || reader.codePoint == '\"' || reader.codePoint == '\'') {
                 var keysValuePair = parseKeyValuePair(reader);
@@ -822,7 +822,7 @@ public class TomlParser {
                 reader.read();
             }
 
-            if (!trySkipToNextLine(reader) || reader.isEndOfFile()) {
+            if (!trySkipToNextLineOrEndOfFile(reader) || reader.isEndOfFile()) {
                 return;
             }
         }
@@ -833,7 +833,7 @@ public class TomlParser {
     }
 
     private static void skipToNextLine(Reader reader) throws IOException {
-        if (trySkipToNextLine(reader)) {
+        if (trySkipToNextLineOrEndOfFile(reader)) {
             return;
         }
 
@@ -865,8 +865,8 @@ public class TomlParser {
         );
     }
 
-    private static boolean trySkipToNextLine(Reader reader) throws IOException {
-        if (trySkipLineEnd(reader)) {
+    private static boolean trySkipToNextLineOrEndOfFile(Reader reader) throws IOException {
+        if (trySkipNewLineOrEndOfFile(reader)) {
             return true;
         }
 
@@ -874,7 +874,7 @@ public class TomlParser {
             reader.read();
 
             while (true) {
-                if (trySkipLineEnd(reader)) {
+                if (trySkipNewLineOrEndOfFile(reader)) {
                     return true;
                 }
 
@@ -897,7 +897,7 @@ public class TomlParser {
         }
     }
 
-    private static boolean trySkipLineEnd(Reader reader) throws IOException {
+    private static boolean trySkipNewLineOrEndOfFile(Reader reader) throws IOException {
         if (reader.isEndOfFile()) {
             return true;
         }
