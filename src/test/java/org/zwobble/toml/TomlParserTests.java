@@ -135,6 +135,16 @@ public class TomlParserTests {
         assertThat(error.sourceRange(), isSourceRange(9, 10));
     }
 
+    @Test
+    public void whenKeyIsDefinedAsPrimitiveThenDefiningSubKeyThrowsError() throws IOException {
+        var error = assertThrows(
+            TomlCannotDefineSubKeyOfNonTableError.class,
+            () -> parse("a = true\na.b = true")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(9, 10));
+    }
+
     // == Keys ==
 
     // === Bare keys ===
