@@ -16,6 +16,8 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.zwobble.toml.UnicodeCodePoints.formatCodePoint;
+
 public class TomlParser {
     private TomlParser() {
     }
@@ -924,18 +926,6 @@ public class TomlParser {
 
     private static boolean isAsciiDigitCodePoint(int character) {
         return character >= 0x30 && character <= 0x39;
-    }
-
-    private static String formatCodePoint(int codePoint) {
-        if (codePoint == '\r') {
-            return "CR";
-        } else if (codePoint == '\n') {
-            return "LF";
-        } else if (codePoint == -1) {
-            return "EOF";
-        } else {
-            return new String(new int[] {codePoint}, 0, 1);
-        }
     }
 
     private static class Reader {
