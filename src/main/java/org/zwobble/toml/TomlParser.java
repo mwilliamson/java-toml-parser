@@ -750,12 +750,14 @@ public class TomlParser {
     }
 
     private static void skipMultiLineStringWhitespace(Reader reader) throws IOException {
-        while (
-            isTomlWhitespace(reader.codePoint) ||
-                reader.codePoint == '\r' ||
-                reader.codePoint == '\n'
-        ) {
-            reader.read();
+        while (true) {
+            if (isTomlWhitespace(reader.codePoint)) {
+                reader.read();
+            } else if (trySkipNewLine(reader)) {
+                // Do nothing
+            } else {
+                return;
+            }
         }
     }
 
