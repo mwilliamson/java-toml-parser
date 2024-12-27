@@ -839,7 +839,7 @@ public class TomlParser {
         var unexpectedWhitespace = new StringBuilder();
 
         while (
-            reader.codePoint != -1 &&
+            !reader.isEndOfFile() &&
                 reader.codePoint != '#' &&
                 reader.codePoint != '\n'
         ) {
