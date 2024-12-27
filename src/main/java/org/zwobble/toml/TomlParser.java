@@ -15,6 +15,7 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.zwobble.toml.UnicodeCodePoints.formatCodePoint;
 
@@ -142,17 +143,26 @@ public class TomlParser {
         } else if (reader.codePoint == '\'') {
             return parseLiteralStringValue(reader);
         } else {
-            return parseBareKey(reader);
+            var key = parseBareKey(reader);
+            if (key.isPresent()) {
+                return key.get();
+            } else {
+                throw new TomlMissingKeyError(reader.position().toSourceRange());
+            }
         }
     }
 
-    private static String parseBareKey(Reader reader) throws IOException {
+    private static Optional<String> parseBareKey(Reader reader) throws IOException {
         var key = new StringBuilder();
         while (isBareKeyCodePoint(reader.codePoint)) {
             key.appendCodePoint(reader.codePoint);
             reader.read();
         }
-        return key.toString();
+        if (key.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(key.toString());
+        }
     }
 
     private static void parseKeyValuePairEqualsSign(Reader reader) throws IOException {

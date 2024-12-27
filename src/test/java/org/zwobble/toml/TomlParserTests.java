@@ -1736,6 +1736,16 @@ public class TomlParserTests {
     // == Tables ==
 
     @Test
+    public void whenTableHeaderIsMissingKeyThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlMissingKeyError.class,
+            () -> parse("[]")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(1, 1));
+    }
+
+    @Test
     public void emptyTable() throws IOException {
         var result = parse("[x]");
 
@@ -1837,6 +1847,16 @@ public class TomlParserTests {
     }
 
     // == Arrays of Tables ==
+
+    @Test
+    public void whenArrayOfTablesHeaderIsMissingKeyThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlMissingKeyError.class,
+            () -> parse("[[]]")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(2, 2));
+    }
 
     @Test
     public void emptyArrayOfTables() throws IOException {
