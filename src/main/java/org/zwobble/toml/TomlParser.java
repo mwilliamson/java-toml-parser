@@ -2,6 +2,7 @@ package org.zwobble.toml;
 
 import org.zwobble.toml.errors.*;
 import org.zwobble.toml.sources.SourcePosition;
+import org.zwobble.toml.sources.SourceRange;
 import org.zwobble.toml.values.*;
 
 import java.io.FileReader;
@@ -94,7 +95,7 @@ public class TomlParser {
         }
     }
 
-    private record KeysValuePair(List<String> keys, TomlValue value) {}
+    private record KeysValuePair(List<TomlKey> keys, TomlValue value) {}
 
     private static void addKeysValuePair(TomlTableBuilder activeTable, KeysValuePair keysValuePair) {
         var table = activeTable;
@@ -116,11 +117,15 @@ public class TomlParser {
         return new KeysValuePair(keys, value);
     }
 
-    private static ArrayList<String> parseKeys(Reader reader) throws IOException {
-        var keys = new ArrayList<String>();
+    private static ArrayList<TomlKey> parseKeys(Reader reader) throws IOException {
+        var keys = new ArrayList<TomlKey>();
 
         while (true) {
-            var key = parseKey(reader);
+            var keyStart = reader.position();
+            var keyString = parseKey(reader);
+            var keyEnd = reader.position();
+            var keySourceRange = keyStart.to(keyEnd);
+            var key = new TomlKey(keyString, keySourceRange);
 
             skipWhitespace(reader);
 

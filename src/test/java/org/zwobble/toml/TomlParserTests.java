@@ -124,6 +124,16 @@ public class TomlParserTests {
         assertThat(error.sourceRange(), isSourceRange(6, 11));
     }
 
+    @Test
+    public void whenKeyIsDefinedTwiceThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlDuplicateKeyError.class,
+            () -> parse("a = true\na = true")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(9, 10));
+    }
+
     // == Keys ==
 
     // === Bare keys ===

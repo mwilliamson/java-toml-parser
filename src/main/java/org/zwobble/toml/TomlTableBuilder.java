@@ -1,23 +1,21 @@
 package org.zwobble.toml;
 
+import org.zwobble.toml.errors.TomlDuplicateKeyError;
 import org.zwobble.toml.values.TomlArray;
 import org.zwobble.toml.values.TomlKeyValuePair;
 import org.zwobble.toml.values.TomlTable;
 import org.zwobble.toml.values.TomlValue;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 class TomlTableBuilder {
     private final TomlTable table;
-    private final List<TomlKeyValuePair> keyValuePairs;
+    private final LinkedHashMap<String, TomlKeyValuePair> keyValuePairs;
     private final Map<String, TomlTableBuilder> subTableBuilders;
     private final Map<String, List<TomlValue>> arrayOfTables;
 
     TomlTableBuilder() {
-        this.keyValuePairs = new ArrayList<>();
+        this.keyValuePairs = new LinkedHashMap<>();
         this.table = new TomlTable(this.keyValuePairs);
         this.subTableBuilders = new HashMap<>();
         this.arrayOfTables = new HashMap<>();
@@ -27,35 +25,41 @@ class TomlTableBuilder {
         return this.table;
     }
 
-    TomlTableBuilder getOrCreateSubTable(String key) {
+    TomlTableBuilder getOrCreateSubTable(TomlKey key) {
         // TODO: handle not a table
-        var subTable = this.subTableBuilders.get(key);
+        var subTable = this.subTableBuilders.get(key.value());
 
         if (subTable == null) {
             subTable = new TomlTableBuilder();
-            this.subTableBuilders.put(key, subTable);
-            this.keyValuePairs.add(TomlKeyValuePair.of(key, subTable.table));
+            this.subTableBuilders.put(key.value(), subTable);
+            var pair = TomlKeyValuePair.of(key.value(), subTable.table);
+            this.keyValuePairs.put(key.value(), pair);
         }
 
         return subTable;
     }
 
-    TomlTableBuilder createArraySubTable(String key) {
+    TomlTableBuilder createArraySubTable(TomlKey key) {
         // TODO: handle inline array or not a array
 
-        if (!this.arrayOfTables.containsKey(key)) {
+        if (!this.arrayOfTables.containsKey(key.value())) {
             var arrayOfTables = new ArrayList<TomlValue>();
-            this.arrayOfTables.put(key, arrayOfTables);
-            this.keyValuePairs.add(TomlKeyValuePair.of(key, TomlArray.of(arrayOfTables)));
+            this.arrayOfTables.put(key.value(), arrayOfTables);
+            var pair = TomlKeyValuePair.of(key.value(), TomlArray.of(arrayOfTables));
+            this.keyValuePairs.put(key.value(), pair);
         }
 
         var subTable = new TomlTableBuilder();
-        this.arrayOfTables.get(key).add(subTable.table);
-        this.subTableBuilders.put(key, subTable);
+        this.arrayOfTables.get(key.value()).add(subTable.table);
+        this.subTableBuilders.put(key.value(), subTable);
         return subTable;
     }
 
-    void add(String key, TomlValue value) {
-        this.keyValuePairs.add(TomlKeyValuePair.of(key, value));
+    void add(TomlKey key, TomlValue value) {
+        var pair = TomlKeyValuePair.of(key.value(), value);
+        var currentValue = this.keyValuePairs.putIfAbsent(key.value(), pair);
+        if (currentValue != null) {
+            throw new TomlDuplicateKeyError(key.value(), key.sourceRange());
+        }
     }
 }
