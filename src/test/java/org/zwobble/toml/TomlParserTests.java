@@ -261,6 +261,24 @@ public class TomlParserTests {
     }
 
     @Test
+    public void integerZeroWithPlusSign() throws IOException {
+        var result = parse("x = +0");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isInt(0, isSourceRange(4, 6)))
+        )));
+    }
+
+    @Test
+    public void integerZeroWithMinusSign() throws IOException {
+        var result = parse("x = -0");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isInt(0, isSourceRange(4, 6)))
+        )));
+    }
+
+    @Test
     public void integerPositive() throws IOException {
         var result = parse("x = 12");
 

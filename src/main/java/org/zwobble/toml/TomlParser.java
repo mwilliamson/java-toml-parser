@@ -481,7 +481,7 @@ public class TomlParser {
             return true;
         }
 
-        if (integerString.length() < 2) {
+        if (integerString.length() <= 2) {
             return false;
         }
 
