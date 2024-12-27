@@ -131,6 +131,7 @@ public class TomlParserTests {
             () -> parse("a = true\na = true")
         );
 
+        assertThat(error.key(), equalTo("a"));
         assertThat(error.sourceRange(), isSourceRange(9, 10));
     }
 
