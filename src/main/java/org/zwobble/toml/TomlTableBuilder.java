@@ -10,9 +10,11 @@ import java.util.*;
 
 class TomlTableBuilder {
     enum DefinedBy {
-        SUPER_TABLE,
-        DOTTED_KEY,
-        TABLE,
+        INLINE,
+        TABLE_IMPLICIT,
+        TABLE_EXPLICIT,
+        KEY_IMPLICIT,
+        KEY_EXPLICIT,
     }
 
     private final TomlTable table;
@@ -45,13 +47,27 @@ class TomlTableBuilder {
             this.subTableBuilders.put(key.value(), subTable);
             var pair = TomlKeyValuePair.of(key.value(), subTable.table);
             this.keyValuePairs.put(key.value(), pair);
-        } else if (subTable.definedBy == DefinedBy.SUPER_TABLE) {
-            subTable.definedBy = definedBy;
-        } else if (
-            !((definedBy == DefinedBy.SUPER_TABLE) ||
-                (definedBy == DefinedBy.DOTTED_KEY && subTable.definedBy == DefinedBy.DOTTED_KEY))
-        ) {
+        } else if (subTable.definedBy == DefinedBy.INLINE) {
             throw new TomlDuplicateKeyError(key.value(), key.sourceRange());
+        } else if (subTable.definedBy == DefinedBy.TABLE_EXPLICIT) {
+            if (definedBy != DefinedBy.TABLE_IMPLICIT) {
+                throw new TomlDuplicateKeyError(key.value(), key.sourceRange());
+            }
+        } else if (subTable.definedBy == DefinedBy.TABLE_IMPLICIT) {
+            if (definedBy == DefinedBy.TABLE_EXPLICIT) {
+                subTable.definedBy = DefinedBy.TABLE_EXPLICIT;
+            } else if (definedBy != DefinedBy.TABLE_IMPLICIT) {
+                throw new TomlDuplicateKeyError(key.value(), key.sourceRange());
+            }
+        } else if (subTable.definedBy == DefinedBy.KEY_EXPLICIT) {
+            if (!(definedBy == DefinedBy.KEY_EXPLICIT || definedBy == DefinedBy.KEY_IMPLICIT)) {
+                throw new TomlDuplicateKeyError(key.value(), key.sourceRange());
+            }
+        } else if (subTable.definedBy == DefinedBy.KEY_IMPLICIT) {
+            if (definedBy == DefinedBy.TABLE_EXPLICIT) {
+                throw new TomlDuplicateKeyError(key.value(), key.sourceRange());
+            }
+            subTable.definedBy = definedBy;
         }
 
         return subTable;
@@ -71,7 +87,7 @@ class TomlTableBuilder {
             this.keyValuePairs.put(key.value(), pair);
         }
 
-        var subTable = new TomlTableBuilder(DefinedBy.TABLE);
+        var subTable = new TomlTableBuilder(DefinedBy.TABLE_EXPLICIT);
         this.arrayOfTables.get(key.value()).add(subTable.table);
         this.subTableBuilders.put(key.value(), subTable);
         return subTable;

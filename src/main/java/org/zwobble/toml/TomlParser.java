@@ -51,7 +51,7 @@ public class TomlParser {
     public static TomlTable parseReader(java.io.Reader rawReader) throws IOException {
         var reader = new Reader(rawReader);
 
-        var rootTable = new TomlTableBuilder(TomlTableBuilder.DefinedBy.SUPER_TABLE);
+        var rootTable = new TomlTableBuilder(TomlTableBuilder.DefinedBy.KEY_IMPLICIT);
         var activeTable = rootTable;
 
         // TODO: handle surrogate pairs
@@ -80,7 +80,7 @@ public class TomlParser {
 
                     var keys = parseKeys(reader);
                     for (var key : keys.subList(0, keys.size() - 1)) {
-                        activeTable = activeTable.getOrCreateSubTable(key, TomlTableBuilder.DefinedBy.SUPER_TABLE);
+                        activeTable = activeTable.getOrCreateSubTable(key, TomlTableBuilder.DefinedBy.TABLE_IMPLICIT);
                     }
                     activeTable = activeTable.createArraySubTable(keys.getLast());
 
@@ -95,9 +95,9 @@ public class TomlParser {
 
                     var keys = parseKeys(reader);
                     for (var key : keys.subList(0, keys.size() - 1)) {
-                        activeTable = activeTable.getOrCreateSubTable(key, TomlTableBuilder.DefinedBy.SUPER_TABLE);
+                        activeTable = activeTable.getOrCreateSubTable(key, TomlTableBuilder.DefinedBy.TABLE_IMPLICIT);
                     }
-                    activeTable = activeTable.getOrCreateSubTable(keys.getLast(), TomlTableBuilder.DefinedBy.TABLE);
+                    activeTable = activeTable.getOrCreateSubTable(keys.getLast(), TomlTableBuilder.DefinedBy.TABLE_EXPLICIT);
 
                     reader.skip(']');
                     skipWhitespace(reader);
@@ -122,15 +122,9 @@ public class TomlParser {
 
     private static void addKeysValuePair(TomlTableBuilder activeTable, KeysValuePair keysValuePair) {
         var table = activeTable;
-        for (var i = 0; i < keysValuePair.keys.size() - 2; i++) {
+        for (var i = 0; i < keysValuePair.keys.size() - 1; i++) {
             var key = keysValuePair.keys.get(i);
-            table = table.getOrCreateSubTable(key, TomlTableBuilder.DefinedBy.SUPER_TABLE);
-        }
-        if (keysValuePair.keys.size() > 1) {
-            table = table.getOrCreateSubTable(
-                keysValuePair.keys.get(keysValuePair.keys.size() - 2),
-                TomlTableBuilder.DefinedBy.DOTTED_KEY
-            );
+            table = table.getOrCreateSubTable(key, TomlTableBuilder.DefinedBy.KEY_IMPLICIT);
         }
         table.add(keysValuePair.keys.getLast(), keysValuePair.value());
     }
@@ -922,7 +916,7 @@ public class TomlParser {
     }
 
     private static TomlValue parseInlineTable(Reader reader) throws IOException {
-        var table = new TomlTableBuilder(TomlTableBuilder.DefinedBy.TABLE);
+        var table = new TomlTableBuilder(TomlTableBuilder.DefinedBy.KEY_EXPLICIT);
 
         reader.skip('{');
         skipWhitespace(reader);
