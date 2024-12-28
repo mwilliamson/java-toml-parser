@@ -126,6 +126,7 @@ public class TomlParser {
         for (var i = 0; i < keysValuePair.keys.size() - 1; i++) {
             var key = keysValuePair.keys.get(i);
             table = table.getOrCreateSubTable(key);
+            table.define();
         }
         table.add(keysValuePair.keys.getLast(), keysValuePair.value());
     }
