@@ -152,10 +152,11 @@ public class TomlParserTests {
     @Test
     public void whenKeyIsDefinedAsPrimitiveThenDefiningSubKeyThrowsError() throws IOException {
         var error = assertThrows(
-            TomlCannotDefineSubKeyOfNonTableError.class,
+            TomlDuplicateKeyError.class,
             () -> parse("a = true\na.b = true")
         );
 
+        assertThat(error.key(), equalTo("a"));
         assertThat(error.sourceRange(), isSourceRange(9, 10));
     }
 
@@ -2422,20 +2423,22 @@ public class TomlParserTests {
     @Test
     public void whenTableRedefinesParentPrimitiveThenErrorIsThrown() throws IOException {
         var error = assertThrows(
-            TomlCannotDefineSubKeyOfNonTableError.class,
+            TomlDuplicateKeyError.class,
             () -> parse("a = true\n[a.b]\n")
         );
 
+        assertThat(error.key(), equalTo("a"));
         assertThat(error.sourceRange(), isSourceRange(10, 11));
     }
 
     @Test
     public void whenTableRedefinesPrimitiveThenErrorIsThrown() throws IOException {
         var error = assertThrows(
-            TomlCannotDefineSubKeyOfNonTableError.class,
+            TomlDuplicateKeyError.class,
             () -> parse("a = true\n[a]\n")
         );
 
+        assertThat(error.key(), equalTo("a"));
         assertThat(error.sourceRange(), isSourceRange(10, 11));
     }
 
@@ -2629,10 +2632,11 @@ public class TomlParserTests {
     @Test
     public void whenArrayOfTablesRedefinesParentPrimitiveThenErrorIsThrown() throws IOException {
         var error = assertThrows(
-            TomlCannotDefineSubKeyOfNonTableError.class,
+            TomlDuplicateKeyError.class,
             () -> parse("a = true\n[[a.b]]\n")
         );
 
+        assertThat(error.key(), equalTo("a"));
         assertThat(error.sourceRange(), isSourceRange(11, 12));
     }
 
@@ -2643,6 +2647,7 @@ public class TomlParserTests {
             () -> parse("a = true\n[[a]]\n")
         );
 
+        assertThat(error.key(), equalTo("a"));
         assertThat(error.sourceRange(), isSourceRange(11, 12));
     }
 

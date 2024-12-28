@@ -1,6 +1,5 @@
 package org.zwobble.toml;
 
-import org.zwobble.toml.errors.TomlCannotDefineSubKeyOfNonTableError;
 import org.zwobble.toml.errors.TomlDuplicateKeyError;
 import org.zwobble.toml.values.TomlArray;
 import org.zwobble.toml.values.TomlKeyValuePair;
@@ -31,7 +30,7 @@ class TomlTableBuilder {
 
         if (subTable == null) {
             if (this.keyValuePairs.containsKey(key.value())) {
-                throw new TomlCannotDefineSubKeyOfNonTableError(key.sourceRange());
+                throw new TomlDuplicateKeyError(key.value(), key.sourceRange());
             }
 
             subTable = new TomlTableBuilder();
