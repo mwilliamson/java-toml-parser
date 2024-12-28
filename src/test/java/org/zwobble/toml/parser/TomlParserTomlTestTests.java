@@ -1,4 +1,4 @@
-package org.zwobble.toml;
+package org.zwobble.toml.parser;
 
 import com.google.gson.*;
 import org.junit.jupiter.api.DynamicTest;

@@ -1,4 +1,4 @@
-package org.zwobble.toml;
+package org.zwobble.toml.parser;
 
 import org.zwobble.toml.sources.SourceRange;
 

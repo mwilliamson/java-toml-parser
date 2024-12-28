@@ -1,4 +1,4 @@
-package org.zwobble.toml;
+package org.zwobble.toml.parser;
 
 public class UnicodeCodePoints {
     private UnicodeCodePoints() {

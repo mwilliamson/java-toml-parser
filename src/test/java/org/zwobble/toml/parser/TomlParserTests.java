@@ -1,4 +1,4 @@
-package org.zwobble.toml;
+package org.zwobble.toml.parser;
 
 import org.junit.jupiter.api.Test;
 import org.zwobble.precisely.Matcher;

@@ -1,4 +1,4 @@
-package org.zwobble.toml;
+package org.zwobble.toml.parser;
 
 import org.zwobble.toml.errors.*;
 import org.zwobble.toml.sources.SourcePosition;
@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import static org.zwobble.toml.UnicodeCodePoints.formatCodePoint;
+import static org.zwobble.toml.parser.UnicodeCodePoints.formatCodePoint;
 
 public class TomlParser {
     private TomlParser() {

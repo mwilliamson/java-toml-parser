@@ -2,7 +2,7 @@ package org.zwobble.toml.errors;
 
 import org.zwobble.toml.sources.SourceRange;
 
-import static org.zwobble.toml.UnicodeCodePoints.formatCodePoint;
+import static org.zwobble.toml.parser.UnicodeCodePoints.formatCodePoint;
 
 public class TomlUnexpectedControlCharacterError extends TomlParseError {
     private final int controlCharacter;
