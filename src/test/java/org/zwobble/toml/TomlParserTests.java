@@ -445,6 +445,24 @@ public class TomlParserTests {
     }
 
     @Test
+    public void floatZeroWithPositiveSign() throws IOException {
+        var result = parse("x = +0.0");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isFloat(0, isSourceRange(4, 8)))
+        )));
+    }
+
+    @Test
+    public void floatZeroWithNegativeSign() throws IOException {
+        var result = parse("x = -0.0");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isFloat(-0.0, isSourceRange(4, 8)))
+        )));
+    }
+
+    @Test
     public void floatPositive() throws IOException {
         var result = parse("x = 12.34");
 
@@ -587,6 +605,39 @@ public class TomlParserTests {
         );
 
         assertThat(error.numberString(), equalTo("1.2.3"));
+        assertThat(error.sourceRange(), isSourceRange(4, 9));
+    }
+
+    @Test
+    public void whenFloatHasLeadingZeroThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlInvalidNumberError.class,
+            () -> parse("x = 01.0")
+        );
+
+        assertThat(error.numberString(), equalTo("01.0"));
+        assertThat(error.sourceRange(), isSourceRange(4, 8));
+    }
+
+    @Test
+    public void whenFloatHasPositiveSignThenLeadingZeroThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlInvalidNumberError.class,
+            () -> parse("x = +01.0")
+        );
+
+        assertThat(error.numberString(), equalTo("+01.0"));
+        assertThat(error.sourceRange(), isSourceRange(4, 9));
+    }
+
+    @Test
+    public void whenFloatHasNegativeSignThenLeadingZeroThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlInvalidNumberError.class,
+            () -> parse("x = -01.0")
+        );
+
+        assertThat(error.numberString(), equalTo("-01.0"));
         assertThat(error.sourceRange(), isSourceRange(4, 9));
     }
 

@@ -2,7 +2,6 @@ package org.zwobble.toml;
 
 import org.zwobble.toml.errors.*;
 import org.zwobble.toml.sources.SourcePosition;
-import org.zwobble.toml.sources.SourceRange;
 import org.zwobble.toml.values.*;
 
 import java.io.FileReader;
@@ -460,48 +459,48 @@ public class TomlParser {
         var end = reader.position();
         var sourceRange = start.to(end);
 
+        var numberString = valueString.toString();
+        if (numberStringHasLeadingZeroes(numberString)) {
+            throw new TomlInvalidNumberError(
+                numberString,
+                sourceRange
+            );
+        }
+
         if (isFloat) {
-            var floatString = valueString.toString();
             try {
-                var value = Double.parseDouble(floatString);
+                var value = Double.parseDouble(numberString);
                 return new TomlFloat(value, sourceRange);
             } catch (NumberFormatException exception) {
                 throw new TomlInvalidNumberError(
-                    floatString,
+                    numberString,
                     sourceRange
                 );
             }
         } else {
-            var integerString = valueString.toString();
-            if (integerStringHasLeadingZeroes(integerString)) {
-                throw new TomlInvalidNumberError(
-                    integerString,
-                    sourceRange
-                );
-            }
             try {
-                var integer = Long.parseLong(integerString);
+                var integer = Long.parseLong(numberString);
                 return new TomlInt(integer, sourceRange);
             } catch (NumberFormatException exception) {
                 throw new TomlInvalidNumberError(
-                    integerString,
+                    numberString,
                     sourceRange
                 );
             }
         }
     }
 
-    private static boolean integerStringHasLeadingZeroes(String integerString) {
-        if (integerString.length() > 1 && integerString.charAt(0) == '0') {
+    private static boolean numberStringHasLeadingZeroes(String number) {
+        if (number.length() > 1 && number.charAt(0) == '0' && isAsciiDigitCodePoint(number.charAt(1))) {
             return true;
         }
 
-        if (integerString.length() <= 2) {
+        if (number.length() <= 2) {
             return false;
         }
 
-        var hasSign = integerString.charAt(0) == '+' || integerString.charAt(0) == '-';
-        if (hasSign && integerString.charAt(1) == '0') {
+        var hasSign = number.charAt(0) == '+' || number.charAt(0) == '-';
+        if (hasSign && number.charAt(1) == '0' && isAsciiDigitCodePoint(number.charAt(2))) {
             return true;
         }
 
