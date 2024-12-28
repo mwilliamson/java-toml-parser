@@ -2684,6 +2684,17 @@ public class TomlParserTests {
         assertThat(error.sourceRange(), isSourceRange(11, 12));
     }
 
+    @Test
+    public void tableOfArraysCannotAppendToInlineArray() throws IOException {
+        var error = assertThrows(
+            TomlDuplicateKeyError.class,
+            () -> parse("a = []\n[[a]]\n")
+        );
+
+        assertThat(error.key(), equalTo("a"));
+        assertThat(error.sourceRange(), isSourceRange(9, 10));
+    }
+
     // == Comments ==
 
     @Test
