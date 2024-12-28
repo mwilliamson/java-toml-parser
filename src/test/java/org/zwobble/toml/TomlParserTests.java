@@ -1966,6 +1966,20 @@ public class TomlParserTests {
         assertThat(error.sourceRange(), isSourceRange(7, 15));
     }
 
+    @Test
+    public void givenEscapeSequenceInStringWhenCodepointIsMaximum32BitSequenceThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlInvalidEscapeSequenceError.class,
+            () -> parse(
+                """
+                x = "\\Uffffffff"
+                """
+            )
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(7, 15));
+    }
+
     // == Offset Date-Times ==
 
     @Test

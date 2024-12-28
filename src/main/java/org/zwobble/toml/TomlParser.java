@@ -905,7 +905,7 @@ public class TomlParser {
         }
 
         // Check for surrogates or values above the maximum Unicode codepoint
-        if ((codePoint >= 0xd800 && codePoint <= 0xdfff) || codePoint > 0x10ffff) {
+        if ((codePoint >= 0xd800 && codePoint <= 0xdfff) || codePoint > 0x10ffff || codePoint < 0) {
             var end = reader.position();
             var sourceRange = start.to(end);
 
