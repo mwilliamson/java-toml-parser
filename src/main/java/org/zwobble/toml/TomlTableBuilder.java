@@ -13,12 +13,23 @@ class TomlTableBuilder {
     private final LinkedHashMap<String, TomlKeyValuePair> keyValuePairs;
     private final Map<String, TomlTableBuilder> subTableBuilders;
     private final Map<String, List<TomlValue>> arrayOfTables;
+    private boolean defined;
 
     TomlTableBuilder() {
         this.keyValuePairs = new LinkedHashMap<>();
         this.table = new TomlTable(this.keyValuePairs);
         this.subTableBuilders = new HashMap<>();
         this.arrayOfTables = new HashMap<>();
+        this.defined = false;
+    }
+
+    boolean define() {
+        if (!this.defined) {
+            this.defined = true;
+            return true;
+        } else {
+            return false;
+        }
     }
 
     TomlTable toTable() {

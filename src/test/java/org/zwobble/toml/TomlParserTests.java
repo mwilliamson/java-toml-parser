@@ -2442,6 +2442,17 @@ public class TomlParserTests {
         assertThat(error.sourceRange(), isSourceRange(10, 11));
     }
 
+    @Test
+    public void tableCannotBeDefinedTwice() throws IOException {
+        var error = assertThrows(
+            TomlDuplicateKeyError.class,
+            () -> parse("[a]\n[a]\n")
+        );
+
+        assertThat(error.key(), equalTo("a"));
+        assertThat(error.sourceRange(), isSourceRange(5, 6));
+    }
+
     // == Inline Tables ==
 
     @Test

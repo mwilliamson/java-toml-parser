@@ -94,6 +94,12 @@ public class TomlParser {
                     for (var key : keys) {
                         activeTable = activeTable.getOrCreateSubTable(key);
                     }
+
+                    if (!activeTable.define()) {
+                        var key = keys.getLast();
+                        throw new TomlDuplicateKeyError(key.value(), key.sourceRange());
+                    }
+
                     reader.skip(']');
                     skipWhitespace(reader);
                     skipToNextLine(reader);
