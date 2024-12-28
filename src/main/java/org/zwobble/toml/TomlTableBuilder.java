@@ -19,7 +19,7 @@ class TomlTableBuilder {
     private final LinkedHashMap<String, TomlKeyValuePair> keyValuePairs;
     private final Map<String, TomlTableBuilder> subTableBuilders;
     private final Map<String, List<TomlValue>> arrayOfTables;
-    private final DefinedBy definedBy;
+    private DefinedBy definedBy;
 
     TomlTableBuilder(DefinedBy definedBy) {
         this.keyValuePairs = new LinkedHashMap<>();
@@ -45,9 +45,10 @@ class TomlTableBuilder {
             this.subTableBuilders.put(key.value(), subTable);
             var pair = TomlKeyValuePair.of(key.value(), subTable.table);
             this.keyValuePairs.put(key.value(), pair);
+        } else if (subTable.definedBy == DefinedBy.SUPER_TABLE) {
+            subTable.definedBy = definedBy;
         } else if (
-            !(subTable.definedBy == DefinedBy.SUPER_TABLE ||
-                (definedBy == DefinedBy.SUPER_TABLE) ||
+            !((definedBy == DefinedBy.SUPER_TABLE) ||
                 (definedBy == DefinedBy.DOTTED_KEY && subTable.definedBy == DefinedBy.DOTTED_KEY))
         ) {
             throw new TomlDuplicateKeyError(key.value(), key.sourceRange());
