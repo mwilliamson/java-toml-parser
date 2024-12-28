@@ -897,9 +897,8 @@ public class TomlParser {
             } else if (reader.codePoint >= 'A' && reader.codePoint <= 'F') {
                 codePoint += reader.codePoint - 'A' + 10;
             } else {
-                var position = reader.position();
-                var sourceRange = position.to(position);
-                throw new TomlParseError("TODO", sourceRange);
+                var sourceRange = reader.codePointSourceRange();
+                throw new TomlInvalidEscapeSequenceError(sourceRange);
             }
             reader.read();
         }

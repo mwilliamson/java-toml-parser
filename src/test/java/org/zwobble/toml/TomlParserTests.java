@@ -1980,6 +1980,20 @@ public class TomlParserTests {
         assertThat(error.sourceRange(), isSourceRange(7, 15));
     }
 
+    @Test
+    public void whenUnicodeEscapeSequenceHasInvalidCharactersThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlInvalidEscapeSequenceError.class,
+            () -> parse(
+                """
+                x = "\\ug000"
+                """
+            )
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(7, 8));
+    }
+
     // == Offset Date-Times ==
 
     @Test
