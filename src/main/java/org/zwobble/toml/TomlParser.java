@@ -815,10 +815,21 @@ public class TomlParser {
                         }
                     }
                 }
+            } else if (isMultiLine && reader.codePoint == '\r') {
+                var sourceRange = reader.codePointSourceRange();
+                reader.consume(string);
+                if (reader.codePoint != '\n') {
+                    throw new TomlUnexpectedControlCharacterError(
+                        '\r',
+                        sourceRange
+                    );
+                } else {
+                    reader.consume(string);
+                }
             } else if (
                 isControlCharacter(reader.codePoint) && !(
                     reader.codePoint == '\t' ||
-                    (isMultiLine && (reader.codePoint == '\r' || reader.codePoint == '\n'))
+                    (isMultiLine && reader.codePoint == '\n')
                 )
             ) {
                 var controlCharacter = reader.codePoint;

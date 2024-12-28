@@ -1547,6 +1547,22 @@ public class TomlParserTests {
     }
 
     @Test
+    public void carriageReturnWithoutLineFeedIsNotNotPermittedInMultiLineBasicString() throws IOException {
+        var error = assertThrows(
+            TomlUnexpectedControlCharacterError.class,
+            () -> parse(
+                """
+                x = \"\"\"
+                \r\"\"\"
+                """
+            )
+        );
+
+        assertThat(error.controlCharacter(), equalTo((int)'\r'));
+        assertThat(error.sourceRange(), isSourceRange(8, 9));
+    }
+
+    @Test
     public void whenMultiLineBasicStringIsUnclosedThenErrorIsThrown() throws IOException {
         var error = assertThrows(
             TomlUnclosedStringError.class,
@@ -1913,6 +1929,22 @@ public class TomlParserTests {
     }
 
     @Test
+    public void carriageReturnWithoutLineFeedIsNotNotPermittedInMultiLineLiteralString() throws IOException {
+        var error = assertThrows(
+            TomlUnexpectedControlCharacterError.class,
+            () -> parse(
+                """
+                x = '''
+                \r'''
+                """
+            )
+        );
+
+        assertThat(error.controlCharacter(), equalTo((int) '\r'));
+        assertThat(error.sourceRange(), isSourceRange(8, 9));
+    }
+
+    @Test
     public void whenMultiLineLiteralStringIsUnclosedThenErrorIsThrown() throws IOException {
         var error = assertThrows(
             TomlUnclosedStringError.class,
@@ -1922,7 +1954,7 @@ public class TomlParserTests {
         assertThat(error.sourceRange(), isSourceRange(7, 7));
     }
 
-    // === Invalid Unicode codepoints ==
+    // === Invalid Unicode codepoints ===
 
     @Test
     public void givenEscapeSequenceInStringWhenCodepointIsLowSurrogateThenErrorIsThrown() throws IOException {
