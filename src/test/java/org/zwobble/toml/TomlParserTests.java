@@ -1229,6 +1229,34 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void multiLineBasicStringsMayContainTabs() throws IOException {
+        var result = parse(
+            """
+            x = \"\"\"\t\"\"\"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\t"))
+        )));
+    }
+
+    @Test
+    public void controlCharactersBesidesTabAreNotPermittedInMultiLineBasicStrings() throws IOException {
+        var error = assertThrows(
+            TomlUnexpectedControlCharacterError.class,
+            () -> parse(
+                """
+                x = \"\"\"\u0007\"\"\"
+                """
+            )
+        );
+
+        assertThat(error.controlCharacter(), equalTo((int) '\u0007'));
+        assertThat(error.sourceRange(), isSourceRange(7, 8));
+    }
+
     // === Literal Strings ===
 
     @Test
@@ -1293,6 +1321,19 @@ public class TomlParserTests {
 
         assertThat(result, isTable(isSequence(
             isKeyValuePair("x", isString("\ud83e\udd67"))
+        )));
+    }
+
+    @Test
+    public void literalStringsMayContainTabs() throws IOException {
+        var result = parse(
+            """
+            x = '\t'
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\t"))
         )));
     }
 
@@ -1532,6 +1573,34 @@ public class TomlParserTests {
         assertThat(result, isTable(isSequence(
             isKeyValuePair("x", isString("\ud83e\udd67"))
         )));
+    }
+
+    @Test
+    public void multiLineLiteralStringsMayContainTabs() throws IOException {
+        var result = parse(
+            """
+            x = '''\t'''
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\t"))
+        )));
+    }
+
+    @Test
+    public void controlCharactersBesidesTabAreNotPermittedInMultiLineLiteralStrings() throws IOException {
+        var error = assertThrows(
+            TomlUnexpectedControlCharacterError.class,
+            () -> parse(
+                """
+                x = '''\u0007'''
+                """
+            )
+        );
+
+        assertThat(error.controlCharacter(), equalTo((int) '\u0007'));
+        assertThat(error.sourceRange(), isSourceRange(7, 8));
     }
 
     // == Offset Date-Times ==

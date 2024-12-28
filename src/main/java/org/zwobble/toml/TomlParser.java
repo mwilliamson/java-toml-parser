@@ -742,7 +742,12 @@ public class TomlParser {
                         }
                     }
                 }
-            } else if (isControlCharacter(reader.codePoint) && reader.codePoint != '\t' && !isMultiLine) {
+            } else if (
+                isControlCharacter(reader.codePoint) && !(
+                    reader.codePoint == '\t' ||
+                    (isMultiLine && (reader.codePoint == '\r' || reader.codePoint == '\n'))
+                )
+            ) {
                 var controlCharacter = reader.codePoint;
                 var start = reader.position();
                 reader.read();
