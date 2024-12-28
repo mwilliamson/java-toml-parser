@@ -2453,6 +2453,17 @@ public class TomlParserTests {
         assertThat(error.sourceRange(), isSourceRange(5, 6));
     }
 
+    @Test
+    public void cannotRedefineInlineTable() throws IOException {
+        var error = assertThrows(
+            TomlDuplicateKeyError.class,
+            () -> parse("a = { x = true }\n[a]\n")
+        );
+
+        assertThat(error.key(), equalTo("a"));
+        assertThat(error.sourceRange(), isSourceRange(18, 19));
+    }
+
     // == Inline Tables ==
 
     @Test
