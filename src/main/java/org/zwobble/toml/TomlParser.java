@@ -2,6 +2,7 @@ package org.zwobble.toml;
 
 import org.zwobble.toml.errors.*;
 import org.zwobble.toml.sources.SourcePosition;
+import org.zwobble.toml.sources.SourceRange;
 import org.zwobble.toml.values.*;
 
 import java.io.FileReader;
@@ -188,7 +189,11 @@ public class TomlParser {
             return parseNan(reader);
         } else if (reader.codePoint == 'i') {
             return parseInf(reader);
-        } else if (isAsciiDigitCodePoint(reader.codePoint) || reader.codePoint == '+' || reader.codePoint == '-') {
+        } else if (
+            isAsciiDigitCodePoint(reader.codePoint) ||
+                reader.codePoint == '+' ||
+                reader.codePoint == '-' ||
+                reader.codePoint == '_') {
             return parseNumber(reader);
         } else if (reader.codePoint == '"') {
             var start = reader.position();
@@ -266,6 +271,10 @@ public class TomlParser {
     private static TomlValue parseNumber(Reader reader) throws IOException {
         var start = reader.position();
 
+        if (reader.codePoint == '_') {
+            throw new TomlUnderscoreInNumberMustBeSurroundedByDigits(reader.codePointSourceRange());
+        }
+
         var valueString = new StringBuilder();
 
         valueString.appendCodePoint(reader.codePoint);
@@ -342,7 +351,14 @@ public class TomlParser {
                 }
                 isFloat = true;
             } else if (reader.codePoint == '_') {
+                var sourceRange = reader.codePointSourceRange();
+                if (!isAsciiDigitCodePoint(valueString.charAt(valueString.length() - 1))) {
+                    throw new TomlUnderscoreInNumberMustBeSurroundedByDigits(sourceRange);
+                }
                 reader.read();
+                if (!isAsciiDigitCodePoint(reader.codePoint)) {
+                    throw new TomlUnderscoreInNumberMustBeSurroundedByDigits(sourceRange);
+                }
             } else if (isAsciiDigitCodePoint(reader.codePoint)) {
                 valueString.appendCodePoint(reader.codePoint);
                 reader.read();
@@ -1033,6 +1049,10 @@ public class TomlParser {
 
         public SourcePosition position() {
             return new SourcePosition(codePointIndex);
+        }
+
+        public SourceRange codePointSourceRange() {
+            return position().to(new SourcePosition(codePointIndex + 1));
         }
     }
 

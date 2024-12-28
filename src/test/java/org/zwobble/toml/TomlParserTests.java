@@ -337,6 +337,36 @@ public class TomlParserTests {
     }
 
     @Test
+    public void whenIntStartsWithUnderscoreThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlUnderscoreInNumberMustBeSurroundedByDigits.class,
+            () -> parse("x = _1")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(4, 5));
+    }
+
+    @Test
+    public void whenIntHasDoubleUnderscoreThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlUnderscoreInNumberMustBeSurroundedByDigits.class,
+            () -> parse("x = 1__1")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(5, 6));
+    }
+
+    @Test
+    public void whenIntEndsWithUnderscoreThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlUnderscoreInNumberMustBeSurroundedByDigits.class,
+            () -> parse("x = 1_")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(5, 6));
+    }
+
+    @Test
     public void intBinary() throws IOException {
         var result = parse("x = 0b1101");
 
@@ -551,6 +581,76 @@ public class TomlParserTests {
         assertThat(result, isTable(isSequence(
             isKeyValuePair("x", isFloat(-12.34, isSourceRange(4, 12)))
         )));
+    }
+
+    @Test
+    public void whenFloatStartsWithUnderscoreThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlUnderscoreInNumberMustBeSurroundedByDigits.class,
+            () -> parse("x = _1.0")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(4, 5));
+    }
+
+    @Test
+    public void whenFloatHasDoubleUnderscoreThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlUnderscoreInNumberMustBeSurroundedByDigits.class,
+            () -> parse("x = 0.1__1")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(7, 8));
+    }
+
+    @Test
+    public void whenFloatEndsWithUnderscoreThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlUnderscoreInNumberMustBeSurroundedByDigits.class,
+            () -> parse("x = 0.1_")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(7, 8));
+    }
+
+    @Test
+    public void whenFloatHasUnderscoreBeforeDotThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlUnderscoreInNumberMustBeSurroundedByDigits.class,
+            () -> parse("x = 0_.1")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(5, 6));
+    }
+
+    @Test
+    public void whenFloatHasUnderscoreAfterDotThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlUnderscoreInNumberMustBeSurroundedByDigits.class,
+            () -> parse("x = 0_.1")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(5, 6));
+    }
+
+    @Test
+    public void whenFloatHasUnderscoreBeforeEThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlUnderscoreInNumberMustBeSurroundedByDigits.class,
+            () -> parse("x = 0.1_e1")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(7, 8));
+    }
+
+    @Test
+    public void whenFloatHasUnderscoreAfterEThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlUnderscoreInNumberMustBeSurroundedByDigits.class,
+            () -> parse("x = 0e_1")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(6, 7));
     }
 
     @Test
