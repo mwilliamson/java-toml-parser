@@ -194,7 +194,9 @@ public class TomlParser {
             isAsciiDigitCodePoint(reader.codePoint) ||
                 reader.codePoint == '+' ||
                 reader.codePoint == '-' ||
-                reader.codePoint == '_') {
+                reader.codePoint == '_' ||
+                reader.codePoint == '.'
+        ) {
             return parseNumber(reader);
         } else if (reader.codePoint == '"') {
             var start = reader.position();
@@ -272,73 +274,74 @@ public class TomlParser {
     private static TomlValue parseNumber(Reader reader) throws IOException {
         var start = reader.position();
 
-        if (reader.codePoint == '_') {
-            throw new TomlUnderscoreInNumberMustBeSurroundedByDigits(reader.codePointSourceRange());
-        }
-
         var valueString = new StringBuilder();
 
-        valueString.appendCodePoint(reader.codePoint);
-        reader.read();
-
-        if (reader.codePoint == 'n' && (valueString.charAt(0) == '-' || valueString.charAt(0) == '+')) {
-            reader.skip(new int[] {'n', 'a', 'n'});
-
-            var end = reader.position();
-            var sourceRange = start.to(end);
-
-            return new TomlFloat(Double.NaN, sourceRange);
-        }
-
-        if (reader.codePoint == 'i' && valueString.charAt(0) == '-') {
-            reader.skip(new int[] {'i', 'n', 'f'});
-
-            var end = reader.position();
-            var sourceRange = start.to(end);
-
-            return new TomlFloat(Double.NEGATIVE_INFINITY, sourceRange);
-        }
-
-        if (reader.codePoint == 'i' && valueString.charAt(0) == '+') {
-            reader.skip(new int[] {'i', 'n', 'f'});
-
-            var end = reader.position();
-            var sourceRange = start.to(end);
-
-            return new TomlFloat(Double.POSITIVE_INFINITY, sourceRange);
-        }
-
-        if (reader.codePoint == 'b') {
+        if (reader.codePoint == '-' || reader.codePoint == '+') {
+            valueString.appendCodePoint(reader.codePoint);
             reader.read();
 
-            var intString = parseBinaryDigits(reader);
+            if (reader.codePoint == 'n') {
+                reader.skip(new int[] {'n', 'a', 'n'});
 
-            var end = reader.position();
-            var sourceRange = start.to(end);
+                var end = reader.position();
+                var sourceRange = start.to(end);
 
-            return parseIntegerString(intString, 2, sourceRange);
-        }
+                return new TomlFloat(Double.NaN, sourceRange);
+            }
 
-        if (reader.codePoint == 'o') {
+            if (reader.codePoint == 'i' && valueString.charAt(0) == '-') {
+                reader.skip(new int[] {'i', 'n', 'f'});
+
+                var end = reader.position();
+                var sourceRange = start.to(end);
+
+                return new TomlFloat(Double.NEGATIVE_INFINITY, sourceRange);
+            }
+
+            if (reader.codePoint == 'i' && valueString.charAt(0) == '+') {
+                reader.skip(new int[] {'i', 'n', 'f'});
+
+                var end = reader.position();
+                var sourceRange = start.to(end);
+
+                return new TomlFloat(Double.POSITIVE_INFINITY, sourceRange);
+            }
+        } else if (reader.codePoint == '0') {
+            valueString.appendCodePoint(reader.codePoint);
             reader.read();
 
-            var intString = readOctalDigits(reader);
+            if (reader.codePoint == 'b') {
+                reader.read();
 
-            var end = reader.position();
-            var sourceRange = start.to(end);
+                var intString = parseBinaryDigits(reader);
 
-            return parseIntegerString(intString, 8, sourceRange);
-        }
+                var end = reader.position();
+                var sourceRange = start.to(end);
 
-        if (reader.codePoint == 'x') {
-            reader.read();
+                return parseIntegerString(intString, 2, sourceRange);
+            }
 
-            var intString = readHexDigits(reader);
+            if (reader.codePoint == 'o') {
+                reader.read();
 
-            var end = reader.position();
-            var sourceRange = start.to(end);
+                var intString = readOctalDigits(reader);
 
-            return parseIntegerString(intString, 16, sourceRange);
+                var end = reader.position();
+                var sourceRange = start.to(end);
+
+                return parseIntegerString(intString, 8, sourceRange);
+            }
+
+            if (reader.codePoint == 'x') {
+                reader.read();
+
+                var intString = readHexDigits(reader);
+
+                var end = reader.position();
+                var sourceRange = start.to(end);
+
+                return parseIntegerString(intString, 16, sourceRange);
+            }
         }
 
         var isFloat = false;
@@ -482,15 +485,7 @@ public class TomlParser {
         }
 
         if (isFloat) {
-            try {
-                var value = Double.parseDouble(numberString);
-                return new TomlFloat(value, sourceRange);
-            } catch (NumberFormatException exception) {
-                throw new TomlInvalidNumberError(
-                    numberString,
-                    sourceRange
-                );
-            }
+            return parseFloatString(numberString, sourceRange);
         } else {
             try {
                 var integer = Long.parseLong(numberString);
@@ -684,6 +679,22 @@ public class TomlParser {
         return (codePoint >= '0' && codePoint <= '9') ||
             (codePoint >= 'a' && codePoint <= 'f') ||
             (codePoint >= 'A' && codePoint <= 'F');
+    }
+
+    private static TomlFloat parseFloatString(String numberString, SourceRange sourceRange) {
+        if (numberString.startsWith(".") || numberString.endsWith(".")) {
+            throw new TomlInvalidNumberError(numberString, sourceRange);
+        }
+
+        try {
+            var value = Double.parseDouble(numberString);
+            return new TomlFloat(value, sourceRange);
+        } catch (NumberFormatException exception) {
+            throw new TomlInvalidNumberError(
+                numberString,
+                sourceRange
+            );
+        }
     }
 
     private static TomlInt parseIntegerString(String integerString, int base, SourceRange sourceRange) {

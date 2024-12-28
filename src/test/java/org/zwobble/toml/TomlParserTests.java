@@ -808,7 +808,7 @@ public class TomlParserTests {
     }
 
     @Test
-    public void whenFloatIsInvalidThenErrorIsThrown() throws IOException {
+    public void whenFloatHasMultipleDotsThenErrorIsThrown() throws IOException {
         var error = assertThrows(
             TomlInvalidNumberError.class,
             () -> parse("x = 1.2.3")
@@ -816,6 +816,39 @@ public class TomlParserTests {
 
         assertThat(error.numberString(), equalTo("1.2.3"));
         assertThat(error.sourceRange(), isSourceRange(4, 9));
+    }
+
+    @Test
+    public void whenFloatHasMultipleEsThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlInvalidNumberError.class,
+            () -> parse("x = 1e2e3")
+        );
+
+        assertThat(error.numberString(), equalTo("1e2e3"));
+        assertThat(error.sourceRange(), isSourceRange(4, 9));
+    }
+
+    @Test
+    public void whenFloatHasNothingBeforeDotThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlInvalidNumberError.class,
+            () -> parse("x = .7")
+        );
+
+        assertThat(error.numberString(), equalTo(".7"));
+        assertThat(error.sourceRange(), isSourceRange(4, 6));
+    }
+
+    @Test
+    public void whenFloatHasNothingAfterDotThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlInvalidNumberError.class,
+            () -> parse("x = 7.")
+        );
+
+        assertThat(error.numberString(), equalTo("7."));
+        assertThat(error.sourceRange(), isSourceRange(4, 6));
     }
 
     @Test
