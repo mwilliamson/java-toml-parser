@@ -487,15 +487,7 @@ public class TomlParser {
         if (isFloat) {
             return parseFloatString(numberString, sourceRange);
         } else {
-            try {
-                var integer = Long.parseLong(numberString);
-                return new TomlInt(integer, sourceRange);
-            } catch (NumberFormatException exception) {
-                throw new TomlInvalidNumberError(
-                    numberString,
-                    sourceRange
-                );
-            }
+            return parseIntegerString(numberString, 10, sourceRange);
         }
     }
 
