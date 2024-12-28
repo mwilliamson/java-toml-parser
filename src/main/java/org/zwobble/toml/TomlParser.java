@@ -311,34 +311,34 @@ public class TomlParser {
         if (reader.codePoint == 'b') {
             reader.read();
 
-            var intValue = parseBinaryDigits(reader);
+            var intString = parseBinaryDigits(reader);
 
             var end = reader.position();
             var sourceRange = start.to(end);
 
-            return new TomlInt(intValue, sourceRange);
+            return parseIntegerString(intString, 2, sourceRange);
         }
 
         if (reader.codePoint == 'o') {
             reader.read();
 
-            var intValue = parseOctalDigits(reader);
+            var intString = readOctalDigits(reader);
 
             var end = reader.position();
             var sourceRange = start.to(end);
 
-            return new TomlInt(intValue, sourceRange);
+            return parseIntegerString(intString, 8, sourceRange);
         }
 
         if (reader.codePoint == 'x') {
             reader.read();
 
-            var intValue = parseHexDigits(reader);
+            var intString = readHexDigits(reader);
 
             var end = reader.position();
             var sourceRange = start.to(end);
 
-            return new TomlInt(intValue, sourceRange);
+            return parseIntegerString(intString, 16, sourceRange);
         }
 
         var isFloat = false;
@@ -618,7 +618,7 @@ public class TomlParser {
         }
     }
 
-    private static long parseBinaryDigits(Reader reader) throws IOException {
+    private static String parseBinaryDigits(Reader reader) throws IOException {
         var numberString = new StringBuilder();
         while (true) {
             if (isBinaryDigitCodePoint(reader.codePoint)) {
@@ -631,7 +631,7 @@ public class TomlParser {
                     TomlParser::isBinaryDigitCodePoint
                 );
             } else {
-                return Long.parseLong(numberString.toString(), 2);
+                return numberString.toString();
             }
         }
     }
@@ -640,7 +640,7 @@ public class TomlParser {
         return codePoint == '0' || codePoint == '1';
     }
 
-    private static long parseOctalDigits(Reader reader) throws IOException {
+    private static String readOctalDigits(Reader reader) throws IOException {
         var numberString = new StringBuilder();
         while (true) {
             if (isOctalDigitCodePoint(reader.codePoint)) {
@@ -653,7 +653,7 @@ public class TomlParser {
                     TomlParser::isOctalDigitCodePoint
                 );
             } else {
-                return Long.parseLong(numberString.toString(), 8);
+                return numberString.toString();
             }
         }
     }
@@ -662,7 +662,7 @@ public class TomlParser {
         return codePoint >= '0' && codePoint <= '7';
     }
 
-    private static long parseHexDigits(Reader reader) throws IOException {
+    private static String readHexDigits(Reader reader) throws IOException {
         var numberString = new StringBuilder();
         while (true) {
             if (isHexDigitCodePoint(reader.codePoint)) {
@@ -675,7 +675,7 @@ public class TomlParser {
                     TomlParser::isHexDigitCodePoint
                 );
             } else {
-                return Long.parseLong(numberString.toString(), 16);
+                return numberString.toString();
             }
         }
     }
@@ -684,6 +684,15 @@ public class TomlParser {
         return (codePoint >= '0' && codePoint <= '9') ||
             (codePoint >= 'a' && codePoint <= 'f') ||
             (codePoint >= 'A' && codePoint <= 'F');
+    }
+
+    private static TomlInt parseIntegerString(String integerString, int base, SourceRange sourceRange) {
+        try {
+            var value = Long.parseLong(integerString, base);
+            return new TomlInt(value, sourceRange);
+        } catch (NumberFormatException exception) {
+            throw new TomlInvalidNumberError(integerString, sourceRange);
+        }
     }
 
     private static String parseBasicStringValue(Reader reader, boolean isKey) throws IOException {

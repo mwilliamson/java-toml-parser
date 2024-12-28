@@ -376,6 +376,16 @@ public class TomlParserTests {
     }
 
     @Test
+    public void whenIntBinaryHasOnlyPrefixThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlInvalidNumberError.class,
+            () -> parse("x = 0b")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(4, 6));
+    }
+
+    @Test
     public void intBinaryUnderscores() throws IOException {
         var result = parse("x = 0b1_10_1");
 
