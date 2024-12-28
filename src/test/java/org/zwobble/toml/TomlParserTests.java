@@ -275,6 +275,17 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void dottedKeyCannotRedefineTable() throws IOException {
+        var error = assertThrows(
+            TomlDuplicateKeyError.class,
+            () -> parse("[a.b]\n[a]\nb.c = true\n")
+        );
+
+        assertThat(error.key(), equalTo("b"));
+        assertThat(error.sourceRange(), isSourceRange(10, 11));
+    }
+
     // == Booleans ==
 
     @Test
@@ -2473,6 +2484,17 @@ public class TomlParserTests {
 
         assertThat(error.key(), equalTo("a"));
         assertThat(error.sourceRange(), isSourceRange(12, 13));
+    }
+
+    @Test
+    public void cannotRedefineTableDefinedByArrayOfTables() throws IOException {
+        var error = assertThrows(
+            TomlDuplicateKeyError.class,
+            () -> parse("[[a]]\n[a]\n")
+        );
+
+        assertThat(error.key(), equalTo("a"));
+        assertThat(error.sourceRange(), isSourceRange(7, 8));
     }
 
     // == Inline Tables ==

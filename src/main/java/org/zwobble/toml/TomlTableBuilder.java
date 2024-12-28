@@ -9,34 +9,31 @@ import org.zwobble.toml.values.TomlValue;
 import java.util.*;
 
 class TomlTableBuilder {
+    enum DefinedBy {
+        SUPER_TABLE,
+        DOTTED_KEY,
+        TABLE,
+    }
+
     private final TomlTable table;
     private final LinkedHashMap<String, TomlKeyValuePair> keyValuePairs;
     private final Map<String, TomlTableBuilder> subTableBuilders;
     private final Map<String, List<TomlValue>> arrayOfTables;
-    private boolean defined;
+    private final DefinedBy definedBy;
 
-    TomlTableBuilder() {
+    TomlTableBuilder(DefinedBy definedBy) {
         this.keyValuePairs = new LinkedHashMap<>();
         this.table = new TomlTable(this.keyValuePairs);
         this.subTableBuilders = new HashMap<>();
         this.arrayOfTables = new HashMap<>();
-        this.defined = false;
-    }
-
-    boolean define() {
-        if (!this.defined) {
-            this.defined = true;
-            return true;
-        } else {
-            return false;
-        }
+        this.definedBy = definedBy;
     }
 
     TomlTable toTable() {
         return this.table;
     }
 
-    TomlTableBuilder getOrCreateSubTable(TomlKey key) {
+    TomlTableBuilder getOrCreateSubTable(TomlKey key, DefinedBy definedBy) {
         var subTable = this.subTableBuilders.get(key.value());
 
         if (subTable == null) {
@@ -44,10 +41,16 @@ class TomlTableBuilder {
                 throw new TomlDuplicateKeyError(key.value(), key.sourceRange());
             }
 
-            subTable = new TomlTableBuilder();
+            subTable = new TomlTableBuilder(definedBy);
             this.subTableBuilders.put(key.value(), subTable);
             var pair = TomlKeyValuePair.of(key.value(), subTable.table);
             this.keyValuePairs.put(key.value(), pair);
+        } else if (
+            !(subTable.definedBy == DefinedBy.SUPER_TABLE ||
+                (definedBy == DefinedBy.SUPER_TABLE) ||
+                (definedBy == DefinedBy.DOTTED_KEY && subTable.definedBy == DefinedBy.DOTTED_KEY))
+        ) {
+            throw new TomlDuplicateKeyError(key.value(), key.sourceRange());
         }
 
         return subTable;
@@ -67,7 +70,7 @@ class TomlTableBuilder {
             this.keyValuePairs.put(key.value(), pair);
         }
 
-        var subTable = new TomlTableBuilder();
+        var subTable = new TomlTableBuilder(DefinedBy.TABLE);
         this.arrayOfTables.get(key.value()).add(subTable.table);
         this.subTableBuilders.put(key.value(), subTable);
         return subTable;
