@@ -2454,18 +2454,7 @@ public class TomlParserTests {
     }
 
     @Test
-    public void tableCannotBeDefinedTwice() throws IOException {
-        var error = assertThrows(
-            TomlDuplicateKeyError.class,
-            () -> parse("[a]\n[a]\n")
-        );
-
-        assertThat(error.key(), equalTo("a"));
-        assertThat(error.sourceRange(), isSourceRange(5, 6));
-    }
-
-    @Test
-    public void cannotRedefineInlineTable() throws IOException {
+    public void tableHeaderCannotRedefineInlineTable() throws IOException {
         var error = assertThrows(
             TomlDuplicateKeyError.class,
             () -> parse("a = { x = true }\n[a]\n")
@@ -2476,7 +2465,67 @@ public class TomlParserTests {
     }
 
     @Test
-    public void cannotRedefineTableDefinedByDottedKey() throws IOException {
+    public void tableHeaderCannotBeDefinedTwice() throws IOException {
+        var error = assertThrows(
+            TomlDuplicateKeyError.class,
+            () -> parse("[a]\n[a]\n")
+        );
+
+        assertThat(error.key(), equalTo("a"));
+        assertThat(error.sourceRange(), isSourceRange(5, 6));
+    }
+
+    @Test
+    public void tableHeaderCanDefineSubKeyOfExistingTableHeader() throws IOException {
+        var result = parse("""
+        [x]
+        a = true
+        [x.y]
+        b = false
+        """);
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isTable(isSequence(
+                isKeyValuePair("a", isBool(true)),
+                isKeyValuePair("y", isTable(isSequence(
+                    isKeyValuePair("b", isBool(false))
+                )))
+            )))
+        )));
+    }
+
+    @Test
+    public void tableHeaderCanDefineSuperKeyOfExistingTableHeader() throws IOException {
+        var result = parse("""
+        [x.y]
+        b = false
+        [x]
+        a = true
+        """);
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isTable(isSequence(
+                isKeyValuePair("y", isTable(isSequence(
+                    isKeyValuePair("b", isBool(false))
+                ))),
+                isKeyValuePair("a", isBool(true))
+            )))
+        )));
+    }
+
+    @Test
+    public void tableHeaderCannotDefineSuperTableOfExistingTableHeaderTwice() throws IOException {
+        var error = assertThrows(
+            TomlDuplicateKeyError.class,
+            () -> parse("[[a.b]]\n[a]\n[a]\n")
+        );
+
+        assertThat(error.key(), equalTo("a"));
+        assertThat(error.sourceRange(), isSourceRange(13, 14));
+    }
+
+    @Test
+    public void tableHeaderCannotRedefineTableDefinedByDottedKey() throws IOException {
         var error = assertThrows(
             TomlDuplicateKeyError.class,
             () -> parse("a.b = true\n[a]\n")
@@ -2484,6 +2533,29 @@ public class TomlParserTests {
 
         assertThat(error.key(), equalTo("a"));
         assertThat(error.sourceRange(), isSourceRange(12, 13));
+    }
+
+    @Test
+    public void tableHeaderCanDefineSiblingTableOfTableDefinedByDottedKey() throws IOException {
+        var result = parse("a.b = true\n[a.c]\n");
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("a", isTable(isSequence(
+                isKeyValuePair("b", isBool(true)),
+                isKeyValuePair("c", isTable(isSequence()))
+            )))
+        )));
+    }
+
+    @Test
+    public void tableHeaderCannotDefineSiblingTableOfTableDefinedByDottedKeyTwice() throws IOException {
+        var error = assertThrows(
+            TomlDuplicateKeyError.class,
+            () -> parse("a.b = true\n[a.c]\n[a.c]\n")
+        );
+
+        assertThat(error.key(), equalTo("c"));
+        assertThat(error.sourceRange(), isSourceRange(20, 21));
     }
 
     @Test
@@ -2495,17 +2567,6 @@ public class TomlParserTests {
 
         assertThat(error.key(), equalTo("a"));
         assertThat(error.sourceRange(), isSourceRange(7, 8));
-    }
-
-    @Test
-    public void cannotDefineSuperTableTwice() throws IOException {
-        var error = assertThrows(
-            TomlDuplicateKeyError.class,
-            () -> parse("[[a.b]]\n[a]\n[a]\n")
-        );
-
-        assertThat(error.key(), equalTo("a"));
-        assertThat(error.sourceRange(), isSourceRange(13, 14));
     }
 
     // == Inline Tables ==
