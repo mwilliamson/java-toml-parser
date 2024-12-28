@@ -847,6 +847,8 @@ public class TomlParser {
                     controlCharacter,
                     sourceRange
                 );
+            } else if (reader.isEndOfFile()) {
+                throw new TomlUnclosedStringError(reader.position().toSourceRange());
             } else {
                 string.appendCodePoint(reader.codePoint);
                 reader.read();

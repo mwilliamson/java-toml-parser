@@ -1067,6 +1067,16 @@ public class TomlParserTests {
         assertThat(error.sourceRange(), isSourceRange(5, 6));
     }
 
+    @Test
+    public void whenBasicStringIsUnclosedThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlUnclosedStringError.class,
+            () -> parse("x = \"")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(5, 5));
+    }
+
     // === Multi-line Basic Strings ===
 
     @Test
@@ -1522,6 +1532,16 @@ public class TomlParserTests {
         assertThat(error.sourceRange(), isSourceRange(7, 8));
     }
 
+    @Test
+    public void whenMultiLineBasicStringIsUnclosedThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlUnclosedStringError.class,
+            () -> parse("x = \"\"\"")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(7, 7));
+    }
+
     // === Literal Strings ===
 
     @Test
@@ -1615,6 +1635,16 @@ public class TomlParserTests {
 
         assertThat(error.controlCharacter(), equalTo((int) '\u0007'));
         assertThat(error.sourceRange(), isSourceRange(5, 6));
+    }
+
+    @Test
+    public void whenLiteralStringIsUnclosedThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlUnclosedStringError.class,
+            () -> parse("x = '")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(5, 5));
     }
 
     // == Multi-Line Literal Strings ==
@@ -1866,6 +1896,16 @@ public class TomlParserTests {
 
         assertThat(error.controlCharacter(), equalTo((int) '\u0007'));
         assertThat(error.sourceRange(), isSourceRange(7, 8));
+    }
+
+    @Test
+    public void whenMultiLineLiteralStringIsUnclosedThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlUnclosedStringError.class,
+            () -> parse("x = '''")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(7, 7));
     }
 
     // == Offset Date-Times ==
