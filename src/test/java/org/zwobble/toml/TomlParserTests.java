@@ -774,6 +774,34 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void basicStringsMayContainTabs() throws IOException {
+        var result = parse(
+            """
+            x = "\t"
+            """
+        );
+
+        assertThat(result, isTable(isSequence(
+            isKeyValuePair("x", isString("\t"))
+        )));
+    }
+
+    @Test
+    public void controlCharactersBesidesTabAreNotPermittedInBasicStrings() throws IOException {
+        var error = assertThrows(
+            TomlUnexpectedControlCharacterError.class,
+            () -> parse(
+                """
+                x = "\u0007"
+                """
+            )
+        );
+
+        assertThat(error.controlCharacter(), equalTo((int) '\u0007'));
+        assertThat(error.sourceRange(), isSourceRange(5, 6));
+    }
+
     // === Multi-line Basic Strings ===
 
     @Test

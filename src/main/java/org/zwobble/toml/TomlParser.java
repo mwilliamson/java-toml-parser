@@ -742,6 +742,16 @@ public class TomlParser {
                         }
                     }
                 }
+            } else if (isControlCharacter(reader.codePoint) && reader.codePoint != '\t' && !isMultiLine) {
+                var controlCharacter = reader.codePoint;
+                var start = reader.position();
+                reader.read();
+                var end = reader.position();
+                var sourceRange = start.to(end);
+                throw new TomlUnexpectedControlCharacterError(
+                    controlCharacter,
+                    sourceRange
+                );
             } else {
                 string.appendCodePoint(reader.codePoint);
                 reader.read();
