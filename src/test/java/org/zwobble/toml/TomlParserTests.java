@@ -385,6 +385,36 @@ public class TomlParserTests {
     }
 
     @Test
+    public void whenIntBinaryHasUnderscoreAfterPrefixThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlUnderscoreInNumberMustBeSurroundedByDigits.class,
+            () -> parse("x = 0b_1")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(6, 7));
+    }
+
+    @Test
+    public void whenIntBinaryHasDoubleUnderscoreThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlUnderscoreInNumberMustBeSurroundedByDigits.class,
+            () -> parse("x = 0b1__1")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(7, 8));
+    }
+
+    @Test
+    public void whenIntBinaryEndsWithUnderscoreThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlUnderscoreInNumberMustBeSurroundedByDigits.class,
+            () -> parse("x = 0b1_")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(7, 8));
+    }
+
+    @Test
     public void intOctal() throws IOException {
         var result = parse("x = 0o701");
 
@@ -400,6 +430,36 @@ public class TomlParserTests {
         assertThat(result, isTable(isSequence(
             isKeyValuePair("x", isInt(449, isSourceRange(4, 11)))
         )));
+    }
+
+    @Test
+    public void whenIntOctalHasUnderscoreAfterPrefixThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlUnderscoreInNumberMustBeSurroundedByDigits.class,
+            () -> parse("x = 0o_1")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(6, 7));
+    }
+
+    @Test
+    public void whenIntOctalHasDoubleUnderscoreThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlUnderscoreInNumberMustBeSurroundedByDigits.class,
+            () -> parse("x = 0o1__1")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(7, 8));
+    }
+
+    @Test
+    public void whenIntOctalEndsWithUnderscoreThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlUnderscoreInNumberMustBeSurroundedByDigits.class,
+            () -> parse("x = 0o1_")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(7, 8));
     }
 
     @Test
@@ -427,6 +487,36 @@ public class TomlParserTests {
         assertThat(result, isTable(isSequence(
             isKeyValuePair("x", isInt(3841, isSourceRange(4, 11)))
         )));
+    }
+
+    @Test
+    public void whenIntHexHasUnderscoreAfterPrefixThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlUnderscoreInNumberMustBeSurroundedByDigits.class,
+            () -> parse("x = 0x_1")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(6, 7));
+    }
+
+    @Test
+    public void whenIntHexHasDoubleUnderscoreThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlUnderscoreInNumberMustBeSurroundedByDigits.class,
+            () -> parse("x = 0x1__1")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(7, 8));
+    }
+
+    @Test
+    public void whenIntHexEndsWithUnderscoreThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlUnderscoreInNumberMustBeSurroundedByDigits.class,
+            () -> parse("x = 0x1_")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(7, 8));
     }
 
     @Test

@@ -17,6 +17,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import static org.zwobble.toml.UnicodeCodePoints.formatCodePoint;
 
@@ -351,14 +352,11 @@ public class TomlParser {
                 }
                 isFloat = true;
             } else if (reader.codePoint == '_') {
-                var sourceRange = reader.codePointSourceRange();
-                if (!isAsciiDigitCodePoint(valueString.charAt(valueString.length() - 1))) {
-                    throw new TomlUnderscoreInNumberMustBeSurroundedByDigits(sourceRange);
-                }
-                reader.read();
-                if (!isAsciiDigitCodePoint(reader.codePoint)) {
-                    throw new TomlUnderscoreInNumberMustBeSurroundedByDigits(sourceRange);
-                }
+                readNumberUnderscore(
+                    reader,
+                    valueString,
+                    TomlParser::isAsciiDigitCodePoint
+                );
             } else if (isAsciiDigitCodePoint(reader.codePoint)) {
                 valueString.appendCodePoint(reader.codePoint);
                 reader.read();
@@ -506,6 +504,26 @@ public class TomlParser {
         }
     }
 
+    private static void readNumberUnderscore(
+        Reader reader,
+        StringBuilder valueString,
+        Predicate<Integer> isDigit
+    ) throws IOException {
+        var sourceRange = reader.codePointSourceRange();
+        if (valueString.isEmpty()) {
+            throw new TomlUnderscoreInNumberMustBeSurroundedByDigits(sourceRange);
+        }
+
+        var previousCharacter = valueString.charAt(valueString.length() - 1);
+        if (!isDigit.test((int) previousCharacter)) {
+            throw new TomlUnderscoreInNumberMustBeSurroundedByDigits(sourceRange);
+        }
+        reader.skip('_');
+        if (!isDigit.test(reader.codePoint)) {
+            throw new TomlUnderscoreInNumberMustBeSurroundedByDigits(sourceRange);
+        }
+    }
+
     private static boolean numberStringHasLeadingZeroes(String number) {
         if (number.length() > 1 && number.charAt(0) == '0' && isAsciiDigitCodePoint(number.charAt(1))) {
             return true;
@@ -603,47 +621,69 @@ public class TomlParser {
     private static long parseBinaryDigits(Reader reader) throws IOException {
         var numberString = new StringBuilder();
         while (true) {
-            if (reader.codePoint == '0' || reader.codePoint == '1') {
+            if (isBinaryDigitCodePoint(reader.codePoint)) {
                 numberString.appendCodePoint(reader.codePoint);
                 reader.read();
             } else if (reader.codePoint == '_') {
-                reader.read();
+                readNumberUnderscore(
+                    reader,
+                    numberString,
+                    TomlParser::isBinaryDigitCodePoint
+                );
             } else {
                 return Long.parseLong(numberString.toString(), 2);
             }
         }
     }
 
+    private static boolean isBinaryDigitCodePoint(int codePoint) {
+        return codePoint == '0' || codePoint == '1';
+    }
+
     private static long parseOctalDigits(Reader reader) throws IOException {
         var numberString = new StringBuilder();
         while (true) {
-            if (reader.codePoint >= '0' && reader.codePoint <= '7') {
+            if (isOctalDigitCodePoint(reader.codePoint)) {
                 numberString.appendCodePoint(reader.codePoint);
                 reader.read();
             } else if (reader.codePoint == '_') {
-                reader.read();
+                readNumberUnderscore(
+                    reader,
+                    numberString,
+                    TomlParser::isOctalDigitCodePoint
+                );
             } else {
                 return Long.parseLong(numberString.toString(), 8);
             }
         }
     }
 
+    private static boolean isOctalDigitCodePoint(int codePoint) {
+        return codePoint >= '0' && codePoint <= '7';
+    }
+
     private static long parseHexDigits(Reader reader) throws IOException {
         var numberString = new StringBuilder();
         while (true) {
-            if (
-                (reader.codePoint >= '0' && reader.codePoint <= '9') ||
-                    (reader.codePoint >= 'a' && reader.codePoint <= 'f') ||
-                    (reader.codePoint >= 'A' && reader.codePoint <= 'F')
-            ) {
+            if (isHexDigitCodePoint(reader.codePoint)) {
                 numberString.appendCodePoint(reader.codePoint);
                 reader.read();
             } else if (reader.codePoint == '_') {
-                reader.read();
+                readNumberUnderscore(
+                    reader,
+                    numberString,
+                    TomlParser::isHexDigitCodePoint
+                );
             } else {
                 return Long.parseLong(numberString.toString(), 16);
             }
         }
+    }
+
+    private static boolean isHexDigitCodePoint(int codePoint) {
+        return (codePoint >= '0' && codePoint <= '9') ||
+            (codePoint >= 'a' && codePoint <= 'f') ||
+            (codePoint >= 'A' && codePoint <= 'F');
     }
 
     private static String parseBasicStringValue(Reader reader, boolean isKey) throws IOException {
