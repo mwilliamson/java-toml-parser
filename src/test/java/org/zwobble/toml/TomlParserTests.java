@@ -6,6 +6,7 @@ import org.zwobble.toml.errors.*;
 import org.zwobble.toml.sources.SourceRange;
 import org.zwobble.toml.values.*;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.time.LocalDate;
@@ -37,6 +38,19 @@ public class TomlParserTests {
         var result = parse("\r\n");
 
         assertThat(result, isTable(isSequence()));
+    }
+
+    @Test
+    public void whenCodepointIsSurrogateThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlInvalidUtf8Error.class,
+            () -> TomlParser.parseInputStream(
+                new ByteArrayInputStream(new byte[] {'#', (byte)0xed, (byte)0xa0, (byte)0x80})
+            )
+        );
+
+        // TODO: better source range
+        assertThat(error.sourceRange(), isSourceRange(0, 0));
     }
 
     // == Key/Value Pairs ==

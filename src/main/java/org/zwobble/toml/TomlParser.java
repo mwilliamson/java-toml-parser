@@ -5,8 +5,12 @@ import org.zwobble.toml.sources.SourcePosition;
 import org.zwobble.toml.sources.SourceRange;
 import org.zwobble.toml.values.*;
 
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -26,8 +30,21 @@ public class TomlParser {
     }
 
     public static TomlTable parseFile(Path path) throws IOException {
-        try (var fileReader = new FileReader(path.toFile(), StandardCharsets.UTF_8)) {
-            return parseReader(fileReader);
+        try (var inputStream = new FileInputStream(path.toFile())) {
+            return parseInputStream(inputStream);
+        }
+    }
+
+    public static TomlTable parseInputStream(InputStream inputStream) throws IOException {
+        var decoder = StandardCharsets.UTF_8
+            .newDecoder()
+            .onMalformedInput(CodingErrorAction.REPORT)
+            .onUnmappableCharacter(CodingErrorAction.REPORT);
+
+        try (var reader = new InputStreamReader(inputStream, decoder)) {
+            return parseReader(reader);
+        } catch (MalformedInputException exception) {
+            throw new TomlInvalidUtf8Error(new SourcePosition(0).toSourceRange());
         }
     }
 
