@@ -22,6 +22,20 @@ public final class TomlTable implements TomlValue, Iterable<TomlKeyValuePair> {
         return this.pairs.values();
     }
 
+    /**
+     * Get the value associated with a key.
+     * @param key The key to find a value for.
+     * @return The value associated with the key if there is one, otherwise null.
+     */
+    public TomlValue get(String key) {
+        var pair = this.pairs.get(key);
+        if (pair == null) {
+            return null;
+        } else {
+            return pair.value();
+        }
+    }
+
     @Override
     public Iterator<TomlKeyValuePair> iterator() {
         return this.keyValuePairs().iterator();

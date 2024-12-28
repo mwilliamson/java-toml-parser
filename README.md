@@ -6,7 +6,7 @@ A Java parser for TOML 1.0.0.
 
 Add to a Maven project with:
 
-```
+```xml
   <repositories>
     <repository>
       <id>jitpack.io</id>
@@ -26,7 +26,21 @@ replacing `$VERSION` with the commit hash you want to use.
 
 ## Usage
 
+Import `org.zwobble.toml.parser.TomlParser` and read a file using a `Path`:
 
+```java
+var table = TomlParser.parseFile(path);
+var name = table.get("name");
+System.out.println(name);
+```
+
+or using an input stream:
+
+```java
+var table = TomlParser.parseInputStream(inputStream);
+var name = table.get("name");
+System.out.println(name);
+```
 
 ## Questions and Answers
 
