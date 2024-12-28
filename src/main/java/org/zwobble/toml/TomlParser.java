@@ -826,12 +826,12 @@ public class TomlParser {
                     }
                     case 'u' -> {
                         reader.read();
-                        var codePoint = parseHex(reader, 4);
+                        var codePoint = parseHexEscapeSequence(reader, 4);
                         string.appendCodePoint(codePoint);
                     }
                     case 'U' -> {
                         reader.read();
-                        var codePoint = parseHex(reader, 8);
+                        var codePoint = parseHexEscapeSequence(reader, 8);
                         string.appendCodePoint(codePoint);
                     }
                     default -> {
@@ -885,7 +885,8 @@ public class TomlParser {
         }
     }
 
-    private static int parseHex(Reader reader, int codePointCount) throws IOException {
+    private static int parseHexEscapeSequence(Reader reader, int codePointCount) throws IOException {
+        var start = reader.position();
         var codePoint = 0;
         for (var i = 0; i < codePointCount; i++) {
             codePoint <<= 4;
@@ -901,6 +902,14 @@ public class TomlParser {
                 throw new TomlParseError("TODO", sourceRange);
             }
             reader.read();
+        }
+
+        // Check for surrogates or values above the maximum Unicode codepoint
+        if ((codePoint >= 0xd800 && codePoint <= 0xdfff) || codePoint > 0x10ffff) {
+            var end = reader.position();
+            var sourceRange = start.to(end);
+
+            throw new TomlInvalidEscapeSequenceError(sourceRange);
         }
         return codePoint;
     }

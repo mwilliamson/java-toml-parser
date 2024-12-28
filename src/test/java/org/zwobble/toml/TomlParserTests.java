@@ -1922,6 +1922,50 @@ public class TomlParserTests {
         assertThat(error.sourceRange(), isSourceRange(7, 7));
     }
 
+    // === Invalid Unicode codepoints ==
+
+    @Test
+    public void givenEscapeSequenceInStringWhenCodepointIsLowSurrogateThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlInvalidEscapeSequenceError.class,
+            () -> parse(
+                """
+                x = "\\udfff"
+                """
+            )
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(7, 11));
+    }
+
+    @Test
+    public void givenEscapeSequenceInStringWhenCodepointIsHighSurrogateThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlInvalidEscapeSequenceError.class,
+            () -> parse(
+                """
+                x = "\\ud800"
+                """
+            )
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(7, 11));
+    }
+
+    @Test
+    public void givenEscapeSequenceInStringWhenCodepointIsOverMaximumUnicodeCodepointThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlInvalidEscapeSequenceError.class,
+            () -> parse(
+                """
+                x = "\\U00110000"
+                """
+            )
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(7, 15));
+    }
+
     // == Offset Date-Times ==
 
     @Test
