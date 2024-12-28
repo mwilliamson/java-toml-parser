@@ -44,9 +44,13 @@ class TomlTableBuilder {
     }
 
     TomlTableBuilder createArraySubTable(TomlKey key) {
-        // TODO: handle inline array or not a array
+        // TODO: handle inline array
 
         if (!this.arrayOfTables.containsKey(key.value())) {
+            if (this.keyValuePairs.containsKey(key.value())) {
+                throw new TomlDuplicateKeyError(key.value(), key.sourceRange());
+            }
+
             var arrayOfTables = new ArrayList<TomlValue>();
             this.arrayOfTables.put(key.value(), arrayOfTables);
             var pair = TomlKeyValuePair.of(key.value(), TomlArray.of(arrayOfTables));

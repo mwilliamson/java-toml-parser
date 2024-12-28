@@ -2419,6 +2419,26 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void whenTableRedefinesParentPrimitiveThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlCannotDefineSubKeyOfNonTableError.class,
+            () -> parse("a = true\n[a.b]\n")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(10, 11));
+    }
+
+    @Test
+    public void whenTableRedefinesPrimitiveThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlCannotDefineSubKeyOfNonTableError.class,
+            () -> parse("a = true\n[a]\n")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(10, 11));
+    }
+
     // == Inline Tables ==
 
     @Test
@@ -2604,6 +2624,26 @@ public class TomlParserTests {
                 isTable(isSequence())
             )))
         )));
+    }
+
+    @Test
+    public void whenArrayOfTablesRedefinesParentPrimitiveThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlCannotDefineSubKeyOfNonTableError.class,
+            () -> parse("a = true\n[[a.b]]\n")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(11, 12));
+    }
+
+    @Test
+    public void whenArrayOfTablesRedefinesPrimitiveThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlDuplicateKeyError.class,
+            () -> parse("a = true\n[[a]]\n")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(11, 12));
     }
 
     // == Comments ==
