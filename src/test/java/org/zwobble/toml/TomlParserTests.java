@@ -216,6 +216,16 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void keyCannotBeMultiLineBasicString() throws IOException {
+        var error = assertThrows(
+            TomlKeyCannotBeMultiLineStringError.class,
+            () -> parse("\"\"\"one two\"\"\" = true")
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(2, 3));
+    }
+
     // === Dotted keys ===
 
     @Test

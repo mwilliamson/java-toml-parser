@@ -143,9 +143,9 @@ public class TomlParser {
 
     private static String parseKey(Reader reader) throws IOException {
         if (reader.codePoint == '\"') {
-            return parseBasicStringValue(reader);
+            return parseBasicStringValue(reader, true);
         } else if (reader.codePoint == '\'') {
-            return parseLiteralStringValue(reader);
+            return parseLiteralStringValue(reader, true);
         } else {
             var key = parseBareKey(reader);
             if (key.isPresent()) {
@@ -193,7 +193,7 @@ public class TomlParser {
         } else if (reader.codePoint == '"') {
             var start = reader.position();
 
-            var string = parseBasicStringValue(reader);
+            var string = parseBasicStringValue(reader, false);
 
             var end = reader.position();
             var sourceRange = start.to(end);
@@ -202,7 +202,7 @@ public class TomlParser {
         } else if (reader.codePoint == '\'') {
             var start = reader.position();
 
-            var string = parseLiteralStringValue(reader);
+            var string = parseLiteralStringValue(reader, false);
 
             var end = reader.position();
             var sourceRange = start.to(end);
@@ -630,18 +630,19 @@ public class TomlParser {
         }
     }
 
-    private static String parseBasicStringValue(Reader reader) throws IOException {
-        return parseStringValue(reader, '"', true);
+    private static String parseBasicStringValue(Reader reader, boolean isKey) throws IOException {
+        return parseStringValue(reader, '"', true, isKey);
     }
 
-    private static String parseLiteralStringValue(Reader reader) throws IOException {
-        return parseStringValue(reader, '\'', false);
+    private static String parseLiteralStringValue(Reader reader, boolean isKey) throws IOException {
+        return parseStringValue(reader, '\'', false, isKey);
     }
 
     private static String parseStringValue(
         Reader reader,
         char quote,
-        boolean allowEscaping
+        boolean allowEscaping,
+        boolean isKey
     ) throws IOException {
         reader.skip(quote);
 
@@ -652,6 +653,13 @@ public class TomlParser {
             reader.read();
 
             if (reader.codePoint == quote) {
+                if (isKey) {
+                    var start = reader.position();
+                    reader.read();
+                    var end = reader.position();
+                    var sourceRange = start.to(end);
+                    throw new TomlKeyCannotBeMultiLineStringError(sourceRange);
+                }
                 reader.read();
                 isMultiLine = true;
 
