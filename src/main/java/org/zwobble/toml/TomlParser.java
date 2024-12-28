@@ -178,8 +178,7 @@ public class TomlParser {
     private static Optional<String> parseBareKey(Reader reader) throws IOException {
         var key = new StringBuilder();
         while (isBareKeyCodePoint(reader.codePoint)) {
-            key.appendCodePoint(reader.codePoint);
-            reader.read();
+            reader.consume(key);
         }
         if (key.isEmpty()) {
             return Optional.empty();
@@ -294,8 +293,7 @@ public class TomlParser {
         var valueString = new StringBuilder();
 
         if (reader.codePoint == '-' || reader.codePoint == '+') {
-            valueString.appendCodePoint(reader.codePoint);
-            reader.read();
+            reader.consume(valueString);
 
             if (reader.codePoint == 'n') {
                 reader.skip(new int[] {'n', 'a', 'n'});
@@ -324,8 +322,7 @@ public class TomlParser {
                 return new TomlFloat(Double.POSITIVE_INFINITY, sourceRange);
             }
         } else if (reader.codePoint == '0') {
-            valueString.appendCodePoint(reader.codePoint);
-            reader.read();
+            reader.consume(valueString);
 
             if (reader.codePoint == 'b') {
                 reader.read();
@@ -364,11 +361,9 @@ public class TomlParser {
         var isFloat = false;
         while (true) {
             if (reader.codePoint == 'e' || reader.codePoint == 'E') {
-                valueString.appendCodePoint(reader.codePoint);
-                reader.read();
+                reader.consume(valueString);
                 if (reader.codePoint == '-' || reader.codePoint == '+') {
-                    valueString.appendCodePoint(reader.codePoint);
-                    reader.read();
+                    reader.consume(valueString);
                 }
                 isFloat = true;
             } else if (reader.codePoint == '_') {
@@ -378,32 +373,25 @@ public class TomlParser {
                     TomlParser::isAsciiDigitCodePoint
                 );
             } else if (isAsciiDigitCodePoint(reader.codePoint)) {
-                valueString.appendCodePoint(reader.codePoint);
-                reader.read();
+                reader.consume(valueString);
             } else if (reader.codePoint == '.') {
-                valueString.appendCodePoint(reader.codePoint);
-                reader.read();
+                reader.consume(valueString);
                 isFloat = true;
             } else if (reader.codePoint == '-') {
+                // TODO: handle not four digits already
                 // Offset date-time, local date-time or local date
-                valueString.appendCodePoint(reader.codePoint);
-                reader.read();
+                reader.consume(valueString);
 
                 // Month
-                valueString.appendCodePoint(reader.codePoint);
-                reader.read();
-                valueString.appendCodePoint(reader.codePoint);
-                reader.read();
+                reader.consume(valueString);
+                reader.consume(valueString);
 
                 // Hyphen
-                valueString.appendCodePoint(reader.codePoint);
-                reader.skip('-');
+                reader.consume(valueString, '-');
 
                 // Day
-                valueString.appendCodePoint(reader.codePoint);
-                reader.read();
-                valueString.appendCodePoint(reader.codePoint);
-                reader.read();
+                reader.consume(valueString);
+                reader.consume(valueString);
 
                 // Separator or end of local date
                 if (reader.codePoint == ' ') {
@@ -419,8 +407,7 @@ public class TomlParser {
                         return new TomlLocalDate(value, sourceRange);
                     }
                 } else if (reader.codePoint == 'T' || reader.codePoint == 't') {
-                    valueString.appendCodePoint(reader.codePoint);
-                    reader.read();
+                    reader.consume(valueString);
                 } else {
                     var end = reader.position();
                     var sourceRange = start.to(end);
@@ -468,8 +455,7 @@ public class TomlParser {
                     }
                 }
             } else if (reader.codePoint == ':') {
-                valueString.appendCodePoint(reader.codePoint);
-                reader.read();
+                reader.consume(valueString);
 
                 readTimeFromMinutes(reader, valueString);
 
@@ -550,29 +536,22 @@ public class TomlParser {
         StringBuilder valueString
     ) throws IOException {
         if (reader.codePoint == 'z' || reader.codePoint == 'Z') {
-            valueString.appendCodePoint(reader.codePoint);
-            reader.read();
+            reader.consume(valueString);
 
             return true;
         } else if (reader.codePoint == '+' || reader.codePoint == '-') {
-            valueString.appendCodePoint(reader.codePoint);
-            reader.read();
+            reader.consume(valueString);
 
             // Hours
-            valueString.appendCodePoint(reader.codePoint);
-            reader.read();
-            valueString.appendCodePoint(reader.codePoint);
-            reader.read();
+            reader.consume(valueString);
+            reader.consume(valueString);
 
             // Colon
-            valueString.appendCodePoint(reader.codePoint);
-            reader.skip(':');
+            reader.consume(valueString, ':');
 
             // Minutes
-            valueString.appendCodePoint(reader.codePoint);
-            reader.read();
-            valueString.appendCodePoint(reader.codePoint);
-            reader.read();
+            reader.consume(valueString);
+            reader.consume(valueString);
 
             return true;
         } else {
@@ -582,42 +561,32 @@ public class TomlParser {
 
     private static void readTime(Reader reader, StringBuilder valueString) throws IOException {
         // Hours
-        valueString.appendCodePoint(reader.codePoint);
-        reader.read();
-        valueString.appendCodePoint(reader.codePoint);
-        reader.read();
+        reader.consume(valueString);
+        reader.consume(valueString);
 
         // Colon
-        valueString.appendCodePoint(reader.codePoint);
-        reader.skip(':');
+        reader.consume(valueString, ':');
 
         readTimeFromMinutes(reader, valueString);
     }
 
     private static void readTimeFromMinutes(Reader reader, StringBuilder valueString) throws IOException {
         // Minutes
-        valueString.appendCodePoint(reader.codePoint);
-        reader.read();
-        valueString.appendCodePoint(reader.codePoint);
-        reader.read();
+        reader.consume(valueString);
+        reader.consume(valueString);
 
         // Colon
-        valueString.appendCodePoint(reader.codePoint);
-        reader.skip(':');
+        reader.consume(valueString, ':');
 
         // Seconds
-        valueString.appendCodePoint(reader.codePoint);
-        reader.read();
-        valueString.appendCodePoint(reader.codePoint);
-        reader.read();
+        reader.consume(valueString);
+        reader.consume(valueString);
 
         // Fractional seconds
         if (reader.codePoint == '.') {
-            valueString.appendCodePoint(reader.codePoint);
-            reader.read();
+            reader.consume(valueString);
             while (isAsciiDigitCodePoint(reader.codePoint)) {
-                valueString.appendCodePoint(reader.codePoint);
-                reader.read();
+                reader.consume(valueString);
             }
         }
     }
@@ -626,8 +595,7 @@ public class TomlParser {
         var numberString = new StringBuilder();
         while (true) {
             if (isBinaryDigitCodePoint(reader.codePoint)) {
-                numberString.appendCodePoint(reader.codePoint);
-                reader.read();
+                reader.consume(numberString);
             } else if (reader.codePoint == '_') {
                 readNumberUnderscore(
                     reader,
@@ -648,8 +616,7 @@ public class TomlParser {
         var numberString = new StringBuilder();
         while (true) {
             if (isOctalDigitCodePoint(reader.codePoint)) {
-                numberString.appendCodePoint(reader.codePoint);
-                reader.read();
+                reader.consume(numberString);
             } else if (reader.codePoint == '_') {
                 readNumberUnderscore(
                     reader,
@@ -670,8 +637,7 @@ public class TomlParser {
         var numberString = new StringBuilder();
         while (true) {
             if (isHexDigitCodePoint(reader.codePoint)) {
-                numberString.appendCodePoint(reader.codePoint);
-                reader.read();
+                reader.consume(numberString);
             } else if (reader.codePoint == '_') {
                 readNumberUnderscore(
                     reader,
@@ -867,8 +833,7 @@ public class TomlParser {
             } else if (reader.isEndOfFile()) {
                 throw new TomlUnclosedStringError(reader.position().toSourceRange());
             } else {
-                string.appendCodePoint(reader.codePoint);
-                reader.read();
+                reader.consume(string);
             }
         }
     }
@@ -991,13 +956,11 @@ public class TomlParser {
         ) {
             unexpectedText.append(unexpectedWhitespace);
             unexpectedWhitespace.setLength(0);
-            unexpectedText.appendCodePoint(reader.codePoint);
-            reader.read();
+            reader.consume(unexpectedText);
             unexpectedTextEnd = reader.position();
 
             while (isTomlWhitespace(reader.codePoint)) {
-                unexpectedWhitespace.appendCodePoint(reader.codePoint);
-                reader.read();
+                reader.consume(unexpectedWhitespace);
             }
         }
 
@@ -1109,8 +1072,21 @@ public class TomlParser {
         }
 
         public void read() throws IOException {
+            // TODO: do nothing if codepoint is -1
             this.codePoint = reader.read();
             codePointIndex += 1;
+        }
+
+        public void consume(StringBuilder valueString) throws IOException {
+            if (codePoint != -1) {
+                valueString.appendCodePoint(codePoint);
+                read();
+            }
+        }
+
+        public void consume(StringBuilder valueString, int expectedCodePoint) throws IOException {
+            expect(expectedCodePoint);
+            consume(valueString);
         }
 
         public void skip(int expectedCodePoint) throws IOException {
