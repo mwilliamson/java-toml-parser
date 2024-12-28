@@ -1296,6 +1296,21 @@ public class TomlParserTests {
         )));
     }
 
+    @Test
+    public void controlCharactersBesidesTabAreNotPermittedInLiteralStrings() throws IOException {
+        var error = assertThrows(
+            TomlUnexpectedControlCharacterError.class,
+            () -> parse(
+                """
+                x = '\u0007'
+                """
+            )
+        );
+
+        assertThat(error.controlCharacter(), equalTo((int) '\u0007'));
+        assertThat(error.sourceRange(), isSourceRange(5, 6));
+    }
+
     // == Multi-Line Literal Strings ==
 
     @Test
