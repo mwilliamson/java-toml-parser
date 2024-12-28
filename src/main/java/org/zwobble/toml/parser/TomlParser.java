@@ -25,16 +25,35 @@ import java.util.function.Predicate;
 
 import static org.zwobble.toml.parser.UnicodeCodePoints.formatCodePoint;
 
+/**
+ * A parser for TOML 1.0.0.
+ */
 public class TomlParser {
     private TomlParser() {
     }
 
+    /**
+     * Parse a TOML 1.0.0 file at the given path.
+     *
+     * @param path The path to the file.
+     * @return The root table of the TOML file.
+     * @throws IOException if there is an error while reading the file.
+     * @throws TomlParseError if the TOML document is invalid
+     */
     public static TomlTable parseFile(Path path) throws IOException {
         try (var inputStream = new FileInputStream(path.toFile())) {
             return parseInputStream(inputStream);
         }
     }
 
+    /**
+     * Parse a TOML 1.0.0 file from the given input stream.
+     *
+     * @param inputStream The input stream to parse.
+     * @return The root table of the TOML file.
+     * @throws IOException if there is an error while reading the input stream.
+     * @throws TomlParseError if the TOML document is invalid
+     */
     public static TomlTable parseInputStream(InputStream inputStream) throws IOException {
         var decoder = StandardCharsets.UTF_8
             .newDecoder()

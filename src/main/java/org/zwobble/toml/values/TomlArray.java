@@ -4,6 +4,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * An array of TOML values.
+ */
 public final class TomlArray implements TomlValue, Iterable<TomlValue> {
     public static TomlArray of(List<TomlValue> elements) {
         return new TomlArray(elements);
@@ -15,6 +18,9 @@ public final class TomlArray implements TomlValue, Iterable<TomlValue> {
         this.elements = elements;
     }
 
+    /**
+     * The elements in the array.
+     */
     public Iterable<TomlValue> elements() {
         return this.elements;
     }

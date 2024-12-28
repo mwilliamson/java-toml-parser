@@ -4,6 +4,9 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Objects;
 
+/**
+ * A TOML table, that is, a mapping from string keys to TOML values.
+ */
 public final class TomlTable implements TomlValue, Iterable<TomlKeyValuePair> {
     public static TomlTable of(LinkedHashMap<String, TomlKeyValuePair> pairs) {
         return new TomlTable(pairs);
