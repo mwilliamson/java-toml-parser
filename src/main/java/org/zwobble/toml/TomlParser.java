@@ -835,6 +835,8 @@ public class TomlParser {
                         string.appendCodePoint(codePoint);
                     }
                     default -> {
+                        var sourceRange = reader.codePointSourceRange();
+
                         while (true) {
                             if (trySkipNewLine(reader)) {
                                 skipMultiLineStringWhitespace(reader);
@@ -842,9 +844,7 @@ public class TomlParser {
                             } else if (isTomlWhitespace(reader.codePoint)) {
                                 reader.read();
                             } else {
-                                var position = reader.position();
-                                var sourceRange = position.to(position);
-                                throw new TomlParseError("TODO", sourceRange);
+                                throw new TomlInvalidEscapeSequenceError(sourceRange);
                             }
                         }
                     }

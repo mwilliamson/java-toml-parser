@@ -1994,6 +1994,20 @@ public class TomlParserTests {
         assertThat(error.sourceRange(), isSourceRange(7, 8));
     }
 
+    @Test
+    public void whenEscapeSequenceUsesUnrecognizedSingleCharacterThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlInvalidEscapeSequenceError.class,
+            () -> parse(
+                """
+                x = "\\p"
+                """
+            )
+        );
+
+        assertThat(error.sourceRange(), isSourceRange(6, 7));
+    }
+
     // == Offset Date-Times ==
 
     @Test
