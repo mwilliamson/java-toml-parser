@@ -682,8 +682,22 @@ public class TomlParser {
     }
 
     private static TomlFloat parseFloatString(String numberString, SourceRange sourceRange) {
-        if (numberString.startsWith(".") || numberString.endsWith(".")) {
-            throw new TomlInvalidNumberError(numberString, sourceRange);
+        for (var index = 0; index < numberString.length(); index++) {
+            if (numberString.charAt(index) == '.') {
+                if (index == 0 || index == numberString.length() - 1) {
+                    throw new TomlInvalidNumberError(numberString, sourceRange);
+                }
+
+                var previousCharacter = numberString.charAt(index - 1);
+                if (!isAsciiDigitCodePoint(previousCharacter)) {
+                    throw new TomlInvalidNumberError(numberString, sourceRange);
+                }
+
+                var nextCharacter = numberString.charAt(index + 1);
+                if (!isAsciiDigitCodePoint(nextCharacter)) {
+                    throw new TomlInvalidNumberError(numberString, sourceRange);
+                }
+            }
         }
 
         try {

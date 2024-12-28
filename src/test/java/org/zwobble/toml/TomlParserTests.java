@@ -852,6 +852,28 @@ public class TomlParserTests {
     }
 
     @Test
+    public void whenFloatHasDotBeforeEThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlInvalidNumberError.class,
+            () -> parse("x = 7.e2")
+        );
+
+        assertThat(error.numberString(), equalTo("7.e2"));
+        assertThat(error.sourceRange(), isSourceRange(4, 8));
+    }
+
+    @Test
+    public void whenFloatHasDotAfterEThenErrorIsThrown() throws IOException {
+        var error = assertThrows(
+            TomlInvalidNumberError.class,
+            () -> parse("x = 7e.2")
+        );
+
+        assertThat(error.numberString(), equalTo("7e.2"));
+        assertThat(error.sourceRange(), isSourceRange(4, 8));
+    }
+
+    @Test
     public void whenFloatHasLeadingZeroThenErrorIsThrown() throws IOException {
         var error = assertThrows(
             TomlInvalidNumberError.class,
